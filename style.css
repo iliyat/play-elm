@@ -1,0 +1,150 @@
+body {
+    font-family: "Roboto", sans-serif;
+}
+
+.table {
+    background-color: transparent;
+    position: relative;
+    border-collapse: collapse;
+    white-space: nowrap;
+    font-size: 13px;
+    width: 100%;
+}
+
+.table th {
+    position: relative;
+    vertical-align: bottom;
+    text-overflow: ellipsis;
+    line-height: 24px;
+    letter-spacing: 0;
+    height: 56px;
+    font-size: 12px;
+    color: rgba(0,0,0,.54);
+    padding-bottom: 8px;
+    box-sizing: border-box;
+    padding: 0 18px 12px 18px;
+    text-align: left;
+    font-weight: 700;
+}
+
+.table th:first-of-type {
+  text-align: left;
+}
+
+.table td:first-of-type {
+  text-align: left;
+}
+
+.table th:last-of-type {
+  padding-right: 24px;
+}
+
+.tr {
+  cursor: default;
+  position: relative;
+  height: 48px;
+  max-height: 48px;
+}
+
+.tr td {
+    position: relative;
+    max-width: 180px;
+    height: 48px;
+    max-height: 48px;
+    border-top: 1px solid #EDEFF1;
+    border-bottom: 1px solid #EDEFF1;
+    padding: 12px 18px;
+    box-sizing: border-box;
+    vertical-align: middle;
+}
+
+.sorted-asc::before {
+    font-family: Material Icons;
+    font-weight: 400;
+    font-style: normal;
+    line-height: 1;
+    letter-spacing: normal;
+    text-transform: none;
+    display: inline-block;
+    word-wrap: normal;
+    font-size: 16px;
+    margin-right: 5px;
+    vertical-align: sub;
+    content: "\e5d8";
+}
+
+.sorted-desc::before {
+    font-family: Material Icons;
+    font-weight: 400;
+    font-style: normal;
+    line-height: 1;
+    letter-spacing: normal;
+    text-transform: none;
+    display: inline-block;
+    word-wrap: normal;
+    font-size: 16px;
+    margin-right: 5px;
+    vertical-align: sub;
+    content: "\e5db";
+}
+
+.table .mdc-checkbox {
+  margin: -11px;
+}
+
+/* Material-ui styles */
+.button {
+    cursor: pointer;
+    display: inline-flex;
+    background: transparent;
+    align-items: center;
+    flex-direction: inherit;
+    justify-content: flex-start;
+}
+
+.c54 {
+    color: inherit;
+    border: 0;
+    cursor: pointer;
+    outline: none;
+    position: relative;
+    user-select: none;
+    text-decoration: none;
+    -webkit-appearance: none;
+    -webkit-tap-highlight-color: rgba(0, 0, 0, 0);
+}
+
+.bold {
+  color: rgba(0, 0, 0, 0.87);
+}
+
+.asc {
+    transform: rotate(180deg);
+}
+
+.desc {
+    transform: rotate(0deg);
+}
+
+.hidden {
+    opacity: 0;
+}
+.arrow-icon {
+    width: 16px;
+    height: 16px;
+    transition: opacity 200ms cubic-bezier(0.4, 0.0, 0.2, 1) 0ms,transform 200ms cubic-bezier(0.4, 0.0, 0.2, 1) 0ms;
+    margin-left: 4px;
+    user-select: none;
+    margin-right: 4px;
+}
+
+.mdc-menu-anchor {
+    position: absolute;
+    top: 0px;
+    left: 0px;
+}
+
+.global-div {
+  position: relative;
+  z-index: 1000;
+}

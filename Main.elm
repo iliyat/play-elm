@@ -1,9 +1,8 @@
-port module Main exposing (..)
+module Roles exposing (main)
 
-import Html exposing (p, div, text, span)
-import String
-import List
+import Html
 import Dict
+import Set
 
 
 type Rule
@@ -12,26 +11,6 @@ type Rule
     | Update
     | Delete
     | Nope
-
-
-type Entity
-    = Legal
-    | Brand
-    | PointOfSale
-    | Workplace
-    | Employee
-    | CalculationDaily
-
-
-type Role
-    = Admin
-    | Accountant
-
-
-type alias U =
-    { entity : Entity
-    , rules : List String
-    }
 
 
 ruleDict : Dict.Dict String Rule
@@ -44,19 +23,28 @@ ruleDict =
         ]
 
 
-entities : Dict.Dict String Entity
-entities =
+indexRoutes : Dict.Dict String String
+indexRoutes =
     Dict.fromList
-        [ ( "legal", Legal )
-        , ( "brand", Brand )
-        , ( "pointOfSale", PointOfSale )
-        , ( "workplace", Workplace )
-        , ( "employee", Employee )
-        , ( "rule", CalculationDaily )
+        [ ( "ADMINISTRATOR", "/directory/brands" )
+        , ( "ACCOUNTANT", "/directory/brands" )
+        , ( "HUMAN_RESOURCES", "/directory/offices" )
+        , ( "SENIOR_MANAGER", "/directory/offices" )
+        , ( "LOANS_MANAGER", "/directory/offices" )
+        , ( "TECHNICAL_SUPPORT", "/directory/offices" )
+        , ( "CALL_CENTER", "/directory/employees" )
+        , ( "VIDEO_AUDITOR", "/directory/employees" )
         ]
 
 
-roleDict : Dict.Dict String (Dict.Dict String (List Rule))
+getIndexRoute : List String -> String
+getIndexRoute roles =
+    List.head roles
+        |> Maybe.map
+            (\v -> Dict.get v indexRoutes |> Maybe.withDefault "/undefined-role")
+        |> Maybe.withDefault "/no-access"
+
+
 roleDict =
     Dict.fromList
         [ ( "ADMINISTRATOR"
@@ -74,18 +62,18 @@ roleDict =
                 [ ( "legal", [ Read, Create, Update ] )
                 , ( "brand", [ Read, Create, Update ] )
                 , ( "pointOfSale", [ Read, Create, Update ] )
-                , ( "workplace", [ Read, Create, Update ] )
+                , ( "workplace", [] )
                 , ( "employee", [] )
                 , ( "rule", [] )
                 ]
           )
         , ( "HUMAN_RESOURCES"
           , Dict.fromList
-                [ ( "legal", [ Read, Create, Update, Delete ] )
+                [ ( "legal", [] )
                 , ( "brand", [] )
                 , ( "pointOfSale", [ Read, Create, Update ] )
-                , ( "workplace", [ Read, Create, Update ] )
-                , ( "employee", [] )
+                , ( "workplace", [] )
+                , ( "employee", [ Read, Create, Update, Delete ] )
                 , ( "rule", [] )
                 ]
           )
@@ -93,8 +81,8 @@ roleDict =
           , Dict.fromList
                 [ ( "legal", [] )
                 , ( "brand", [] )
-                , ( "pointOfSale", [ Read, Update ] )
-                , ( "workplace", [ Read ] )
+                , ( "pointOfSale", [ Read ] )
+                , ( "workplace", [] )
                 , ( "employee", [] )
                 , ( "rule", [] )
                 ]
@@ -114,6 +102,26 @@ roleDict =
                 [ ( "legal", [] )
                 , ( "brand", [] )
                 , ( "pointOfSale", [ Read, Update ] )
+                , ( "workplace", [ Read, Create, Update ] )
+                , ( "employee", [ Read ] )
+                , ( "rule", [] )
+                ]
+          )
+        , ( "CALL_CENTER"
+          , Dict.fromList
+                [ ( "legal", [] )
+                , ( "brand", [] )
+                , ( "pointOfSale", [ Read ] )
+                , ( "workplace", [] )
+                , ( "employee", [ Read ] )
+                , ( "rule", [] )
+                ]
+          )
+        , ( "VIDEO_AUDITOR"
+          , Dict.fromList
+                [ ( "legal", [] )
+                , ( "brand", [] )
+                , ( "pointOfSale", [ Read ] )
                 , ( "workplace", [] )
                 , ( "employee", [ Read ] )
                 , ( "rule", [] )
@@ -122,26 +130,40 @@ roleDict =
         ]
 
 
-canUser : List String -> String -> String -> Bool
-canUser roles rule entity =
+availableEntites : List String -> List String
+availableEntites =
     let
-        fold role acc =
-            let
-                rulesForRole =
-                    Dict.get role roleDict |> Maybe.andThen (Dict.get entity) |> Maybe.withDefault []
-            in
-                List.append acc rulesForRole
+        entities role =
+            Dict.get role roleDict
+                |> Maybe.withDefault Dict.empty
+                |> Dict.filter (\k v -> List.member Read v)
+                |> Dict.keys
 
-        getRules =
-            List.foldl fold [] roles
+        foldFunc role acc =
+            List.append acc (entities role)
     in
-        List.member (Dict.get rule ruleDict |> Maybe.withDefault Nope) getRules
+        Set.toList << Set.fromList << List.foldl foldFunc []
+
+
+ruleMapper : Rule -> String
+ruleMapper rule =
+    case rule of
+        Read ->
+            "r"
+
+        Create ->
+            "c"
+
+        Update ->
+            "u"
+
+        Delete ->
+            "d"
+
+        _ ->
+            ""
 
 
 main : Html.Html msg
 main =
-    Html.text <|
-        toString <|
-            canUser [ "HUMAN_RESOURCES", "ACCOUNTANT" ]
-                "u"
-                "brand"
+    Html.text <| toString <| availableEntites [ "ADMINISTRATOR" ]
