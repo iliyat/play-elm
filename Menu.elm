@@ -3,13 +3,12 @@ port module Menu exposing (view)
 import Html exposing (Html, div, h1, input, text, li, ul, Attribute, span)
 import Html.Attributes exposing (classList, class)
 import Html.Events exposing (on, onInput, onClick, onWithOptions, onMouseUp)
-import Json.Decode exposing (Decoder, succeed, at, string, map)
-import Debug
+import Icons.MoreVert as MoreVert
 
 
 main =
     Html.program
-        { init = init ""
+        { init = init
         , update = update
         , view = view
         , subscriptions = \_ -> Sub.none
@@ -21,12 +20,12 @@ main =
 
 
 type alias Model =
-    { query : String }
+    { query : String, isOpen : Bool }
 
 
-init : String -> ( Model, Cmd Msg )
-init st =
-    ( { query = "" }, Cmd.none )
+init : ( Model, Cmd Msg )
+init =
+    ( { query = "", isOpen = False }, Cmd.none )
 
 
 
@@ -35,7 +34,7 @@ init st =
 
 type Msg
     = SetQuery String
-    | MouseUp
+    | ToggleClick
 
 
 update : Msg -> Model -> ( Model, Cmd Msg )
@@ -46,8 +45,8 @@ update msg model =
             , Cmd.none
             )
 
-        MouseUp ->
-            ( model, Cmd.none )
+        ToggleClick ->
+            ( { model | isOpen = not model.isOpen }, Cmd.none )
 
 
 
@@ -69,23 +68,17 @@ view_ isOpen =
         ]
 
 
-targetValue : Decoder String
-targetValue =
-    at [ "target", "value" ] string
-
-
-handleMouseUp message =
-    on "mouseup" (succeed message) |> Debug.log "test"
-
-
 view : Model -> Html Msg
 view model =
-    div [ handleMouseUp MouseUp ]
-        [ view_ True
-        , Html.node "link" [ Html.Attributes.rel "stylesheet", Html.Attributes.href "style.css" ] []
-        , Html.node "link"
-            [ Html.Attributes.rel "stylesheet"
-            , Html.Attributes.href "https://unpkg.com/material-components-web@latest/dist/material-components-web.min.css"
+    div []
+        [ div [ class "mdc-menu-anchor" ]
+            [ div [ onClick ToggleClick ] [ MoreVert.view "" ]
+            , view_ model.isOpen
+            , Html.node "link" [ Html.Attributes.rel "stylesheet", Html.Attributes.href "style.css" ] []
+            , Html.node "link"
+                [ Html.Attributes.rel "stylesheet"
+                , Html.Attributes.href "https://unpkg.com/material-components-web@latest/dist/material-components-web.min.css"
+                ]
+                []
             ]
-            []
         ]

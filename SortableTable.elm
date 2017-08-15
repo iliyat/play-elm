@@ -9,6 +9,7 @@ import Checkbox
 import Icons.ArrowUpward as ArrowUpward
 import Icons.MoreVert as MoreVert
 import Menu
+import Tuple
 
 
 main =
@@ -105,12 +106,16 @@ view { people, tableState, query } =
         acceptablePeople =
             List.filter (String.contains lowerQuery << String.toLower << .name) people
     in
-        div [ class "global-div" ]
+        div []
             [ div []
                 [ input [ placeholder "Search by Name", onInput SetQuery ] []
                 , Table.view config tableState acceptablePeople
                 ]
-            , Html.node "link" [ Html.Attributes.rel "stylesheet", Html.Attributes.href "style.css" ] []
+            , Html.node "link"
+                [ Html.Attributes.rel "stylesheet"
+                , Html.Attributes.href "style.css?v.10.1"
+                ]
+                []
             , Html.node "link"
                 [ Html.Attributes.rel "stylesheet"
                 , Html.Attributes.href "https://unpkg.com/material-components-web@latest/dist/material-components-web.min.css"
@@ -121,12 +126,19 @@ view { people, tableState, query } =
 
 simpleThead : List ( String, Table.Status, Attribute msg ) -> Table.HtmlDetails msg
 simpleThead headers =
-    Table.HtmlDetails [] (List.map simpleTheadHelp headers)
-
-
-simpleTheadHelp : ( String, Table.Status, Attribute msg ) -> Html msg
-simpleTheadHelp ( name, status, onClick ) =
     let
+        indexed =
+            List.indexedMap (,) headers
+    in
+        Table.HtmlDetails [] (List.map simpleTheadHelp indexed)
+
+
+simpleTheadHelp : ( Int, ( String, Table.Status, Attribute msg ) ) -> Html msg
+simpleTheadHelp ( index, ( name, status, onClick ) ) =
+    let
+        isFirstIndex =
+            index == 1
+
         content =
             case status of
                 Table.Unsortable ->
@@ -136,21 +148,42 @@ simpleTheadHelp ( name, status, onClick ) =
                     [ Html.text name ]
 
                 Table.Reversible Nothing ->
-                    [ Html.span [ class "c54 button" ]
-                        [ ArrowUpward.view "arrow-icon hidden"
-                        , Html.text name
-                        ]
-                    ]
+                    case isFirstIndex of
+                        True ->
+                            [ Html.span [ class "c54 arrow-button" ]
+                                [ Html.text name
+                                , ArrowUpward.view "arrow-icon arrow-hidden"
+                                ]
+                            ]
+
+                        False ->
+                            [ Html.span [ class "c54 arrow-button" ]
+                                [ ArrowUpward.view "arrow-icon arrow-hidden"
+                                , Html.text name
+                                ]
+                            ]
 
                 Table.Reversible (Just isReversed) ->
-                    [ Html.span [ class "c54 button bold" ]
-                        [ if isReversed then
-                            ArrowUpward.view "arrow-icon asc"
-                          else
-                            ArrowUpward.view "arrow-icon desc"
-                        , Html.text name
-                        ]
-                    ]
+                    case isFirstIndex of
+                        True ->
+                            [ Html.span [ class "c54 arrow-button bold" ]
+                                [ Html.text name
+                                , if isReversed then
+                                    ArrowUpward.view "arrow-icon asc"
+                                  else
+                                    ArrowUpward.view "arrow-icon desc"
+                                ]
+                            ]
+
+                        False ->
+                            [ Html.span [ class "c54 arrow-button bold" ]
+                                [ if isReversed then
+                                    ArrowUpward.view "arrow-icon asc"
+                                  else
+                                    ArrowUpward.view "arrow-icon desc"
+                                , Html.text name
+                                ]
+                            ]
     in
         Html.th [ onClick ] content
 
@@ -191,9 +224,7 @@ viewMenu p =
     Table.HtmlDetails []
         [ div
             [ onMenuTdClick (ToggleMenu p.name), class "mdc-menu-anchor" ]
-            [ MoreVert.view ""
-            , Menu.view p.menuClicked
-            ]
+            [ MoreVert.view "" ]
         ]
 
 
@@ -208,12 +239,11 @@ config =
             , Table.stringColumn "City" .city
             , Table.intColumn "Year" .year
             , Table.stringColumn "State" .state
-            , menuColumn
             ]
         , customizations =
             { defaultCustomizations
-                | tableAttrs = [ class "table" ]
-                , rowAttrs = \d -> [ class "tr", onClick (ToggleSelected d.name) ]
+                | tableAttrs = [ class "elm-table" ]
+                , rowAttrs = \d -> [ onClick (ToggleSelected d.name) ]
                 , thead = simpleThead
             }
         }
