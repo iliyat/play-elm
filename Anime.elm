@@ -3,9 +3,10 @@ module Main exposing (..)
 import Html exposing (..)
 import Html.Attributes exposing (..)
 import Html.Events exposing (..)
-import Animation exposing (px)
+import Animation exposing (px, turn)
 import Animation.Messenger
 import Mouse
+import Time
 
 
 type alias Model =
@@ -30,10 +31,10 @@ type alias Styles =
 styles : Styles
 styles =
     { open =
-        [ Animation.height (px 200.0)
+        [ Animation.scale3d 0.1 0.3 1
         ]
     , closed =
-        [ Animation.height (px 0.0)
+        [ Animation.scale3d 1 1 1
         ]
     }
 
@@ -46,8 +47,7 @@ update action model =
                 | opened = True
                 , style =
                     Animation.interrupt
-                        [ Animation.to styles.open
-                        ]
+                        [ Animation.to styles.open ]
                         model.style
               }
             , Cmd.none
@@ -83,13 +83,14 @@ view model =
         , button [ onClick Close ] [ text "close" ]
         , div
             [ class "container"
-            , style [ ( "background-color", "red" ), ( "width", "200px" ) ]
+            , style [ ( "background-color", "red" ), ( "width", "20px" ) ]
             ]
             [ div
                 (Animation.render model.style
                     ++ [ style
-                            [ ( "background-color", "red" )
-                            , ( "width", "200px" )
+                            [ ( "background-color", "blue" )
+                            , ( "width", "50px" )
+                            , ( "height", "50px" )
                             ]
                        , class "menu"
                        ]
@@ -115,8 +116,7 @@ init : ( Model, Cmd Msg )
 init =
     ( { style =
             Animation.style
-                [ Animation.opacity 1.0
-                , Animation.height (px 1)
+                [ Animation.scale3d 1 1 1
                 ]
       , opened = False
       }

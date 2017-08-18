@@ -126,11 +126,14 @@ view model =
     div []
         [ button [ onCustomClick ButtonClick, Html.Attributes.id "btn" ] [ text "click!" ]
         , menuView model.opened
-        , Html.node "link" [ Html.Attributes.rel "stylesheet", Html.Attributes.href "style.css" ] []
         , Html.node "link"
-            [ Html.Attributes.rel "stylesheet"
-            , Html.Attributes.href "https://unpkg.com/material-components-web@latest/dist/material-components-web.min.css"
-            ]
+            [ Html.Attributes.rel "stylesheet", Html.Attributes.href "https://fonts.googleapis.com/css?family=Roboto+Mono" ]
+            []
+        , Html.node "link"
+            [ Html.Attributes.rel "stylesheet", Html.Attributes.href "https://fonts.googleapis.com/css?family=Roboto:300,400,500" ]
+            []
+        , Html.node "link"
+            [ Html.Attributes.rel "stylesheet", Html.Attributes.href "https://unpkg.com/material-components-web@latest/dist/material-components-web.min.css" ]
             []
         ]
 
@@ -146,7 +149,7 @@ menuView isOpen =
             [ ( "mdc-simple-menu mdc-simple-menu--open", True )
             ]
         , style
-            [ ( "width", "200px" )
+            [ ( "width", "170" )
             , ( "opacity"
               , if isOpen then
                     "1"
@@ -157,7 +160,10 @@ menuView isOpen =
         ]
         [ ul [ class "mdc-simple-menu__items mdc-list" ]
             [ li [ class "mdc-list-item" ] [ text "Back" ]
-            , li [ class "mdc-list-item" ] [ text "Back" ]
+            , li [ class "mdc-list-item" ] [ text "Forward" ]
+            , li [ class "mdc-list-item" ] [ text "Reload" ]
+            , li [ class "mdc-list-divider" ] []
+            , li [ class "mdc-list-item" ] [ text "Save As..." ]
             ]
         ]
 
