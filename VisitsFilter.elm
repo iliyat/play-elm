@@ -1,7 +1,6 @@
 module VisitsFilter exposing (..)
 
 import Html
-import Dict
 import Set
 
 
@@ -107,17 +106,14 @@ getModels deviceTypeName manufacturerName filter =
     in
         List.map .name foundModel.model
 
-getNextFilterValues : String -> FilterType -> String 
-getNextFilterValues deviceTypeName filter =
-  let
-      nextList = getManufacturers deviceTypeName filter
+
+
+-- getNextFilterValues : String -> FilterType -> String
+-- getNextFilterValues deviceTypeName filter =
+--   let
+--       nextList = getManufacturers deviceTypeName filter
 
 
 main : Html.Html msg
 main =
     Html.text <| toString <| getModels "ПК" "Asus" filters_
-
-
-
-
-
