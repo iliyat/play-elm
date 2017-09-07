@@ -11,6 +11,7 @@ import Icons.MoreVert as MoreVert
 import Menu exposing (menuView)
 import DOM exposing (target, offsetWidth)
 import Debug
+import Button
 import Mouse
 
 
@@ -173,6 +174,11 @@ view { people, tableState, query, left, top, opened } =
                 , Html.Attributes.href "https://unpkg.com/material-components-web@latest/dist/material-components-web.min.css"
                 ]
                 []
+            , Html.node "link"
+                [ Html.Attributes.rel "stylesheet"
+                , Html.Attributes.href "https://fonts.googleapis.com/icon?family=Material+Icons"
+                ]
+                []
             ]
 
 
@@ -310,7 +316,7 @@ onMenuClick msg =
 viewMenu : Person -> Table.HtmlDetails Msg
 viewMenu p =
     Table.HtmlDetails []
-        [ button [ onMenuClick (ToggleMenu p.name) ] [ text "click" ]
+        [ Button.renderButton [ onMenuClick (ToggleMenu p.name) ]
         , Menu.menuView False 0 0
         ]
 

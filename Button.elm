@@ -1,4 +1,4 @@
-port module Button exposing (view)
+port module Button exposing (view, renderButton)
 
 import Html
     exposing
@@ -52,25 +52,30 @@ update msg model =
             ( { model | isOpen = not model.isOpen }, Cmd.none )
 
 
-
--- VIEW
--- but : Html Msg
--- but =
---     button [ class "mdc-button" ] [ MoreVert.view "" ]
+{-| Represents a button.
+-}
 
 
-but : Html Msg
-but =
+
+-- button : List (Attribute msg) -> List (Html msg) -> Html msg
+-- button =
+--   node "button"
+
+
+renderButton : List (Attribute msg) -> Html msg
+renderButton a =
     i
-        [ class "mdc-icon-toggle material-icons mdc-custom-icon"
-        , style
+        ([ class "mdc-icon-toggle material-icons mdc-custom-icon"
+         , style
             [ ( "width", "24px" )
             , ( "height", "24px" )
             , ( "padding", "10px 0px" )
             , ( "font-size", "24px" )
             , ( "line-height", "3px" )
             ]
-        ]
+         ]
+            ++ a
+        )
         [ text "more_vert" ]
 
 
@@ -79,7 +84,7 @@ view model =
     div []
         [ div []
             [ div [] []
-            , but
+            , renderButton []
             , Html.node "link"
                 [ Html.Attributes.rel "stylesheet"
                 , Html.Attributes.href "style.css?v1"
