@@ -3,168 +3,122 @@ module Main exposing (..)
 import Html exposing (..)
 import Html.Attributes exposing (..)
 import Html.Events exposing (..)
-import Animation exposing (px, turn, percent)
-import Color exposing (rgb, rgba)
+import Animation exposing (px, turn)
+import Mouse
+import Time
 
 
 type alias Model =
-    { widgets : List Widget }
-
-
-type alias Widget =
-    { label : String
-    , action : Msg
-    , style : Animation.State
+    { style : Animation.State
+    , opened : Bool
     }
 
 
 type Msg
-    = RotateWidget Int
+    = Open
+    | Close
+    | Click Mouse.Position
     | Animate Animation.Msg
 
 
-onStyle : (Animation.State -> Animation.State) -> Widget -> Widget
-onStyle styleFn widget =
-    { widget | style = styleFn widget.style }
+type alias Styles =
+    { open : List Animation.Property
+    , closed : List Animation.Property
+    }
 
 
-onIndex : Int -> List a -> (a -> a) -> List a
-onIndex i list fn =
-    List.indexedMap
-        (\j val ->
-            if i == j then
-                fn val
-            else
-                val
-        )
-        list
-
-
-onWidgetStyle : Model -> Int -> (Animation.State -> Animation.State) -> Model
-onWidgetStyle model index fn =
-    { model
-        | widgets =
-            onIndex index model.widgets <|
-                onStyle fn
+styles : Styles
+styles =
+    { open =
+        [ Animation.scale (2)
+        ]
+    , closed =
+        [ Animation.scale (0)
+        ]
     }
 
 
 update : Msg -> Model -> ( Model, Cmd Msg )
 update action model =
     case action of
-        RotateWidget i ->
-            ( onWidgetStyle model i <|
-                (Animation.interrupt
-                    [ Animation.to
-                        [ Animation.rotate (turn 1) ]
-                    , Animation.set
-                        [ Animation.rotate (turn 0) ]
-                    ]
-                )
-            , Cmd.none
-            )
-
-        Animate time ->
+        Open ->
             ( { model
-                | widgets =
-                    List.map
-                        (onStyle (Animation.update time))
-                        model.widgets
+                | opened = True
+                , style =
+                    Animation.interrupt
+                        [ Animation.to styles.open ]
+                        model.style
               }
             , Cmd.none
             )
 
+        Close ->
+            ( { model
+                | opened = False
+                , style =
+                    Animation.interrupt
+                        [ Animation.to styles.closed
+                        ]
+                        model.style
+              }
+            , Cmd.none
+            )
+
+        Animate animMsg ->
+            ( { model
+                | style = Animation.update animMsg model.style
+              }
+            , Cmd.none
+            )
+
+        Click pos ->
+            ( model, Cmd.none )
+
 
 view : Model -> Html Msg
 view model =
-    div
-        [ style
-            [ ( "position", "absolute" )
-            , ( "left", "0px" )
-            , ( "top", "0px" )
-            , ( "width", "100%" )
-            , ( "height", "100%" )
-            , ( "background-color", "#f0f0f0" )
-            ]
-        ]
-        [ div
-            [ style
-                [ ( "display", "flex" )
-                , ( "flex-direction", "row" )
-                , ( "flex-wrap", "wrap" )
-                , ( "justify-content", "center" )
-                , ( "position", "absolute" )
-                , ( "left", "0px" )
-                , ( "top", "0px" )
-                , ( "width", "100%" )
+    div []
+        [ button [ onClick Open ] [ text "Open" ]
+        , button [ onClick Close ] [ text "close" ]
+        , div []
+            [ div
+                (Animation.render model.style
+                    ++ [ style
+                            [ ( "background-color", "blue" )
+                            , ( "width", "170px" )
+                            , ( "height", "50px" )
+                            , ( "transform-origin", "top left" )
+                            ]
+                       , class "menu"
+                       ]
+                )
+                [ div [] []
                 ]
             ]
-            (List.map viewWidget model.widgets)
         ]
-
-
-viewWidget : Widget -> Html Msg
-viewWidget widget =
-    div
-        (Animation.render widget.style
-            ++ [ style
-                    [ ( "position", "relative" )
-                    , ( "text-align", "center" )
-                    , ( "cursor", "pointer" )
-                    , ( "border-style", "solid" )
-                    , ( "vertical-align", "middle" )
-                    ]
-               , onClick (widget.action)
-               ]
-        )
-        [ text widget.label ]
-
-
-init : ( Model, Cmd Msg )
-init =
-    let
-        initialWidgetStyle =
-            Animation.style
-                [ Animation.display Animation.inlineBlock
-                , Animation.width (px 100)
-                , Animation.height (px 100)
-                , Animation.margin (px 50)
-                , Animation.padding (px 25)
-                , Animation.rotate (turn 0.0)
-                , Animation.rotate3d (turn 0.0) (turn 0.0) (turn 0.0)
-                , Animation.translate (px 0) (px 0)
-                , Animation.opacity 1
-                , Animation.backgroundColor Color.white
-                , Animation.color Color.black
-                , Animation.scale 1.0
-                , Animation.borderColor Color.white
-                , Animation.borderWidth (px 4)
-                , Animation.borderRadius (px 8)
-                , Animation.translate3d (percent 0) (percent 0) (px 0)
-                , Animation.shadow
-                    { offsetX = 0
-                    , offsetY = 1
-                    , size = 0
-                    , blur = 2
-                    , color = rgba 0 0 0 0.1
-                    }
-                ]
-    in
-        ( { widgets =
-                [ { label = "Rotate"
-                  , action = RotateWidget 0
-                  , style = initialWidgetStyle
-                  }
-                ]
-          }
-        , Cmd.none
-        )
 
 
 subscriptions : Model -> Sub Msg
 subscriptions model =
-    Animation.subscription Animate <|
-        List.map .style model.widgets
+    Sub.batch
+        [ if model.opened == True then
+            Mouse.clicks Click
+          else
+            Sub.none
+        , Animation.subscription Animate [ model.style ]
+        ]
+
+
+init : ( Model, Cmd Msg )
+init =
+    ( { style =
+            Animation.style
+                [ Animation.scale (0)
+                ]
+      , opened = False
+      }
+    , Cmd.none
+    )
 
 
 main : Program Never Model Msg
