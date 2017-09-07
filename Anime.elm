@@ -4,13 +4,12 @@ import Html exposing (..)
 import Html.Attributes exposing (..)
 import Html.Events exposing (..)
 import Animation exposing (px, turn)
-import Animation.Messenger
 import Mouse
 import Time
 
 
 type alias Model =
-    { style : Animation.Messenger.State Msg
+    { style : Animation.State
     , opened : Bool
     }
 
@@ -31,10 +30,10 @@ type alias Styles =
 styles : Styles
 styles =
     { open =
-        [ Animation.scale3d 0.1 0.3 1
+        [ Animation.scale (2)
         ]
     , closed =
-        [ Animation.scale3d 1 1 1
+        [ Animation.scale (0)
         ]
     }
 
@@ -81,16 +80,14 @@ view model =
     div []
         [ button [ onClick Open ] [ text "Open" ]
         , button [ onClick Close ] [ text "close" ]
-        , div
-            [ class "container"
-            , style [ ( "background-color", "red" ), ( "width", "20px" ) ]
-            ]
+        , div []
             [ div
                 (Animation.render model.style
                     ++ [ style
                             [ ( "background-color", "blue" )
-                            , ( "width", "50px" )
+                            , ( "width", "170px" )
                             , ( "height", "50px" )
+                            , ( "transform-origin", "top left" )
                             ]
                        , class "menu"
                        ]
@@ -116,7 +113,7 @@ init : ( Model, Cmd Msg )
 init =
     ( { style =
             Animation.style
-                [ Animation.scale3d 1 1 1
+                [ Animation.scale (0)
                 ]
       , opened = False
       }

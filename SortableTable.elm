@@ -1,15 +1,17 @@
 module Main exposing (..)
 
-import Html exposing (Html, div, h1, input, text, Attribute, span)
-import Html.Attributes exposing (placeholder, class, checked, type_)
+import Html exposing (Html, div, h1, input, text, Attribute, span, button)
+import Html.Attributes exposing (placeholder, class, checked, type_, style)
 import Html.Events exposing (onInput, onClick, onWithOptions)
-import Json.Decode exposing (succeed)
+import Json.Decode as Json
 import Table exposing (defaultCustomizations)
 import Checkbox
 import Icons.ArrowUpward as ArrowUpward
 import Icons.MoreVert as MoreVert
-import Menu
-import Tuple
+import Menu exposing (menuView)
+import DOM exposing (target, offsetWidth)
+import Debug
+import Mouse
 
 
 main =
@@ -17,7 +19,7 @@ main =
         { init = init presidents
         , update = update
         , view = view
-        , subscriptions = \_ -> Sub.none
+        , subscriptions = subscriptions
         }
 
 
@@ -29,6 +31,10 @@ type alias Model =
     { people : List Person
     , tableState : Table.State
     , query : String
+    , geometry : Maybe Geometry
+    , opened : Bool
+    , top : Float
+    , left : Float
     }
 
 
@@ -39,6 +45,10 @@ init people =
             { people = people
             , tableState = Table.initialSort "Year"
             , query = ""
+            , geometry = Nothing
+            , opened = False
+            , top = 0
+            , left = 0
             }
     in
         ( model, Cmd.none )
@@ -51,8 +61,9 @@ init people =
 type Msg
     = SetQuery String
     | ToggleSelected String
-    | ToggleMenu String
+    | ToggleMenu String Geometry
     | SetTableState Table.State
+    | Click Mouse.Position
 
 
 update : Msg -> Model -> ( Model, Cmd Msg )
@@ -69,12 +80,52 @@ update msg model =
             )
 
         ToggleSelected name ->
-            ( { model | people = List.map (toggleSelected name) model.people }
+            if model.opened then
+                ( model, Cmd.none )
+            else
+                ( { model | people = List.map (toggleSelected name) model.people }
+                , Cmd.none
+                )
+
+        ToggleMenu name geom ->
+            ( { model
+                | opened = True
+                , geometry = Just geom
+                , top = geom.button.bounds.top
+                , left = geom.button.bounds.left
+                , people = List.map (toggleMenuClicked name) model.people
+              }
             , Cmd.none
             )
 
-        ToggleMenu name ->
-            ( { model | people = List.map (toggleMenuClicked name) model.people }, Cmd.none )
+        Click pos ->
+            let
+                _ =
+                    Debug.log "pos" pos
+            in
+                case model.geometry of
+                    Just geometry ->
+                        let
+                            inside { x, y } { top, left, width, height } =
+                                (left <= toFloat x)
+                                    && (toFloat x <= left + width)
+                                    && (top <= toFloat y)
+                                    && (toFloat y <= top + height)
+                        in
+                            if inside pos geometry.menu.bounds then
+                                ( model, Cmd.none )
+                            else
+                                ( { model
+                                    | opened = False
+                                    , top = geometry.button.bounds.top
+                                    , left = geometry.button.bounds.left
+                                    , people = List.map (\p -> { p | menuClicked = False }) model.people
+                                  }
+                                , Cmd.none
+                                )
+
+                    Nothing ->
+                        ( model, Cmd.none )
 
 
 toggleSelected : String -> Person -> Person
@@ -98,7 +149,7 @@ toggleMenuClicked name person =
 
 
 view : Model -> Html Msg
-view { people, tableState, query } =
+view { people, tableState, query, left, top, opened } =
     let
         lowerQuery =
             String.toLower query
@@ -106,10 +157,11 @@ view { people, tableState, query } =
         acceptablePeople =
             List.filter (String.contains lowerQuery << String.toLower << .name) people
     in
-        div []
+        div [ style [ ( "width", "700px" ) ] ]
             [ div []
                 [ input [ placeholder "Search by Name", onInput SetQuery ] []
                 , Table.view config tableState acceptablePeople
+                , Menu.menuView opened top left
                 ]
             , Html.node "link"
                 [ Html.Attributes.rel "stylesheet"
@@ -212,19 +264,54 @@ menuColumn =
         }
 
 
-onMenuTdClick : a -> Html.Attribute a
-onMenuTdClick msg =
-    onWithOptions "click"
-        { stopPropagation = True, preventDefault = True }
-        (succeed msg)
+
+-- Custom event handler
+
+
+type alias Geometry =
+    { button : Element
+    , menu : Element
+    }
+
+
+type alias Element =
+    { offsetTop : Float
+    , offsetLeft : Float
+    , offsetHeight : Float
+    , bounds : DOM.Rectangle
+    }
+
+
+{-| Decode an Element
+-}
+element : Json.Decoder Element
+element =
+    Json.map4 Element
+        DOM.offsetTop
+        DOM.offsetLeft
+        DOM.offsetHeight
+        DOM.boundingClientRect
+
+
+{-| Decode Geometry
+-}
+decoder : Json.Decoder Geometry
+decoder =
+    Json.map2 Geometry
+        (DOM.target element)
+        (DOM.target (DOM.nextSibling element))
+
+
+onMenuClick : (Geometry -> msg) -> Attribute msg
+onMenuClick msg =
+    onWithOptions "click" { stopPropagation = True, preventDefault = True } (Json.map msg Menu.decoder)
 
 
 viewMenu : Person -> Table.HtmlDetails Msg
 viewMenu p =
     Table.HtmlDetails []
-        [ div
-            [ onMenuTdClick (ToggleMenu p.name), class "mdc-menu-anchor" ]
-            [ MoreVert.view "" ]
+        [ button [ onMenuClick (ToggleMenu p.name) ] [ text "click" ]
+        , Menu.menuView False 0 0
         ]
 
 
@@ -239,6 +326,7 @@ config =
             , Table.stringColumn "City" .city
             , Table.intColumn "Year" .year
             , Table.stringColumn "State" .state
+            , menuColumn
             ]
         , customizations =
             { defaultCustomizations
@@ -310,3 +398,17 @@ presidents =
     , Person "Barack Obama" 1961 "Honolulu" "Hawaii" False False
     , Person "Donald Trump" 1946 "New York City" "New York" False False
     ]
+
+
+
+-- SUBSCRIBTIONS
+
+
+subscriptions : Model -> Sub Msg
+subscriptions model =
+    Sub.batch
+        [ if model.opened == True then
+            Mouse.clicks Click
+          else
+            Sub.none
+        ]
