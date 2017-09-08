@@ -7,8 +7,7 @@ import Json.Decode as Json
 import Table exposing (defaultCustomizations)
 import Checkbox
 import Icons.ArrowUpward as ArrowUpward
-import Icons.MoreVert as MoreVert
-import Menu exposing (menuView)
+import MenuUi as Menu exposing (menuView)
 import DOM exposing (target, offsetWidth)
 import Debug
 import Button
@@ -93,7 +92,7 @@ update msg model =
                 | opened = True
                 , geometry = Just geom
                 , top = geom.button.bounds.top
-                , left = geom.button.bounds.left
+                , left = geom.button.bounds.left - 170 + geom.button.bounds.width
                 , people = List.map (toggleMenuClicked name) model.people
               }
             , Cmd.none
@@ -105,7 +104,7 @@ update msg model =
                     Debug.log "pos" pos
             in
                 case model.geometry of
-                    Just geometry ->
+                    Just geom ->
                         let
                             inside { x, y } { top, left, width, height } =
                                 (left <= toFloat x)
@@ -113,13 +112,13 @@ update msg model =
                                     && (top <= toFloat y)
                                     && (toFloat y <= top + height)
                         in
-                            if inside pos geometry.menu.bounds then
+                            if inside pos geom.menu.bounds then
                                 ( model, Cmd.none )
                             else
                                 ( { model
                                     | opened = False
-                                    , top = geometry.button.bounds.top
-                                    , left = geometry.button.bounds.left
+                                    , top = geom.button.bounds.top
+                                    , left = geom.button.bounds.left - 170 + geom.button.bounds.width
                                     , people = List.map (\p -> { p | menuClicked = False }) model.people
                                   }
                                 , Cmd.none
@@ -166,7 +165,7 @@ view { people, tableState, query, left, top, opened } =
                 ]
             , Html.node "link"
                 [ Html.Attributes.rel "stylesheet"
-                , Html.Attributes.href "style.css?v.10.1"
+                , Html.Attributes.href "style.css?v.11.1"
                 ]
                 []
             , Html.node "link"

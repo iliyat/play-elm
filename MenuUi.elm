@@ -1,4 +1,4 @@
-module Menu exposing (Geometry, menuView, decoder)
+module MenuUi exposing (Geometry, menuView, decoder)
 
 import Html exposing (Html, text, div, button, Attribute, ul, li)
 import Html.Events exposing (on)
@@ -135,11 +135,13 @@ decoder =
 
 view : Model -> Html Msg
 view model =
-    div []
+    div [ style [ ( "width", "400px" ), ( "text-align", "right" ) ] ]
         [ button [ onMenuClick ButtonClick, Html.Attributes.id "btn" ] [ text "click!" ]
         , menuView model.opened 0 0
         , Html.node "link"
-            [ Html.Attributes.rel "stylesheet", Html.Attributes.href "https://fonts.googleapis.com/css?family=Roboto+Mono" ]
+            [ Html.Attributes.rel "stylesheet"
+            , Html.Attributes.href "style.css?v.10.1"
+            ]
             []
         , Html.node "link"
             [ Html.Attributes.rel "stylesheet", Html.Attributes.href "https://fonts.googleapis.com/css?family=Roboto:300,400,500" ]
@@ -156,41 +158,77 @@ view model =
 
 menuView : Bool -> Float -> Float -> Html.Html msg
 menuView isOpen top left =
-    div
-        [ class "mdc-simple-menu mdc-simple-menu--open"
-        , style
-            [ ( "opacity"
-              , if isOpen then
-                    "1"
-                else
-                    "0"
-              )
-            , ( "transform-origin", "top left" )
-            , ( "transform"
-              , if isOpen then
-                    "scale(1)"
-                else
-                    "scale(0.6)"
-              )
-            , ( "transition", "transform 250ms cubic-bezier(0.23, 1, 0.32, 1) 0ms, opacity 250ms cubic-bezier(0.23, 1, 0.32, 1) 0ms" )
-            , ( "position", "fixed" )
-            , ( "left", toString left ++ "px" )
-            , ( "top", toString top ++ "px" )
-            , ( "z-index"
-              , if isOpen then
-                    "20000"
-                else
-                    "-1"
-              )
+    let
+        opacity =
+            if isOpen then
+                "1"
+            else
+                "0"
+
+        zIndex =
+            if isOpen then
+                "2000"
+            else
+                "-1"
+
+        transform =
+            if isOpen then
+                "scale(1, 1)"
+            else
+                "scale(0, 0)"
+
+        transform1 =
+            if isOpen then
+                "scaleX(1)"
+            else
+                "scaleX(0)"
+
+        transform2 =
+            if isOpen then
+                "scaleY(1)"
+            else
+                "scaleY(0)"
+    in
+        div
+            [ class "mdc-simple-menu mdc-simple-menu--open"
+            , style
+                [ ( "opacity", opacity )
+                , ( "transform-origin", "right top 0px" )
+                , ( "transform", transform )
+                , ( "transition", "transform 250ms cubic-bezier(0.23, 1, 0.32, 1) 0ms, opacity 250ms cubic-bezier(0.23, 1, 0.32, 1) 0ms" )
+                , ( "position", "fixed" )
+                , ( "left", toString left ++ "px" )
+                , ( "top", toString top ++ "px" )
+                , ( "z-index", zIndex )
+                ]
             ]
-        ]
-        [ ul [ class "mdc-simple-menu__items mdc-list" ]
-            [ li [ class "mdc-list-item" ] [ text "Редактировать" ]
-            , li [ class "mdc-list-item" ] [ text "Отправить в архив" ]
-            , li [ class "mdc-list-divider" ] []
-            , li [ class "mdc-list-item" ] [ text "Создать дубликат" ]
+            [ div
+                [ style
+                    [ ( "opacity", opacity )
+                    , ( "max-height", "100%" )
+                    , ( "overflow-y", "auto" )
+                    , ( "transform-origin", "right top 0px" )
+                    , ( "transform", transform1 )
+                    , ( "transition", "transform 250ms cubic-bezier(0.23, 1, 0.32, 1) 0ms, opacity 250ms cubic-bezier(0.23, 1, 0.32, 1) 0ms" )
+                    ]
+                ]
+                [ div
+                    [ style
+                        [ ( "opacity", opacity )
+                        , ( "transform-origin", "right top 0px" )
+                        , ( "transform", transform2 )
+                        , ( "transition", "transform 500ms cubic-bezier(0.23, 1, 0.32, 1) 0ms, opacity 500ms cubic-bezier(0.23, 1, 0.32, 1) 0ms" )
+                        ]
+                    ]
+                    [ ul [ class "mdc-simple-menu__items mdc-list" ]
+                        [ li [ class "mdc-list-item" ] [ text "Редактировать" ]
+                        , li [ class "mdc-list-item" ] [ text "Отправить в архив" ]
+                        , li [ class "mdc-list-divider" ] []
+                        , li [ class "mdc-list-item" ] [ text "Создать дубликат" ]
+                        ]
+                    ]
+                ]
             ]
-        ]
 
 
 
