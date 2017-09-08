@@ -165,7 +165,7 @@ view { people, tableState, query, left, top, opened } =
                 ]
             , Html.node "link"
                 [ Html.Attributes.rel "stylesheet"
-                , Html.Attributes.href "style.css?v.11.1"
+                , Html.Attributes.href "style.css?v.14.1"
                 ]
                 []
             , Html.node "link"

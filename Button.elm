@@ -65,13 +65,16 @@ update msg model =
 renderButton : List (Attribute msg) -> Html msg
 renderButton a =
     i
-        ([ class "mdc-icon-toggle material-icons mdc-custom-icon"
+        ([ class "material-icons more-vert-icon"
          , style
             [ ( "width", "24px" )
             , ( "height", "24px" )
-            , ( "padding", "10px 0px" )
             , ( "font-size", "24px" )
+            , ( "cursor", "pointer" )
             , ( "line-height", "3px" )
+            , ( "color", "rgba(0,0,0,.54)" )
+            , ( "padding", "12px" )
+            , ( "box-sizing", "border-box" )
             ]
          ]
             ++ a

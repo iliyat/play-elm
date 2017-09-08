@@ -42,7 +42,6 @@ body {
 }
 
 .elm-table tr {
-  cursor: default;
   position: relative;
   height: 48px;
   max-height: 48px;
@@ -155,15 +154,6 @@ body {
   z-index: 1000;
 }
 
-.mdc-custom-icon {
-  width: 24px;
-  height: 24px;
-  padding: 10px 0px;
-  font-size: 24px;
-  line-height: 3px;
-}
-
-
 /* ------------------- MENU ---------------- */
 
 .mdc-list-divider {
@@ -172,4 +162,17 @@ body {
 .mdc-list-item {
   height: 32px!important;
   font-size: 14px!important;
+}
+
+/* Talbe menu styles */
+
+.elm-table tbody tr:hover {
+ background-color: #EDEFF1; 
+}
+
+.elm-table tbody tr .more-vert-icon {
+  opacity: 0;
+}
+.elm-table tbody tr:hover .more-vert-icon {
+  opacity: 1;
 }
