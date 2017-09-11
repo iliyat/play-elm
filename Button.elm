@@ -11,8 +11,6 @@ import Html
         , i
         )
 import Html.Attributes exposing (classList, class, style)
-import Html.Events
-import Icons.MoreVert as MoreVert
 
 
 main =
