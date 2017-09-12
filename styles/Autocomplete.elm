@@ -1,8 +1,9 @@
 module Autocomplete exposing (..)
 
 import Html exposing (Html, div, h1, input, text, Attribute, span, button)
-import Html.Attributes exposing (placeholder, class, checked, type_, style)
-import Html.Events exposing (onInput, onClick, onWithOptions)
+import Html.Attributes exposing (placeholder, checked, type_, style)
+import Views
+import Debug
 
 
 main =
@@ -25,12 +26,7 @@ type alias Model =
 
 init : ( Model, Cmd Msg )
 init =
-    let
-        model =
-            { query = ""
-            }
-    in
-        ( model, Cmd.none )
+    ( { query = "" }, Cmd.none )
 
 
 
@@ -39,11 +35,15 @@ init =
 
 type Msg
     = SetQuery String
+    | OnMenuClick String
 
 
 update : Msg -> Model -> ( Model, Cmd Msg )
 update msg model =
     case msg of
+        OnMenuClick itemValue ->
+            ( model, Cmd.none )
+
         SetQuery newQuery ->
             ( { model | query = newQuery }
             , Cmd.none
@@ -54,15 +54,21 @@ update msg model =
 -- VIEW
 
 
+entries =
+    [ Views.ValueItem "1" "Vasya"
+    , Views.Divider
+    , Views.ValueItem "2" "Petya"
+    ]
+
+
 view : Model -> Html Msg
 view model =
-    div [ style [ ( "width", "700px" ) ] ]
-        [ div []
-            [ input [ placeholder "Search by Name", onInput SetQuery ] []
-            ]
+    div []
+        [ Views.search
+        , Views.menu entries OnMenuClick
         , Html.node "link"
             [ Html.Attributes.rel "stylesheet"
-            , Html.Attributes.href "autocomplete.css"
+            , Html.Attributes.href "auto.css"
             ]
             []
         , Html.node "link"

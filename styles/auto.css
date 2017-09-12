@@ -1,0 +1,59 @@
+.searchBoxContainer {
+    background-color: rgb(255, 255, 255);
+    box-shadow: 0px 0px 2px 0px rgba(52, 62, 77, 0.24);
+    border-radius: 2px;
+}
+
+.searchBoxSearch {
+    background-color: #fff;
+    border-radius: 2px;
+    display: flex;
+    justify-content: space-between;
+    padding: 8px 4px;
+    align-items: flex-start;
+}
+
+.searchBoxSearchBlock {
+    display: flex;
+    align-items: flex-start;
+}
+
+.searchBoxSearchIcon {
+    min-width: 24px;
+    align-items: flex-start;
+    padding: 12px 16px 0px 22px;
+}
+
+.searchBoxTagsBlock {
+    align-items: baseline;
+    display: flex;
+    flex-wrap: wrap;
+}
+
+.searchBoxBlock {
+    align-items: center;
+    display: flex;
+    padding-right: 12px;
+}
+
+.searchBoxInput {
+    outline: none;
+    border-style: none;
+    -webkit-appearance: textfield;
+    line-height: 24px;
+    height: 48px;
+    font-size: 16px;
+}
+
+.searchBoxListItem {
+    height: 32px !important;
+    font-size: 14px !important;
+}
+
+.searchBoxListItem:hover {
+    background-color: #eee;
+}
+
+.searchBoxListItemDivider {
+    margin: 8px 0px !important;
+}
