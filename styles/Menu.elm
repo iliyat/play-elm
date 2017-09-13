@@ -27,7 +27,7 @@ import Mouse
 
 type alias Model =
     { geometry : Maybe Geometry
-    , opened : Bool
+    , open : Bool
     , top : Float
     , left : Float
     }
@@ -56,7 +56,7 @@ type alias Element =
 init : Model
 init =
     { geometry = Nothing
-    , opened = False
+    , open = False
     , top = 0
     , left = 0
     }
@@ -178,7 +178,7 @@ onMenuClick msg =
 
 updateModel : Geometry -> Model
 updateModel geom =
-    { opened = True
+    { open = True
     , top = geom.button.bounds.top
     , left = geom.button.bounds.left - 170 + geom.button.bounds.width
     , geometry = Just geom
@@ -204,7 +204,7 @@ mouseClick pos model geometry =
             model
         else
             { model
-                | opened = False
+                | open = False
                 , top = geometry.button.bounds.top
                 , left = geometry.button.bounds.left - 170 + geometry.button.bounds.width
             }
@@ -215,7 +215,7 @@ mouseClick pos model geometry =
 subscriptions : Model -> (Mouse.Position -> msg) -> Sub msg
 subscriptions model msg =
     Sub.batch
-        [ if model.opened == True then
+        [ if model.open == True then
             Mouse.clicks msg
           else
             Sub.none

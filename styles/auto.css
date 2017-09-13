@@ -70,6 +70,8 @@
 
 .searchBoxHidden {
     opacity: 0 !important;
+    position: relative;
+    z-index: -100500 !important;
 }
 
 .chipContainer {

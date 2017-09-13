@@ -79,7 +79,7 @@ update msg model =
                         | top = geometry.button.bounds.top
                         , left = geometry.button.bounds.left - 170 + geometry.button.bounds.width
                         , geometry = Just geometry
-                        , opened =
+                        , open =
                             if String.length value > 0 then
                                 True
                             else
@@ -102,7 +102,7 @@ update msg model =
                             Menu.mouseClick pos model.menuModel geom
 
                         closed =
-                            not menuModel.opened
+                            not menuModel.open
                     in
                         if closed then
                             ( { model | menuModel = menuModel }, Cmd.none )
@@ -127,15 +127,20 @@ entries =
     ]
 
 
+config : Model -> Views.Config Msg
+config model =
+    { onSearchChange = SetSearchString
+    , onTagDelete = OnTagDelete
+    , onMenuClick = OnMenuClick
+    , tags = model.tags
+    , open = model.menuModel.open
+    }
+
+
 view : Model -> Html Msg
 view model =
     div []
-        [ Views.search model.tags
-            SetSearchString
-            OnTagDelete
-            model.menuModel.opened
-            entries
-            OnMenuClick
+        [ Views.search (config model) entries
         , Html.node "link"
             [ Html.Attributes.rel "stylesheet"
             , Html.Attributes.href "auto.css"

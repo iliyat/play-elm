@@ -1,4 +1,4 @@
-module Views exposing (search, menu, Item(..))
+module Views exposing (search, menu, Item(..), Config)
 
 import Html exposing (Html, div, input, text, Attribute, span, button, li, ul)
 import Html.Attributes as Attr exposing (placeholder, checked, type_)
@@ -14,6 +14,15 @@ import Menu exposing (Common, onInputChange)
 
 { id, class, classList } =
     searchBoxNamespace
+
+
+type alias Config msg =
+    { onSearchChange : Common -> msg
+    , onTagDelete : String -> msg
+    , onMenuClick : String -> msg
+    , open : Bool
+    , tags : List { label : String, value : String }
+    }
 
 
 type Item v l
@@ -52,27 +61,17 @@ menu isVisible items toMsg =
             ]
 
 
-search :
-    List { label : String, value : String }
-    -> (Common -> msg)
-    ->
-        (String
-         -> msg
-        )
-    -> Bool
-    -> List (Item String String)
-    -> (String -> msg)
-    -> Html msg
-search tags searchTextChange tagDelete isVisible menuItems menuToMsg =
+search : Config msg -> List (Item String String) -> Html msg
+search { onTagDelete, onSearchChange, onMenuClick, tags, open } menuItems =
     let
         inpt_ =
             div [ class [ InputContainer ] ]
-                [ input [ Menu.onInputChange searchTextChange, class [ Input ], type_ "text", placeholder "поиск" ] []
-                , menu isVisible menuItems menuToMsg
+                [ input [ Menu.onInputChange onSearchChange, class [ Input ], type_ "text", placeholder "поиск" ] []
+                , menu open menuItems onMenuClick
                 ]
 
         chips =
-            List.map (\tag -> Chip.view tag tagDelete) tags
+            List.map (\tag -> Chip.view tag onTagDelete) tags
     in
         div [ class [ Container ] ]
             [ div [ class [ Search ] ]

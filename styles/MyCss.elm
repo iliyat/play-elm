@@ -66,5 +66,8 @@ css =
         , class Empty
             []
         , class Hidden
-            [ opacity (num 0) |> important ]
+            [ opacity (num 0) |> important
+            , position relative
+            , property "z-index" "-100500" |> important
+            ]
         ]
