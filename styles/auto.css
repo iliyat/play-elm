@@ -10,7 +10,7 @@
     display: flex;
     justify-content: space-between;
     padding: 8px 4px;
-    align-items: flex-start;
+    align-items: baseline;
 }
 
 .searchBoxSearchBlock {
@@ -52,7 +52,7 @@
 .searchBoxMenu {
     display: block !important;
     position: fixed !important;
-    top: 0px !important;
+    top: 50px !important;
 }
 
 .searchBoxListItem {
@@ -66,6 +66,10 @@
 
 .searchBoxListItemDivider {
     margin: 8px 0px !important;
+}
+
+.searchBoxHidden {
+    opacity: 0 !important;
 }
 
 .chipContainer {

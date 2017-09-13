@@ -3,16 +3,18 @@ module Menu
         ( init
         , Model
         , Geometry
+        , Common
         , Element
         , menuView
         , decoder
         , subscriptions
         , mouseClick
-        , toggleMenu
+        , updateModel
+        , onInputChange
         )
 
 import Html exposing (Html, text, div, button, Attribute, ul, li)
-import Html.Events exposing (on)
+import Html.Events exposing (on, targetValue)
 import Html.Attributes exposing (class, classList, style)
 import Json.Decode as Json
 import DOM exposing (target, offsetWidth)
@@ -34,6 +36,12 @@ type alias Model =
 type alias Geometry =
     { button : Element
     , menu : Element
+    }
+
+
+type alias Common =
+    { geometry : Geometry
+    , value : String
     }
 
 
@@ -72,6 +80,11 @@ decoder =
     Json.map2 Geometry
         (DOM.target element)
         (DOM.target (DOM.nextSibling element))
+
+
+decoderCommon : Json.Decoder Common
+decoderCommon =
+    Json.map2 Common decoder targetValue
 
 
 
@@ -153,19 +166,18 @@ menuView isOpen top left =
             ]
 
 
+onInputChange : (Common -> msg) -> Attribute msg
+onInputChange msg =
+    on "input" (Json.map msg decoderCommon)
+
+
 onMenuClick : (Geometry -> msg) -> Attribute msg
 onMenuClick msg =
     onWithOptions "click" { stopPropagation = True, preventDefault = True } (Json.map msg decoder)
 
 
-
--- renderIcon : (Geometry -> msg) -> Html.Html msg
--- renderIcon msg =
---     renderButton [ onMenuClick (msg) ]
-
-
-toggleMenu : String -> Geometry -> Model
-toggleMenu name geom =
+updateModel : Geometry -> Model
+updateModel geom =
     { opened = True
     , top = geom.button.bounds.top
     , left = geom.button.bounds.left - 170 + geom.button.bounds.width
@@ -181,6 +193,12 @@ mouseClick pos model geometry =
                 && (toFloat x <= left + width)
                 && (top <= toFloat y)
                 && (toFloat y <= top + height)
+
+        os =
+            Debug.log "pos" <| pos
+
+        _ =
+            Debug.log "inside" <| inside pos geometry.menu.bounds
     in
         if inside pos geometry.menu.bounds then
             model

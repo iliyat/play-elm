@@ -15,6 +15,8 @@ type CssClasses
     | ListItem
     | ListItemDivider
     | Menu
+    | Empty
+    | Hidden
 
 
 

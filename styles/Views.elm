@@ -6,6 +6,7 @@ import Html.Events exposing (onClick, onInput)
 import Classes exposing (..)
 import Icons.Icon as Icon
 import Ui.Chip as Chip
+import Menu exposing (Common, onInputChange)
 
 
 -- VIEW
@@ -36,24 +37,24 @@ menu isVisible items toMsg =
                 Divider ->
                     li [ Attr.class "mdc-list-divider", class [ ListItemDivider ] ] []
     in
-        case isVisible of
-            True ->
-                div
-                    [ Attr.class "mdc-simple-menu mdc-simple-menu--open"
-                    , class
-                        [ Menu ]
-                    ]
-                    [ ul [ Attr.class "mdc-simple-menu__items mdc-list" ]
-                        (List.map mapper items)
-                    ]
-
-            False ->
-                div [] []
+        div
+            [ Attr.class "mdc-simple-menu mdc-simple-menu--open"
+            , class
+                [ Menu
+                , if isVisible then
+                    Empty
+                  else
+                    Hidden
+                ]
+            ]
+            [ ul [ Attr.class "mdc-simple-menu__items mdc-list" ]
+                (List.map mapper items)
+            ]
 
 
 search :
     List { label : String, value : String }
-    -> (String -> msg)
+    -> (Common -> msg)
     ->
         (String
          -> msg
@@ -66,7 +67,7 @@ search tags searchTextChange tagDelete isVisible menuItems menuToMsg =
     let
         inpt_ =
             div [ class [ InputContainer ] ]
-                [ input [ onInput searchTextChange, class [ Input ], type_ "text", placeholder "поиск" ] []
+                [ input [ Menu.onInputChange searchTextChange, class [ Input ], type_ "text", placeholder "поиск" ] []
                 , menu isVisible menuItems menuToMsg
                 ]
 

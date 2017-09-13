@@ -18,7 +18,7 @@ css =
             , displayFlex
             , justifyContent spaceBetween
             , padding2 (px 8) (px 4)
-            , alignItems flexStart
+            , alignItems baseline
             ]
         , class SearchBlock
             [ displayFlex
@@ -53,7 +53,7 @@ css =
         , class Menu
             [ display block |> important
             , position fixed |> important
-            , top (px 0) |> important
+            , top (px 50) |> important
             ]
         , class ListItem
             [ height (px 32) |> important
@@ -63,4 +63,8 @@ css =
         , class ListItemDivider
             [ margin2 (px 8) (px 0) |> important
             ]
+        , class Empty
+            []
+        , class Hidden
+            [ opacity (num 0) |> important ]
         ]
