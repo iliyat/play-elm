@@ -20,13 +20,13 @@ main =
 
 
 type alias Model =
-    { query : String
+    { searchString : String
     }
 
 
 init : ( Model, Cmd Msg )
 init =
-    ( { query = "" }, Cmd.none )
+    ( { searchString = "" }, Cmd.none )
 
 
 
@@ -34,7 +34,7 @@ init =
 
 
 type Msg
-    = SetQuery String
+    = SetSearchString String
     | OnMenuClick String
 
 
@@ -44,8 +44,8 @@ update msg model =
         OnMenuClick itemValue ->
             ( model, Cmd.none )
 
-        SetQuery newQuery ->
-            ( { model | query = newQuery }
+        SetSearchString value ->
+            ( { model | searchString = value }
             , Cmd.none
             )
 
@@ -56,32 +56,38 @@ update msg model =
 
 entries =
     [ Views.ValueItem "1" "Vasya"
-    , Views.Divider
     , Views.ValueItem "2" "Petya"
     ]
 
 
 view : Model -> Html Msg
 view model =
-    div []
-        [ Views.search
-        , Views.menu entries OnMenuClick
-        , Html.node "link"
-            [ Html.Attributes.rel "stylesheet"
-            , Html.Attributes.href "auto.css"
+    let
+        showMenu =
+            String.length model.searchString > 0
+    in
+        div []
+            [ Views.search SetSearchString
+            , Views.menu showMenu entries OnMenuClick
+            , Html.node "link"
+                [ Html.Attributes.rel "stylesheet"
+                , Html.Attributes.href "auto.css"
+                ]
+                []
+            , Html.node "link"
+                [ Html.Attributes.rel "stylesheet"
+                , Html.Attributes.href "https://unpkg.com/material-components-web@latest/dist/material-components-web.min.css"
+                ]
+                []
+            , Html.node "link"
+                [ Html.Attributes.rel "stylesheet"
+                , Html.Attributes.href "https://fonts.googleapis.com/icon?family=Material+Icons"
+                ]
+                []
+            , Html.node "link"
+                [ Html.Attributes.rel "stylesheet", Html.Attributes.href "https://fonts.googleapis.com/css?family=Roboto:300,400,500" ]
+                []
             ]
-            []
-        , Html.node "link"
-            [ Html.Attributes.rel "stylesheet"
-            , Html.Attributes.href "https://unpkg.com/material-components-web@latest/dist/material-components-web.min.css"
-            ]
-            []
-        , Html.node "link"
-            [ Html.Attributes.rel "stylesheet"
-            , Html.Attributes.href "https://fonts.googleapis.com/icon?family=Material+Icons"
-            ]
-            []
-        ]
 
 
 

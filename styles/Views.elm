@@ -2,9 +2,10 @@ module Views exposing (search, menu, Item(..))
 
 import Html exposing (Html, div, input, text, Attribute, span, button, li, ul)
 import Html.Attributes as Attr exposing (placeholder, checked, type_)
-import Html.Events exposing (onClick)
+import Html.Events exposing (onClick, onInput)
 import Classes exposing (..)
 import Icons.Icon as Icon
+import Ui.Chip as Chip
 
 
 -- VIEW
@@ -19,8 +20,8 @@ type Item v l
     | Divider
 
 
-menu : List (Item String String) -> (String -> msg) -> Html msg
-menu items toMsg =
+menu : Bool -> List (Item String String) -> (String -> msg) -> Html msg
+menu isVisible items toMsg =
     let
         mapper item =
             case item of
@@ -35,20 +36,26 @@ menu items toMsg =
                 Divider ->
                     li [ Attr.class "mdc-list-divider", class [ ListItemDivider ] ] []
     in
-        div [ Attr.class "mdc-simple-menu mdc-simple-menu--open" ]
-            [ ul [ Attr.class "mdc-simple-menu__items mdc-list" ]
-                (List.map mapper items)
-            ]
+        case isVisible of
+            True ->
+                div [ Attr.class "mdc-simple-menu mdc-simple-menu--open" ]
+                    [ ul [ Attr.class "mdc-simple-menu__items mdc-list" ]
+                        (List.map mapper items)
+                    ]
+
+            False ->
+                div [] []
 
 
-search : Html msg
-search =
+search : (String -> msg) -> Html msg
+search toMsg =
     div [ class [ Container ] ]
         [ div [ class [ Search ] ]
             [ div [ class [ SearchBlock ] ]
                 [ div [ class [ SearchIcon ] ] [ Icon.view "search" ]
                 , div [ class [ TagsBlock ] ]
-                    [ input [ class [ Input ], type_ "text", placeholder "поиск" ] []
+                    [ Chip.view
+                    , input [ onInput toMsg, class [ Input ], type_ "text", placeholder "поиск" ] []
                     ]
                 ]
             , div [ class [ Block ] ] [ Icon.view "close" ]
