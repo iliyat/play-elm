@@ -21,12 +21,23 @@ main =
 
 type alias Model =
     { searchString : String
+    , tags : List { label : String, value : String }
     }
 
 
 init : ( Model, Cmd Msg )
 init =
-    ( { searchString = "" }, Cmd.none )
+    ( { searchString = ""
+      , tags =
+            [ { label = "ololo", value = "test" }
+            , { label = "11", value = "22" }
+            , { label = "11", value = "22" }
+            , { label = "11", value = "22" }
+            , { label = "11", value = "22" }
+            ]
+      }
+    , Cmd.none
+    )
 
 
 
@@ -36,12 +47,16 @@ init =
 type Msg
     = SetSearchString String
     | OnMenuClick String
+    | OnTagDelete String
 
 
 update : Msg -> Model -> ( Model, Cmd Msg )
 update msg model =
     case msg of
         OnMenuClick itemValue ->
+            ( model, Cmd.none )
+
+        OnTagDelete itemValue ->
             ( model, Cmd.none )
 
         SetSearchString value ->
@@ -67,8 +82,9 @@ view model =
             String.length model.searchString > 0
     in
         div []
-            [ Views.search SetSearchString
-            , Views.menu showMenu entries OnMenuClick
+            [ Views.search model.tags SetSearchString OnTagDelete showMenu entries OnMenuClick
+
+            -- , Views.menu showMenu entries OnMenuClick
             , Html.node "link"
                 [ Html.Attributes.rel "stylesheet"
                 , Html.Attributes.href "auto.css"

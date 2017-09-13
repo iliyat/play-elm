@@ -39,6 +39,9 @@ css =
             , displayFlex
             , paddingRight (px 12)
             ]
+        , class InputContainer
+            [ position relative
+            ]
         , class Input
             [ outline none
             , borderStyle none
@@ -46,6 +49,11 @@ css =
             , lineHeight (px 24)
             , height (px 48)
             , fontSize (px 16)
+            ]
+        , class Menu
+            [ display block |> important
+            , position fixed |> important
+            , top (px 0) |> important
             ]
         , class ListItem
             [ height (px 32) |> important

@@ -11,11 +11,11 @@ import Ui.ChipCss exposing (..)
     chipNamespace
 
 
-view : Html msg
-view =
+view : { label : String, value : String } -> (String -> msg) -> Html msg
+view item toMsg =
     div [ class [ Container ] ]
-        [ span [ class [ SpanText ] ] [ text "test" ]
-        , button [ class [ Button ] ]
+        [ span [ class [ SpanText ] ] [ text item.label ]
+        , button [ class [ Button ], onClick (toMsg item.value) ]
             [ Icon.view "cancel"
             ]
         ]

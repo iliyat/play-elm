@@ -36,6 +36,10 @@
     padding-right: 12px;
 }
 
+.searchBoxInputContainer {
+    position: relative;
+}
+
 .searchBoxInput {
     outline: none;
     border-style: none;
@@ -43,6 +47,12 @@
     line-height: 24px;
     height: 48px;
     font-size: 16px;
+}
+
+.searchBoxMenu {
+    display: block !important;
+    position: fixed !important;
+    top: 0px !important;
 }
 
 .searchBoxListItem {

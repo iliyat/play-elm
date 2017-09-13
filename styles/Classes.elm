@@ -11,8 +11,10 @@ type CssClasses
     | TagsBlock
     | Block
     | Input
+    | InputContainer
     | ListItem
     | ListItemDivider
+    | Menu
 
 
 

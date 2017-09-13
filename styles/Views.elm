@@ -38,7 +38,11 @@ menu isVisible items toMsg =
     in
         case isVisible of
             True ->
-                div [ Attr.class "mdc-simple-menu mdc-simple-menu--open" ]
+                div
+                    [ Attr.class "mdc-simple-menu mdc-simple-menu--open"
+                    , class
+                        [ Menu ]
+                    ]
                     [ ul [ Attr.class "mdc-simple-menu__items mdc-list" ]
                         (List.map mapper items)
                     ]
@@ -47,17 +51,35 @@ menu isVisible items toMsg =
                 div [] []
 
 
-search : (String -> msg) -> Html msg
-search toMsg =
-    div [ class [ Container ] ]
-        [ div [ class [ Search ] ]
-            [ div [ class [ SearchBlock ] ]
-                [ div [ class [ SearchIcon ] ] [ Icon.view "search" ]
-                , div [ class [ TagsBlock ] ]
-                    [ Chip.view
-                    , input [ onInput toMsg, class [ Input ], type_ "text", placeholder "поиск" ] []
-                    ]
+search :
+    List { label : String, value : String }
+    -> (String -> msg)
+    ->
+        (String
+         -> msg
+        )
+    -> Bool
+    -> List (Item String String)
+    -> (String -> msg)
+    -> Html msg
+search tags searchTextChange tagDelete isVisible menuItems menuToMsg =
+    let
+        inpt_ =
+            div [ class [ InputContainer ] ]
+                [ input [ onInput searchTextChange, class [ Input ], type_ "text", placeholder "поиск" ] []
+                , menu isVisible menuItems menuToMsg
                 ]
-            , div [ class [ Block ] ] [ Icon.view "close" ]
+
+        chips =
+            List.map (\tag -> Chip.view tag tagDelete) tags
+    in
+        div [ class [ Container ] ]
+            [ div [ class [ Search ] ]
+                [ div [ class [ SearchBlock ] ]
+                    [ div [ class [ SearchIcon ] ] [ Icon.view "search" ]
+                    , div [ class [ TagsBlock ] ]
+                        (chips ++ [ inpt_ ])
+                    ]
+                , div [ class [ Block ] ] [ Icon.view "close" ]
+                ]
             ]
-        ]
