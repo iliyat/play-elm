@@ -30,6 +30,14 @@ type Item v l
     | Divider
 
 
+when : Bool -> (CssClasses -> CssClasses)
+when guard cl =
+    if guard then
+        cl
+    else
+        Empty
+
+
 menu : Bool -> List (Item String String) -> (String -> msg) -> Html msg
 menu isVisible items toMsg =
     let
@@ -50,14 +58,26 @@ menu isVisible items toMsg =
             [ Attr.class "mdc-simple-menu mdc-simple-menu--open"
             , class
                 [ Menu
-                , if isVisible then
-                    Empty
-                  else
-                    Hidden
+                , when (not isVisible) Hidden
                 ]
             ]
-            [ ul [ Attr.class "mdc-simple-menu__items mdc-list" ]
-                (List.map mapper items)
+            [ div
+                [ class
+                    [ MenuInner1
+                    , when (not isVisible) MenuInner1Hidden
+                    ]
+                ]
+                [ div
+                    [ class
+                        [ MenuInner2
+                        , when (not isVisible)
+                            MenuInner2Hidden
+                        ]
+                    ]
+                    [ ul [ Attr.class "mdc-simple-menu__items mdc-list" ]
+                        (List.map mapper items)
+                    ]
+                ]
             ]
 
 

@@ -54,6 +54,27 @@ css =
             [ display block |> important
             , position fixed |> important
             , top (px 50) |> important
+            , property "transform-origin" "left top 0px"
+            , transform (scale2 1 1)
+            , property "transition" "transform 250ms cubic-bezier(0.23, 1, 0.32, 1) 0ms, opacity 250ms cubic-bezier(0.23, 1, 0.32, 1) 0ms"
+            ]
+        , class MenuInner1
+            [ property "transform-origin" "left top 0px"
+            , property "transition" "transform 250ms cubic-bezier(0.23, 1, 0.32, 1) 0ms, opacity 250ms cubic-bezier(0.23, 1, 0.32, 1) 0ms"
+            , transform (scaleX 1)
+            ]
+        , class MenuInner1Hidden
+            [ opacity (num 0) |> important
+            , transform (scaleX 0)
+            ]
+        , class MenuInner2
+            [ property "transform-origin" "left top 0px"
+            , property "transition" "transform 500ms cubic-bezier(0.23, 1, 0.32, 1) 0ms, opacity 500ms cubic-bezier(0.23, 1, 0.32, 1) 0ms"
+            , transform (scaleY 1)
+            ]
+        , class MenuInner2Hidden
+            [ opacity (num 0) |> important
+            , transform (scaleY 0)
             ]
         , class ListItem
             [ height (px 32) |> important
@@ -69,5 +90,6 @@ css =
             [ opacity (num 0) |> important
             , position relative
             , property "z-index" "-100500" |> important
+            , transform (scale2 0 0)
             ]
         ]

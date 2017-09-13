@@ -17,6 +17,10 @@ type CssClasses
     | Menu
     | Empty
     | Hidden
+    | MenuInner1
+    | MenuInner1Hidden
+    | MenuInner2
+    | MenuInner2Hidden
 
 
 

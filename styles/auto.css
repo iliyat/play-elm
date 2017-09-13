@@ -53,6 +53,31 @@
     display: block !important;
     position: fixed !important;
     top: 50px !important;
+    transform-origin: left top 0px;
+    transform: scale(1, 1);
+    transition: transform 250ms cubic-bezier(0.23, 1, 0.32, 1) 0ms, opacity 250ms cubic-bezier(0.23, 1, 0.32, 1) 0ms;
+}
+
+.searchBoxMenuInner1 {
+    transform-origin: left top 0px;
+    transition: transform 250ms cubic-bezier(0.23, 1, 0.32, 1) 0ms, opacity 250ms cubic-bezier(0.23, 1, 0.32, 1) 0ms;
+    transform: scaleX(1);
+}
+
+.searchBoxMenuInner1Hidden {
+    opacity: 0 !important;
+    transform: scaleX(0);
+}
+
+.searchBoxMenuInner2 {
+    transform-origin: left top 0px;
+    transition: transform 500ms cubic-bezier(0.23, 1, 0.32, 1) 0ms, opacity 500ms cubic-bezier(0.23, 1, 0.32, 1) 0ms;
+    transform: scaleY(1);
+}
+
+.searchBoxMenuInner2Hidden {
+    opacity: 0 !important;
+    transform: scaleY(0);
 }
 
 .searchBoxListItem {
@@ -72,6 +97,7 @@
     opacity: 0 !important;
     position: relative;
     z-index: -100500 !important;
+    transform: scale(0, 0);
 }
 
 .chipContainer {
