@@ -56,24 +56,12 @@ menu isVisible items toMsg =
     in
         div
             [ Attr.class "mdc-simple-menu mdc-simple-menu--open"
-            , class
-                [ Menu
-                , when (not isVisible) Hidden
-                ]
+            , class [ Menu, when (not isVisible) Hidden ]
             ]
             [ div
-                [ class
-                    [ MenuInner1
-                    , when (not isVisible) MenuInner1Hidden
-                    ]
-                ]
+                [ class [ MenuInner1, when (not isVisible) MenuInner1Hidden ] ]
                 [ div
-                    [ class
-                        [ MenuInner2
-                        , when (not isVisible)
-                            MenuInner2Hidden
-                        ]
-                    ]
+                    [ class [ MenuInner2, when (not isVisible) MenuInner2Hidden ] ]
                     [ ul [ Attr.class "mdc-simple-menu__items mdc-list" ]
                         (List.map mapper items)
                     ]
