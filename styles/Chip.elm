@@ -10,5 +10,5 @@ view : Html msg
 view =
     div []
         [ span [] []
-        , Icon.view "close"
+        , Icon.view "close" []
         ]

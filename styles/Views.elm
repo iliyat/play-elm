@@ -18,10 +18,13 @@ import Menu exposing (Common, onInputChange)
 
 type alias Config msg =
     { onSearchChange : Common -> msg
-    , onTagDelete : String -> msg
+    , onTagDelete : { value : String, label : String } -> msg
     , onMenuClick : String -> msg
+    , onCloseClick : msg
+    , onOpenSearchClick : msg
     , open : Bool
-    , tags : List { label : String, value : String }
+    , selectedTags : List { label : String, value : String }
+    , searchAvailable : Bool
     }
 
 
@@ -70,7 +73,7 @@ menu isVisible items toMsg =
 
 
 search : Config msg -> List (Item String String) -> Html msg
-search { onTagDelete, onSearchChange, onMenuClick, tags, open } menuItems =
+search { onTagDelete, onSearchChange, onMenuClick, onOpenSearchClick, onCloseClick, selectedTags, open, searchAvailable } menuItems =
     let
         inpt_ =
             div [ class [ InputContainer ] ]
@@ -79,15 +82,30 @@ search { onTagDelete, onSearchChange, onMenuClick, tags, open } menuItems =
                 ]
 
         chips =
-            List.map (\tag -> Chip.view tag onTagDelete) tags
+            List.map (\tag -> Chip.view tag onTagDelete) selectedTags
+
+        content =
+            case searchAvailable of
+                True ->
+                    [ div [ class [ SearchBlock ] ]
+                        [ div [ class [ SearchIcon ] ] [ Icon.view "search" [] ]
+                        , div [ class [ TagsBlock ] ]
+                            (chips ++ [ inpt_ ])
+                        ]
+                    , div [ class [ Block ] ] [ Icon.view "close" [ onClick onCloseClick ] ]
+                    ]
+
+                False ->
+                    [ div [ class [ SearchBlock ] ]
+                        [ div [ class [ SearchIcon ] ] [ Icon.view "search" [] ]
+                        ]
+                    , div [ class [ Block ] ]
+                        [ Icon.view "filter_list"
+                            [ onClick
+                                onOpenSearchClick
+                            ]
+                        ]
+                    ]
     in
         div [ class [ Container ] ]
-            [ div [ class [ Search ] ]
-                [ div [ class [ SearchBlock ] ]
-                    [ div [ class [ SearchIcon ] ] [ Icon.view "search" ]
-                    , div [ class [ TagsBlock ] ]
-                        (chips ++ [ inpt_ ])
-                    ]
-                , div [ class [ Block ] ] [ Icon.view "close" ]
-                ]
-            ]
+            [ div [ class [ Search ] ] content ]

@@ -1,3 +1,7 @@
+body {
+    background-color: rgb(237, 239, 241);
+}
+
 .searchBoxContainer {
     background-color: rgb(255, 255, 255);
     box-shadow: 0px 0px 2px 0px rgba(52, 62, 77, 0.24);
@@ -16,6 +20,8 @@
 .searchBoxSearchBlock {
     display: flex;
     align-items: flex-start;
+    min-height: 56px;
+    max-height: 56px;
 }
 
 .searchBoxSearchIcon {

@@ -193,12 +193,6 @@ mouseClick pos model geometry =
                 && (toFloat x <= left + width)
                 && (top <= toFloat y)
                 && (toFloat y <= top + height)
-
-        os =
-            Debug.log "pos" <| pos
-
-        _ =
-            Debug.log "inside" <| inside pos geometry.menu.bounds
     in
         if inside pos geometry.menu.bounds then
             model

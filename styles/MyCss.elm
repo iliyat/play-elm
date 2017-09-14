@@ -1,13 +1,17 @@
 module MyCss exposing (..)
 
 import Css exposing (..)
+import Css.Elements exposing (body)
 import Css.Namespace exposing (namespace)
 import Classes exposing (..)
 
 
 css =
     (stylesheet << namespace searchBoxNamespace.name)
-        [ class Container
+        [ body
+            [ backgroundColor (rgb 237 239 241)
+            ]
+        , class Container
             [ backgroundColor (rgb 255 255 255)
             , boxShadow5 (px 0) (px 0) (px 2) (px 0) (rgba 52 62 77 0.24)
             , borderRadius (px 2)
@@ -23,6 +27,8 @@ css =
         , class SearchBlock
             [ displayFlex
             , alignItems flexStart
+            , minHeight (px 56)
+            , maxHeight (px 56)
             ]
         , class SearchIcon
             [ minWidth (px 24)

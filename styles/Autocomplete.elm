@@ -23,8 +23,10 @@ main =
 
 type alias Model =
     { searchString : String
-    , tags : List { label : String, value : String }
+    , dataSource : List { label : String, value : String }
+    , selectedTags : List { label : String, value : String }
     , menuModel : Menu.Model
+    , searchAvailable : Bool
     }
 
 
@@ -32,12 +34,14 @@ init : ( Model, Cmd Msg )
 init =
     ( { searchString = ""
       , menuModel = Menu.init
-      , tags =
-            [ { label = "ololo", value = "test" }
-            , { label = "12", value = "18" }
-            , { label = "13", value = "19" }
-            , { label = "13", value = "20" }
-            , { label = "14", value = "23" }
+      , searchAvailable = True
+      , selectedTags =
+            [ { label = "Vasia", value = "10" }
+            ]
+      , dataSource =
+            [ { label = "Boria", value = "1" }
+            , { label = "Petia", value = "2" }
+            , { label = "Vanya", value = "3" }
             ]
       }
     , Cmd.none
@@ -51,23 +55,53 @@ init =
 type Msg
     = SetSearchString Common
     | OnMenuClick String
-    | OnTagDelete String
+    | OnTagDelete { value : String, label : String }
+    | OnCloseClick
+    | OnOpenSearchClick
     | Click Mouse.Position
 
 
 update : Msg -> Model -> ( Model, Cmd Msg )
 update msg model =
     case msg of
-        OnMenuClick itemValue ->
-            ( model, Cmd.none )
+        OnCloseClick ->
+            ( { model
+                | searchAvailable = False
+                , selectedTags = []
+              }
+            , Cmd.none
+            )
 
-        OnTagDelete value ->
+        OnOpenSearchClick ->
+            ( { model | searchAvailable = True }, Cmd.none )
+
+        OnMenuClick value ->
+            let
+                found =
+                    List.filter (\tag -> value == tag.value) model.dataSource
+
+                selectedTags =
+                    List.append model.selectedTags found
+
+                newMenuModel mdl =
+                    ({ mdl | open = False })
+            in
+                ( { model
+                    | selectedTags = selectedTags
+                    , dataSource = List.filter (not << flip List.member selectedTags) model.dataSource
+                    , menuModel = newMenuModel model.menuModel
+                  }
+                , Cmd.none
+                )
+
+        OnTagDelete tag ->
             let
                 filterFunc v tag =
                     tag.value /= v
             in
                 ( { model
-                    | tags = List.filter (filterFunc value) model.tags
+                    | selectedTags = List.filter (filterFunc tag.value) model.selectedTags
+                    , dataSource = List.append model.dataSource [ tag ]
                   }
                 , Cmd.none
                 )
@@ -119,12 +153,12 @@ update msg model =
 
 
 -- VIEW
-
-
-entries =
-    [ Views.ValueItem "1" "Vasya"
-    , Views.ValueItem "2" "Petya"
-    ]
+-- entries =
+--     [ Views.ValueItem "1" "Vasya"
+--     , Views.ValueItem "2" "Petya"
+--     , Views.ValueItem "3" "Vania"
+--     ]
+--
 
 
 config : Model -> Views.Config Msg
@@ -132,15 +166,25 @@ config model =
     { onSearchChange = SetSearchString
     , onTagDelete = OnTagDelete
     , onMenuClick = OnMenuClick
-    , tags = model.tags
+    , onCloseClick = OnCloseClick
+    , onOpenSearchClick = OnOpenSearchClick
+    , selectedTags = model.selectedTags
     , open = model.menuModel.open
+    , searchAvailable = model.searchAvailable
     }
 
 
 view : Model -> Html Msg
 view model =
     div []
-        [ Views.search (config model) entries
+        [ Views.search (config model)
+            (List.map
+                (\e ->
+                    Views.ValueItem e.value
+                        e.label
+                )
+                model.dataSource
+            )
         , Html.node "link"
             [ Html.Attributes.rel "stylesheet"
             , Html.Attributes.href "auto.css"
