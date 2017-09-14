@@ -3,9 +3,11 @@ module Autocomplete exposing (..)
 import Html exposing (Html, div, h1, input, text, Attribute, span, button)
 import Html.Attributes exposing (placeholder, checked, type_, style)
 import Views
+import Dom
 import Debug
 import Menu exposing (Common)
 import Mouse
+import Task
 
 
 main =
@@ -59,6 +61,7 @@ type Msg
     | OnCloseClick
     | OnOpenSearchClick
     | Click Mouse.Position
+    | FocusResult (Result Dom.Error ())
 
 
 update : Msg -> Model -> ( Model, Cmd Msg )
@@ -73,7 +76,13 @@ update msg model =
             )
 
         OnOpenSearchClick ->
-            ( { model | searchAvailable = True }, Cmd.none )
+            ( { model | searchAvailable = True }
+            , Dom.focus "input-search"
+                |> Task.attempt FocusResult
+            )
+
+        FocusResult result ->
+            ( model, Cmd.none )
 
         OnMenuClick value ->
             let
@@ -91,7 +100,7 @@ update msg model =
                     , dataSource = List.filter (not << flip List.member selectedTags) model.dataSource
                     , menuModel = newMenuModel model.menuModel
                   }
-                , Cmd.none
+                , Dom.focus "input-search" |> Task.attempt FocusResult
                 )
 
         OnTagDelete tag ->

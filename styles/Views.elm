@@ -77,7 +77,14 @@ search { onTagDelete, onSearchChange, onMenuClick, onOpenSearchClick, onCloseCli
     let
         inpt_ =
             div [ class [ InputContainer ] ]
-                [ input [ Menu.onInputChange onSearchChange, class [ Input ], type_ "text", placeholder "поиск" ] []
+                [ input
+                    [ Menu.onInputChange onSearchChange
+                    , class [ Input ]
+                    , type_ "text"
+                    , placeholder "поиск"
+                    , id "input-search"
+                    ]
+                    []
                 , menu open menuItems onMenuClick
                 ]
 
@@ -92,7 +99,7 @@ search { onTagDelete, onSearchChange, onMenuClick, onOpenSearchClick, onCloseCli
                         , div [ class [ TagsBlock ] ]
                             (chips ++ [ inpt_ ])
                         ]
-                    , div [ class [ Block ] ] [ Icon.view "close" [ onClick onCloseClick ] ]
+                    , div [ class [ Block ] ] [ Icon.asButton "close" [ onClick onCloseClick ] ]
                     ]
 
                 False ->
@@ -100,7 +107,7 @@ search { onTagDelete, onSearchChange, onMenuClick, onOpenSearchClick, onCloseCli
                         [ div [ class [ SearchIcon ] ] [ Icon.view "search" [] ]
                         ]
                     , div [ class [ Block ] ]
-                        [ Icon.view "filter_list"
+                        [ Icon.asButton "filter_list"
                             [ onClick
                                 onOpenSearchClick
                             ]
