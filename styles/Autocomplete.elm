@@ -27,6 +27,7 @@ type alias Model =
     { searchString : String
     , dataSource : List { label : String, value : String }
     , selectedTags : List { label : String, value : String }
+    , menuTags : List { label : String, value : String }
     , menuModel : Menu.Model
     , searchAvailable : Bool
     }
@@ -36,9 +37,13 @@ init : ( Model, Cmd Msg )
 init =
     ( { searchString = ""
       , menuModel = Menu.init
-      , searchAvailable = True
+      , searchAvailable = False
       , selectedTags =
-            [ { label = "Vasia", value = "10" }
+            []
+      , menuTags =
+            [ { label = "Boria", value = "1" }
+            , { label = "Petia", value = "2" }
+            , { label = "Vanya", value = "3" }
             ]
       , dataSource =
             [ { label = "Boria", value = "1" }
@@ -70,6 +75,7 @@ update msg model =
         OnCloseClick ->
             ( { model
                 | searchAvailable = False
+                , menuTags = model.dataSource
                 , selectedTags = []
               }
             , Cmd.none
@@ -97,7 +103,7 @@ update msg model =
             in
                 ( { model
                     | selectedTags = selectedTags
-                    , dataSource = List.filter (not << flip List.member selectedTags) model.dataSource
+                    , menuTags = List.filter (not << flip List.member selectedTags) model.dataSource
                     , menuModel = newMenuModel model.menuModel
                   }
                 , Dom.focus "input-search" |> Task.attempt FocusResult
@@ -107,10 +113,13 @@ update msg model =
             let
                 filterFunc v tag =
                     tag.value /= v
+
+                selectedTags =
+                    List.filter (filterFunc tag.value) model.selectedTags
             in
                 ( { model
-                    | selectedTags = List.filter (filterFunc tag.value) model.selectedTags
-                    , dataSource = List.append model.dataSource [ tag ]
+                    | selectedTags = selectedTags
+                    , menuTags = List.filter (not << flip List.member selectedTags) model.dataSource
                   }
                 , Cmd.none
                 )
@@ -160,16 +169,6 @@ update msg model =
                     ( model, Cmd.none )
 
 
-
--- VIEW
--- entries =
---     [ Views.ValueItem "1" "Vasya"
---     , Views.ValueItem "2" "Petya"
---     , Views.ValueItem "3" "Vania"
---     ]
---
-
-
 config : Model -> Views.Config Msg
 config model =
     { onSearchChange = SetSearchString
@@ -192,7 +191,7 @@ view model =
                     Views.ValueItem e.value
                         e.label
                 )
-                model.dataSource
+                model.menuTags
             )
         , Html.node "link"
             [ Html.Attributes.rel "stylesheet"

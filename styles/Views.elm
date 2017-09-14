@@ -59,7 +59,7 @@ menu isVisible items toMsg =
     in
         div
             [ Attr.class "mdc-simple-menu mdc-simple-menu--open"
-            , class [ Menu, when (not isVisible) Hidden ]
+            , class [ Menu, when (not isVisible || (List.length items == 0)) Hidden ]
             ]
             [ div
                 [ class [ MenuInner1, when (not isVisible) MenuInner1Hidden ] ]
