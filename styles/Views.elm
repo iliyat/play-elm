@@ -1,4 +1,4 @@
-module Views exposing (search, menu, Item(..), Config)
+module Views exposing (search, menu, Item(..), Config, table)
 
 import Html exposing (Html, div, input, text, Attribute, span, button, li, ul)
 import Html.Attributes as Attr exposing (placeholder, checked, type_)
@@ -7,6 +7,7 @@ import Classes exposing (..)
 import Icons.Icon as Icon
 import Ui.Chip as Chip
 import Menu exposing (Common, onInputChange)
+import Table
 
 
 -- VIEW
@@ -116,3 +117,11 @@ search { onTagDelete, onSearchChange, onMenuClick, onOpenSearchClick, onCloseCli
     in
         div [ class [ Container ] ]
             [ div [ class [ Search ] ] content ]
+
+
+table : Table.Config data msg -> Table.State -> List data -> Int -> Html msg
+table tableConfig tableState list limit =
+    div [ class [ Container ] ]
+        [ div [ class [ TitleContainer ] ] [ text "Заявки (3)" ]
+        , Table.view tableConfig tableState list 20
+        ]

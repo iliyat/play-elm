@@ -21,6 +21,7 @@ type CssClasses
     | MenuInner1Hidden
     | MenuInner2
     | MenuInner2Hidden
+    | TitleContainer
 
 
 

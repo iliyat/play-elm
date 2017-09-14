@@ -98,4 +98,8 @@ css =
             , property "z-index" "-100500" |> important
             , transform (scale2 0 0)
             ]
+        , class TitleContainer
+            [ fontSize (px 20)
+            , padding2 (px 20) (px 24)
+            ]
         ]

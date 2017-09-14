@@ -106,6 +106,11 @@ body {
     transform: scale(0, 0);
 }
 
+.searchBoxTitleContainer {
+    font-size: 20px;
+    padding: 20px 24px;
+}
+
 .chipContainer {
     border: 10px;
     box-sizing: border-box;
