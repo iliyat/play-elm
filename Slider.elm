@@ -253,6 +253,15 @@ view lift model =
         activateOn event =
             Events.on event (Json.map (Activate True >> lift) decodeGeometry)
 
+        upOn event =
+            Events.on event (Json.succeed (lift Up))
+
+        inputOn event =
+            Events.on event (Maybe.withDefault (Json.succeed (lift NoOp)) config.onInput)
+
+        dragOn event =
+            Events.on event (Json.map (Drag >> lift) decodeGeometry)
+
         ups =
             [ "mouseup"
             , "touchend"
@@ -295,6 +304,13 @@ view lift model =
              -- , Events.on "mousedown" (Json.succeed <| lift TestClick)
              ]
                 ++ List.map activateOn downs
+                ++ List.map upOn (List.concat [ ups, leaves, [ "blur" ] ])
+                ++ (if model.active then
+                        List.map inputOn (List.concat [ downs, ups, moves ])
+                    else
+                        List.map inputOn downs
+                   )
+                ++ (List.map dragOn moves)
             )
             [ div [ class "mdc-slider__track-container" ]
                 [ div
