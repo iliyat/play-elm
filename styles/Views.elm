@@ -6,7 +6,7 @@ import Html.Events exposing (onClick, onInput)
 import Classes exposing (..)
 import Icons.Icon as Icon
 import Ui.Chip as Chip
-import Menu exposing (Common, onInputChange)
+import AutocompleteMenu exposing (Common, onInputChange)
 import Table
 
 

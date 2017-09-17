@@ -5,21 +5,25 @@ import Html.Attributes exposing (..)
 import Html.Events exposing (..)
 import Slider
 import Dict exposing (Dict)
+import Menu
 
 
 type alias Model =
     { slider : Slider.Model
+    , menu : Menu.Model
     }
 
 
 defaultModel : Model
 defaultModel =
-    { slider = Slider.defaultModel }
+    { slider = Slider.defaultModel, menu = Menu.defaultModel }
 
 
 type Msg
     = Open
     | SliderMsg (Slider.Msg Msg)
+    | MenuMsg (Menu.Msg Msg)
+    | Select Int
 
 
 update : Msg -> Model -> ( Model, Cmd Msg )
@@ -32,6 +36,16 @@ update action model =
             in
                 ( { model | slider = slider }, effects )
 
+        MenuMsg msg_ ->
+            let
+                ( menu, effects ) =
+                    Menu.update MenuMsg msg_ model.menu
+            in
+                ( { model | menu = menu }, effects )
+
+        Select n ->
+            ( model, Cmd.none )
+
         Open ->
             ( model, Cmd.none )
 
@@ -41,6 +55,14 @@ view model =
     Html.div []
         [ div [ style [ ( "margin", "24px" ) ] ]
             [ Slider.view SliderMsg model.slider
+            , div [ style [ ( "height", "50px" ) ] ] []
+            , button [ Menu.attach (MenuMsg) ] [ text "Toggle!" ]
+            , Menu.view MenuMsg
+                model.menu
+                ([ li [ class "mdc-list-item", Menu.onSelect (Select 1) ] [ text "Редактировать" ]
+                 , li [ class "mdc-list-item" ] [ text "Отправить в архив" ]
+                 ]
+                )
             ]
         , Html.node "link"
             [ Html.Attributes.rel "stylesheet"
@@ -58,12 +80,6 @@ view model =
         ]
 
 
-subscriptions : Model -> Sub Msg
-subscriptions model =
-    Sub.batch
-        []
-
-
 init : ( Model, Cmd Msg )
 init =
     ( defaultModel, Cmd.none )
@@ -77,3 +93,10 @@ main =
         , update = update
         , subscriptions = subscriptions
         }
+
+
+subscriptions : Model -> Sub Msg
+subscriptions model =
+    Sub.batch
+        [ Sub.map MenuMsg (Menu.subscriptions model.menu)
+        ]

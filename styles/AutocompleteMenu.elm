@@ -1,4 +1,4 @@
-module Menu
+module AutocompleteMenu
     exposing
         ( init
         , Model
@@ -9,7 +9,6 @@ module Menu
         , decoder
         , subscriptions
         , mouseClick
-        , updateModel
         , onInputChange
         )
 
@@ -174,15 +173,6 @@ onInputChange msg =
 onMenuClick : (Geometry -> msg) -> Attribute msg
 onMenuClick msg =
     onWithOptions "click" { stopPropagation = True, preventDefault = True } (Json.map msg decoder)
-
-
-updateModel : Geometry -> Model
-updateModel geom =
-    { open = True
-    , top = geom.button.bounds.top
-    , left = geom.button.bounds.left - 170 + geom.button.bounds.width
-    , geometry = Just geom
-    }
 
 
 mouseClick : Mouse.Position -> Model -> Geometry -> Model
