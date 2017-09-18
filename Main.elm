@@ -54,7 +54,9 @@ view : Model -> Html Msg
 view model =
     Html.div []
         [ div [ style [ ( "margin", "24px" ) ] ]
-            [ Slider.view SliderMsg model.slider
+            [ div [ style [ ( "width", "200px" ), ( "border", "1px solid cyan" ) ] ]
+                [ Slider.view SliderMsg model.slider
+                ]
             , div [ style [ ( "height", "50px" ) ] ] []
             , button [ Menu.attach MenuMsg ] [ text "Toggle!" ]
             , Menu.view MenuMsg
@@ -99,4 +101,5 @@ subscriptions : Model -> Sub Msg
 subscriptions model =
     Sub.batch
         [ Sub.map MenuMsg (Menu.subscriptions model.menu)
+        , Sub.map SliderMsg (Slider.subscriptions model.slider)
         ]

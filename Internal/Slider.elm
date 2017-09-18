@@ -1,5 +1,7 @@
 module Internal.Slider exposing (Msg(..), Geometry, defaultGeometry)
 
+import Mouse
+
 
 type Msg m
     = NoOp
@@ -13,6 +15,8 @@ type Msg m
     | Init Geometry
     | Resize
     | AnimationFrame
+    | MouseUp Mouse.Position
+    | MouseDrag Mouse.Position
 
 
 type alias Geometry =
@@ -31,7 +35,7 @@ defaultGeometry =
     { width = 0
     , left = 0
     , x = 0
-    , discrete = False
+    , discrete = True
     , min = 0
     , max = 100
     , steps = 1

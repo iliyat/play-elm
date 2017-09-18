@@ -1,4 +1,4 @@
-module Slider exposing (view, Model, defaultModel, Msg, update)
+module Slider exposing (view, Model, defaultModel, Msg, update, subscriptions)
 
 import Html exposing (Html, text, div, button, Attribute, ul, li)
 import Html.Attributes as Attr exposing (class, classList, style)
@@ -8,11 +8,27 @@ import Svg
 import Svg.Attributes as Svg
 import Internal.Slider exposing (Msg(..), Geometry, defaultGeometry)
 import DOM
+import Mouse
+
+
+subscriptions : Model -> Sub (Msg m)
+subscriptions model =
+    let
+        list =
+            [ Mouse.ups MouseUp ]
+                ++ (if model.active == True then
+                        [ Mouse.moves MouseDrag ]
+                    else
+                        []
+                   )
+    in
+        Sub.batch list
 
 
 type alias Model =
     { focus : Bool
     , active : Bool
+    , touched : Bool
     , geometry : Maybe Geometry
     , value : Maybe Float
     , inTransit : Bool
@@ -25,6 +41,7 @@ defaultModel : Model
 defaultModel =
     { focus = False
     , active = False
+    , touched = False
     , geometry = Nothing
     , value = Nothing
     , inTransit = False
@@ -43,34 +60,30 @@ update fwd msg model =
         NoOp ->
             ( model, Cmd.none )
 
+        Dispatch ms ->
+            ( model, Cmd.none )
+
         Focus ->
             ( { model | focus = True }, Cmd.none )
 
         Blur ->
             ( { model | focus = False, active = False }, Cmd.none )
 
-        Activate inTransit geometry ->
-            let
-                _ =
-                    Debug.log "test" "test"
-            in
-                ( { model
-                    | active = True
-                    , geometry = Just geometry
-                    , inTransit = inTransit
-                    , value = Just (computeValue geometry)
-                  }
-                , Cmd.none
-                )
+        Tick ->
+            ( { model | inTransit = False }, Cmd.none )
 
-        Drag geometry ->
+        Activate inTransit geometry ->
             ( { model
-                | geometry = Just geometry
-                , inTransit = False
+                | active = True
+                , geometry = Just geometry
+                , inTransit = inTransit
                 , value = Just (computeValue geometry)
               }
             , Cmd.none
             )
+
+        Drag geometry ->
+            ( model, Cmd.none )
 
         Init geometry ->
             ( { model
@@ -82,7 +95,34 @@ update fwd msg model =
             )
 
         Up ->
-            ( { model | active = False }, Cmd.none )
+            ( model
+            , Cmd.none
+            )
+
+        MouseUp pos ->
+            ( { model
+                | active = False
+              }
+            , Cmd.none
+            )
+
+        MouseDrag pos ->
+            let
+                g =
+                    model.geometry |> Maybe.withDefault defaultGeometry
+
+                newGeometry =
+                    { g | x = (toFloat pos.x) }
+
+                value =
+                    Just (computeValue newGeometry)
+            in
+                ( { model
+                    | geometry = Just newGeometry
+                    , value = value
+                  }
+                , Cmd.none
+                )
 
         Resize ->
             ( { model | requestAnimation = True }
@@ -90,13 +130,15 @@ update fwd msg model =
             )
 
         AnimationFrame ->
-            ( model, Cmd.none )
-
-        Tick ->
-            ( model, Cmd.none )
-
-        Dispatch _ ->
-            ( model, Cmd.none )
+            if model.requestAnimation then
+                ( { model
+                    | requestAnimation = False
+                    , initialized = False
+                  }
+                , Cmd.none
+                )
+            else
+                ( model, Cmd.none )
 
 
 type alias Config m =
@@ -115,7 +157,7 @@ defaultConfig : Config m
 defaultConfig =
     { value = 0
     , min = 0
-    , max = 100
+    , max = 10
     , steps = 1
     , discrete = False
     , onInput = Nothing
@@ -222,11 +264,8 @@ view lift model =
             defaultConfig
 
         continuousValue =
-            if model.active then
-                model.value
-                    |> Maybe.withDefault config.value
-            else
-                config.value
+            model.value
+                |> Maybe.withDefault config.value
 
         value =
             discretize config.steps continuousValue
@@ -253,14 +292,20 @@ view lift model =
         activateOn event =
             Events.on event (Json.map (Activate True >> lift) decodeGeometry)
 
+        initOn event =
+            Events.on event (Json.map (Init >> lift) decodeGeometry)
+
         upOn event =
             Events.on event (Json.succeed (lift Up))
+
+        dragOn event =
+            Events.on event (Json.map (Drag >> lift) decodeGeometry)
 
         inputOn event =
             Events.on event (Maybe.withDefault (Json.succeed (lift NoOp)) config.onInput)
 
-        dragOn event =
-            Events.on event (Json.map (Drag >> lift) decodeGeometry)
+        changeOn event =
+            Events.on event (Maybe.withDefault (Json.succeed (lift NoOp)) config.onChange)
 
         ups =
             [ "mouseup"
@@ -286,36 +331,46 @@ view lift model =
             , "touchleave" -- TODO
             , "pointerleave" -- TODO
             ]
+
+        activateOn_ event =
+            Events.onWithOptions event
+                { stopPropagation = True
+                , preventDefault = False
+                }
+                (Json.map (Activate False >> lift) decodeGeometry)
+
+        trackScale =
+            if config.max - config.min == 0 then
+                0
+            else
+                (value - config.min) / (config.max - config.min)
     in
         div
             ([ classList
-                [ ( "mdc-slider mdc-slider--discrete", True )
+                [ ( "mdc-slider mdc-slider--discrete elm-mdc-slider--uninitialized", True )
                 , ( "mdc-slider--focus", model.focus )
                 , ( "mdc-slider--active", model.active )
                 , ( "mdc-slider--in-transit", model.inTransit )
+                , ( "mdc-slider--off", value <= config.min )
                 ]
+             , Events.on "focus" (Json.succeed (lift Focus))
+             , Events.on "blur" (Json.succeed (lift Blur))
              , dataAttr "min" (toString config.min)
              , dataAttr "max" (toString config.max)
              , dataAttr "steps" (toString config.steps)
-             , Events.on "focus" (Json.succeed (lift Focus))
-             , Events.on "blur" (Json.succeed (lift Blur))
-             , onMouseDown (Activate False >> lift)
-
-             -- , Events.on "mousedown" (Json.succeed <| lift TestClick)
              ]
                 ++ List.map activateOn downs
-                ++ List.map upOn (List.concat [ ups, leaves, [ "blur" ] ])
+                ++ List.map changeOn ups
                 ++ (if model.active then
                         List.map inputOn (List.concat [ downs, ups, moves ])
                     else
                         List.map inputOn downs
                    )
-                ++ (List.map dragOn moves)
             )
             [ div [ class "mdc-slider__track-container" ]
                 [ div
                     [ class "mdc-slider__track"
-                    , style [ ( "transform", "scaleX(0.35)" ) ]
+                    , style [ ( "transform", "scaleX(" ++ toString trackScale ++ ")" ) ]
                     ]
                     []
                 , div [ class "mdc-slider__track-marker-container" ]
