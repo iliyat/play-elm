@@ -53,14 +53,20 @@ update action model =
                     case msg_ of
                         Internal.Textfield.Blur ->
                             let
-                                result =
-                                    toString (Slider.discretize sliderConfig.steps (model.slider.value |> Maybe.withDefault 0))
+                                { max, steps } =
+                                    sliderConfig
 
-                                _ =
-                                    Debug.log "here" result
+                                discretized =
+                                    Slider.discretize sliderConfig.steps (model.slider.value |> Maybe.withDefault 0)
+
+                                result =
+                                    if discretized > max then
+                                        max
+                                    else
+                                        discretized
                             in
                                 Textfield.update (TextfieldMsg)
-                                    (Internal.Textfield.Input (result))
+                                    (Internal.Textfield.Input (toString result))
                                     model.textfield
 
                         _ ->
@@ -74,7 +80,7 @@ update action model =
                                     String.toInt str |> Result.withDefault 0
 
                                 targetValue =
-                                    (Slider.discretize sliderConfig.steps (toFloat textFieldValue))
+                                    Slider.discretize sliderConfig.steps (toFloat textFieldValue)
                             in
                                 Slider.update SliderMsg (Internal.Slider.SetValue (targetValue)) model.slider
 
@@ -89,7 +95,7 @@ update action model =
 
 sliderConfig : Slider.Config
 sliderConfig =
-    { value = 5
+    { value = 0
     , min = 0
     , max = 20
     , steps = 5
