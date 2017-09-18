@@ -56,7 +56,7 @@ view model =
         [ div [ style [ ( "margin", "24px" ) ] ]
             [ Slider.view SliderMsg model.slider
             , div [ style [ ( "height", "50px" ) ] ] []
-            , button [ Menu.attach (MenuMsg) ] [ text "Toggle!" ]
+            , button [ Menu.attach MenuMsg ] [ text "Toggle!" ]
             , Menu.view MenuMsg
                 model.menu
                 ([ li [ class "mdc-list-item", Menu.onSelect (Select 1) ] [ text "Редактировать" ]

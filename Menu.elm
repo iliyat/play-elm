@@ -63,7 +63,7 @@ init =
 defaultModel : Model
 defaultModel =
     { geometry = Nothing
-    , open = True
+    , open = False
     , top = 0
     , left = 0
     }
@@ -104,8 +104,13 @@ update fwd msg model =
                 Nothing ->
                     ( model, Cmd.none )
 
-        Toggle ann ->
-            ( model, Cmd.none )
+        Toggle geom ->
+            ( { model
+                | open = True
+                , geometry = Just geom
+              }
+            , Cmd.none
+            )
 
         ToggleString st ->
             ( model, Cmd.none )
@@ -187,13 +192,9 @@ view lift { open, left, top } menuItems =
             ]
 
 
-
--- attach : ((String -> Msg m) -> m) -> Attribute m
--- attach lift =
---     Events.on "click" (Json.map (lift ToggleString) Events.targetValue)
--- attach : ((Geometry -> Msg m) -> m) -> Attribute m
--- attach lift =
---     Events.on "click" (Json.map (lift Toggle) decoder)
+attach : (Msg msg -> msg) -> Attribute msg
+attach lift =
+    Events.on "click" (Json.map (lift << Toggle) decoder)
 
 
 onSelect : m -> Attribute m
