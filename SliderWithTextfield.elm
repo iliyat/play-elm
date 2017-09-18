@@ -2,19 +2,14 @@ module Main exposing (..)
 
 import Html exposing (..)
 import Html.Attributes exposing (..)
-import Html.Events exposing (..)
 import Slider
-import Dict exposing (Dict)
-import Menu
 import Textfield
-import Json.Decode as Json exposing (Decoder)
 import Internal.Textfield
 import Internal.Slider
 
 
 type alias Model =
     { slider : Slider.Model
-    , menu : Menu.Model
     , textfield : Textfield.Model
     }
 
@@ -22,19 +17,13 @@ type alias Model =
 defaultModel : Model
 defaultModel =
     { slider = Slider.defaultModel
-    , menu = Menu.defaultModel
     , textfield = Textfield.defaultModel
     }
 
 
 type Msg
-    = Open
-    | SliderMsg (Slider.Msg Msg)
+    = SliderMsg (Slider.Msg Msg)
     | TextfieldMsg Textfield.Msg
-    | Select Int
-    | OnSliderInput Float
-    | OnInputChange String
-    | Change Float
 
 
 update : Msg -> Model -> ( Model, Cmd Msg )
@@ -44,64 +33,67 @@ update action model =
             let
                 ( slider, effects ) =
                     Slider.update SliderMsg msg_ model.slider
+
+                ( textfield, textfieldEffects ) =
+                    case msg_ of
+                        Internal.Slider.Input val ->
+                            Textfield.update (TextfieldMsg) (Internal.Textfield.Input (toString val)) model.textfield
+
+                        _ ->
+                            ( model.textfield, Cmd.none )
             in
-                ( { model | slider = slider }, effects )
+                ( { model | slider = slider, textfield = textfield }
+                , Cmd.batch
+                    [ effects, textfieldEffects ]
+                )
 
         TextfieldMsg msg_ ->
             let
+                ( newTextfieldModel, _ ) =
+                    case msg_ of
+                        Internal.Textfield.Blur ->
+                            let
+                                result =
+                                    toString (Slider.discretize sliderConfig.steps (model.slider.value |> Maybe.withDefault 0))
+
+                                _ =
+                                    Debug.log "here" result
+                            in
+                                Textfield.update (TextfieldMsg)
+                                    (Internal.Textfield.Input (result))
+                                    model.textfield
+
+                        _ ->
+                            ( model.textfield, Cmd.none )
+
                 ( newSliderModel, sliderEffects ) =
                     case msg_ of
                         Internal.Textfield.Input str ->
                             let
-                                result =
+                                textFieldValue =
                                     String.toInt str |> Result.withDefault 0
+
+                                targetValue =
+                                    (Slider.discretize sliderConfig.steps (toFloat textFieldValue))
                             in
-                                Slider.update SliderMsg
-                                    (Internal.Slider.SetValue
-                                        (toFloat result)
-                                    )
-                                    model.slider
+                                Slider.update SliderMsg (Internal.Slider.SetValue (targetValue)) model.slider
 
                         _ ->
                             ( model.slider, Cmd.none )
 
                 ( textfield, effects ) =
-                    Textfield.update TextfieldMsg msg_ model.textfield
+                    Textfield.update TextfieldMsg msg_ newTextfieldModel
             in
                 ( { model | textfield = textfield, slider = newSliderModel }, Cmd.batch [ sliderEffects, effects ] )
 
-        Select n ->
-            ( model, Cmd.none )
 
-        Open ->
-            ( model, Cmd.none )
-
-        OnSliderInput val ->
-            let
-                _ =
-                    Debug.log "input" "input"
-
-                ( textfield, effects ) =
-                    Textfield.update (TextfieldMsg) (Internal.Textfield.Input (toString val)) model.textfield
-            in
-                ( { model | textfield = textfield }, effects )
-
-        Change val ->
-            ( model, Cmd.none )
-
-        OnInputChange str ->
-            ( model, Cmd.none )
-
-
-sliderConfig : Slider.Config Msg
+sliderConfig : Slider.Config
 sliderConfig =
     { value = 5
     , min = 0
     , max = 20
     , steps = 5
     , discrete = False
-    , onInput = OnSliderInput
-    , onChange = Change
     , trackMarkers = False
     }
 

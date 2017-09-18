@@ -7,6 +7,7 @@ type Msg m
     = NoOp
     | Focus
     | Blur
+    | Input Float
     | Activate Bool Geometry
     | Drag Geometry
     | SetValue Float

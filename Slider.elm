@@ -9,10 +9,11 @@ module Slider
         , Config
         , targetValue
         , onInput
+        , discretize
         )
 
 import Html exposing (Html, text, div, button, Attribute, ul, li)
-import Html.Attributes as Attr exposing (class, classList, style)
+import Html.Attributes as Attr exposing (tabindex, class, classList, style)
 import Html.Events as Events
 import Json.Decode as Json exposing (Decoder)
 import Svg
@@ -75,6 +76,13 @@ update fwd msg model =
     case msg of
         NoOp ->
             ( model, Cmd.none )
+
+        Input val ->
+            let
+                _ =
+                    Debug.log "Input" val
+            in
+                ( model, Cmd.none )
 
         SetValue val ->
             ( { model | value = Just val }, Cmd.none )
@@ -160,14 +168,12 @@ update fwd msg model =
                 ( model, Cmd.none )
 
 
-type alias Config msg =
+type alias Config =
     { value : Float
     , min : Float
     , max : Float
     , discrete : Bool
     , steps : Int
-    , onInput : Float -> msg
-    , onChange : Float -> msg
     , trackMarkers : Bool
     }
 
@@ -275,7 +281,7 @@ targetValue =
         decodeGeometry
 
 
-view : (Msg m -> m) -> Model -> Config m -> Html m
+view : (Msg m -> m) -> Model -> Config -> Html m
 view lift model config =
     let
         continuousValue =
@@ -317,11 +323,11 @@ view lift model config =
             Events.on event (Json.map (Drag >> lift) decodeGeometry)
 
         inputOn event =
-            Events.on event (Json.map (config.onInput) targetValue)
+            Events.on event (Json.map (Input >> lift) targetValue)
 
         -- Events.on event (Maybe.withDefault (Json.succeed (lift NoOp)) config.onInput)
         changeOn event =
-            Events.on event (Json.map (config.onChange) targetValue)
+            Events.on event (Json.map (Input >> lift) targetValue)
 
         ups =
             [ "mouseup"
@@ -369,6 +375,7 @@ view lift model config =
                 , ( "mdc-slider--in-transit", model.inTransit )
                 , ( "mdc-slider--off", value <= config.min )
                 ]
+             , tabindex 0
              , Events.on "focus" (Json.succeed (lift Focus))
              , Events.on "blur" (Json.succeed (lift Blur))
              , dataAttr "min" (toString config.min)
