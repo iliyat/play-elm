@@ -9,6 +9,7 @@ type Msg m
     | Blur
     | Activate Bool Geometry
     | Drag Geometry
+    | SetValue Float
     | Up
     | Tick
     | Dispatch (List m)

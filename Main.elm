@@ -67,8 +67,8 @@ view : Model -> Html Msg
 view model =
     Html.div []
         [ div [ style [ ( "margin", "24px" ) ] ]
-            [ div [ style [ ( "width", "200px" ), ( "border", "1px solid cyan" ) ] ]
-                [ Slider.view SliderMsg model.slider
+            [ div [ style [ ( "width", "200px" ) ] ]
+                [ Slider.view SliderMsg model.slider Slider.defaultConfig
                 ]
             , div [ style [ ( "height", "50px" ) ] ] []
             , button [ Menu.attach MenuMsg ] [ text "Toggle!" ]

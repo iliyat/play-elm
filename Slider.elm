@@ -1,4 +1,15 @@
-module Slider exposing (view, Model, defaultModel, Msg, update, subscriptions)
+module Slider
+    exposing
+        ( view
+        , Model
+        , defaultModel
+        , Msg
+        , update
+        , subscriptions
+        , Config
+        , targetValue
+        , onInput
+        )
 
 import Html exposing (Html, text, div, button, Attribute, ul, li)
 import Html.Attributes as Attr exposing (class, classList, style)
@@ -9,6 +20,11 @@ import Svg.Attributes as Svg
 import Internal.Slider exposing (Msg(..), Geometry, defaultGeometry)
 import DOM
 import Mouse
+
+
+onInput : Decoder m -> Attribute m
+onInput =
+    Events.on "input"
 
 
 subscriptions : Model -> Sub (Msg m)
@@ -59,6 +75,9 @@ update fwd msg model =
     case msg of
         NoOp ->
             ( model, Cmd.none )
+
+        SetValue val ->
+            ( { model | value = Just val }, Cmd.none )
 
         Dispatch ms ->
             ( model, Cmd.none )
@@ -141,28 +160,15 @@ update fwd msg model =
                 ( model, Cmd.none )
 
 
-type alias Config m =
+type alias Config msg =
     { value : Float
     , min : Float
     , max : Float
     , discrete : Bool
     , steps : Int
-    , onInput : Maybe (Decoder m)
-    , onChange : Maybe (Decoder m)
+    , onInput : Float -> msg
+    , onChange : Float -> msg
     , trackMarkers : Bool
-    }
-
-
-defaultConfig : Config m
-defaultConfig =
-    { value = 0
-    , min = 0
-    , max = 10
-    , steps = 1
-    , discrete = False
-    , onInput = Nothing
-    , onChange = Nothing
-    , trackMarkers = False
     }
 
 
@@ -257,12 +263,21 @@ dataAttr key val =
     Attr.attribute ("data-" ++ key) val
 
 
-view : (Msg m -> m) -> Model -> Html m
-view lift model =
-    let
-        config =
-            defaultConfig
+targetValue : Decoder Float
+targetValue =
+    Json.map
+        (\geometry ->
+            if geometry.discrete then
+                discretize geometry.steps (computeValue geometry)
+            else
+                computeValue geometry
+        )
+        decodeGeometry
 
+
+view : (Msg m -> m) -> Model -> Config m -> Html m
+view lift model config =
+    let
         continuousValue =
             model.value
                 |> Maybe.withDefault config.value
@@ -302,10 +317,11 @@ view lift model =
             Events.on event (Json.map (Drag >> lift) decodeGeometry)
 
         inputOn event =
-            Events.on event (Maybe.withDefault (Json.succeed (lift NoOp)) config.onInput)
+            Events.on event (Json.map (config.onInput) targetValue)
 
+        -- Events.on event (Maybe.withDefault (Json.succeed (lift NoOp)) config.onInput)
         changeOn event =
-            Events.on event (Maybe.withDefault (Json.succeed (lift NoOp)) config.onChange)
+            Events.on event (Json.map (config.onChange) targetValue)
 
         ups =
             [ "mouseup"

@@ -1,4 +1,13 @@
-module Textfield exposing (view, Model, defaultModel, Msg, update)
+module Textfield
+    exposing
+        ( view
+        , Model
+        , defaultModel
+        , Msg
+        , update
+        , Config
+        , defaultConfig
+        )
 
 import Html exposing (Html, span, input, label, text, div, button, Attribute)
 import Html.Attributes as Attr exposing (class, classList, style)
@@ -77,12 +86,9 @@ defaultConfig =
     }
 
 
-view : (Msg -> m) -> Model -> Html m
-view lift model =
+view : (Msg -> m) -> Model -> Config -> Html m
+view lift model config =
     let
-        config =
-            defaultConfig
-
         isFocused =
             model.isFocused && not config.disabled
 
@@ -106,6 +112,9 @@ view lift model =
                 "34px"
             else
                 "18px"
+
+        extra =
+            config.extra |> Maybe.withDefault ""
     in
         div
             [ classList
@@ -164,6 +173,6 @@ view lift model =
                     , ( "color", "rgba(0, 0, 0, 0.38)" )
                     ]
                 ]
-                [ text "дней" ]
+                [ text extra ]
             , div [ class "mdc-textfield__bottom-line" ] []
             ]
