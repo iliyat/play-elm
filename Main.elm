@@ -6,23 +6,29 @@ import Html.Events exposing (..)
 import Slider
 import Dict exposing (Dict)
 import Menu
+import Textfield
 
 
 type alias Model =
     { slider : Slider.Model
     , menu : Menu.Model
+    , textfield : Textfield.Model
     }
 
 
 defaultModel : Model
 defaultModel =
-    { slider = Slider.defaultModel, menu = Menu.defaultModel }
+    { slider = Slider.defaultModel
+    , menu = Menu.defaultModel
+    , textfield = Textfield.defaultModel
+    }
 
 
 type Msg
     = Open
     | SliderMsg (Slider.Msg Msg)
     | MenuMsg (Menu.Msg Msg)
+    | TextfieldMsg Textfield.Msg
     | Select Int
 
 
@@ -42,6 +48,13 @@ update action model =
                     Menu.update MenuMsg msg_ model.menu
             in
                 ( { model | menu = menu }, effects )
+
+        TextfieldMsg msg_ ->
+            let
+                ( textfield, effects ) =
+                    Textfield.update TextfieldMsg msg_ model.textfield
+            in
+                ( { model | textfield = textfield }, effects )
 
         Select n ->
             ( model, Cmd.none )
@@ -65,6 +78,8 @@ view model =
                  , li [ class "mdc-list-item" ] [ text "Отправить в архив" ]
                  ]
                 )
+            , div [ style [ ( "height", "50px" ) ] ] []
+            , Textfield.view TextfieldMsg model.textfield
             ]
         , Html.node "link"
             [ Html.Attributes.rel "stylesheet"
