@@ -1,6 +1,6 @@
 module Textfield exposing (view, Model, defaultModel, Msg, update)
 
-import Html exposing (Html, input, label, text, div, button, Attribute)
+import Html exposing (Html, span, input, label, text, div, button, Attribute)
 import Html.Attributes as Attr exposing (class, classList, style)
 import Html.Events as Events
 import Json.Decode as Json exposing (Decoder)
@@ -52,30 +52,29 @@ type alias Config =
     , value : Maybe String
     , defaultValue : Maybe String
     , disabled : Bool
+    , asTitle : Bool
     , required : Bool
     , type_ : Maybe String
     , fullWidth : Bool
     , invalid : Bool
+    , extra : Maybe String
     }
 
 
 defaultConfig : Config
 defaultConfig =
-    { labelText = Just "Text field"
+    { labelText = Just "Сумма"
     , labelFloat = False
     , value = Nothing
     , defaultValue = Nothing
     , disabled = False
+    , asTitle = True
     , required = False
     , type_ = Just "text"
     , fullWidth = False
     , invalid = False
+    , extra = Just "₽"
     }
-
-
-dataAttr : String -> String -> Attribute msg
-dataAttr key val =
-    Attr.attribute ("data-" ++ key) val
 
 
 view : (Msg -> m) -> Model -> Html m
@@ -89,6 +88,24 @@ view lift model =
 
         isDirty =
             model.isDirty
+
+        labelBottom =
+            if config.asTitle then
+                "24px"
+            else
+                "8px"
+
+        height =
+            if config.asTitle then
+                "68px"
+            else
+                "48px"
+
+        fontSize =
+            if config.asTitle then
+                "34px"
+            else
+                "18px"
     in
         div
             [ classList
@@ -100,9 +117,15 @@ view lift model =
                 ]
             , Events.onFocus <| lift Focus
             , Events.onBlur <| lift Blur
+            , style
+                [ ( "height", height )
+                ]
             ]
             [ input
                 [ Attr.type_ "text"
+                , style
+                    [ ( "font-size", fontSize )
+                    ]
                 , classList
                     [ ( "mdc-textfield__input", True )
                     ]
@@ -117,6 +140,9 @@ view lift model =
                     [ ( "mdc-textfield__label mdc-typography", True )
                     , ( "mdc-textfield__label--float-above", isFocused || isDirty )
                     ]
+                , style
+                    [ ( "bottom", labelBottom )
+                    ]
                 ]
                 (case config.labelText of
                     Just str ->
@@ -125,5 +151,19 @@ view lift model =
                     Nothing ->
                         []
                 )
+            , span
+                [ style
+                    [ ( "float", "right" )
+                    , ( "position", "absolute" )
+                    , ( "right", "0" )
+                    , ( "bottom", "10px" )
+                    , ( "height", "24px" )
+                    , ( "font-family", "Roboto" )
+                    , ( "font-size", "34px" )
+                    , ( "line-height", "15px" )
+                    , ( "color", "rgba(0, 0, 0, 0.38)" )
+                    ]
+                ]
+                [ text "дней" ]
             , div [ class "mdc-textfield__bottom-line" ] []
             ]
