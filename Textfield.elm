@@ -104,7 +104,7 @@ view lift model config =
             model.isFocused && not config.disabled
 
         isDirty =
-            model.isDirty
+            model.isDirty || (config.defaultValue /= Nothing)
 
         labelBottom =
             if config.asTitle then
@@ -124,8 +124,18 @@ view lift model config =
             else
                 "18px"
 
+        value =
+            model.value
+                |> Maybe.withDefault
+                    (config.defaultValue
+                        |> Maybe.withDefault ""
+                    )
+
         extra =
             config.extra |> Maybe.withDefault ""
+
+        _ =
+            Debug.log "f" isDirty
     in
         div
             [ classList
@@ -137,9 +147,7 @@ view lift model config =
                 ]
             , Events.onFocus <| lift Focus
             , Events.onBlur <| lift Blur
-            , style
-                [ ( "height", height )
-                ]
+            , style [ ( "height", height ) ]
             ]
             [ input
                 [ Attr.type_ "text"
@@ -152,7 +160,7 @@ view lift model config =
                 , Events.onFocus <| lift Focus
                 , Events.onBlur <| lift Blur
                 , Events.onInput (Input >> lift)
-                , Attr.value (Maybe.withDefault "" model.value)
+                , Attr.value value
                 ]
                 []
             , label

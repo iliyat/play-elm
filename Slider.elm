@@ -419,11 +419,5 @@ view lift model config =
                 , div
                     [ class "mdc-slider__focus-ring" ]
                     []
-                , div
-                    [ class "mdc-slider__pin" ]
-                    [ div
-                        [ class "mdc-slider__pin-value-marker" ]
-                        [ text (toString value) ]
-                    ]
                 ]
             ]

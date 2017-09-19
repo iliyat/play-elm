@@ -7,6 +7,13 @@ import Textfield
 import Internal.Textfield
 import Internal.Slider
 import SliderCss exposing (..)
+import FormatNumber.Locales exposing (Locale)
+import FormatNumber exposing (format)
+
+
+rusLocale : Locale
+rusLocale =
+    Locale 0 " " "." "-" ""
 
 
 ({ class } as class_) =
@@ -39,6 +46,8 @@ discretize value =
     in
         if discretizedValue > sliderConfig.max then
             sliderConfig.max
+        else if discretizedValue < sliderConfig.min then
+            sliderConfig.min
         else
             discretizedValue
 
@@ -118,7 +127,11 @@ update action model =
 
 sliderConfig : Slider.Config
 sliderConfig =
-    Slider.defaultConfig
+    let
+        sc =
+            Slider.defaultConfig
+    in
+        { sc | value = 2000, min = 2000, max = 10000, steps = 1000 }
 
 
 textfieldConfig : Textfield.Config
@@ -127,7 +140,7 @@ textfieldConfig =
         dc =
             Textfield.defaultConfig
     in
-        { dc | extra = Just "₽", fullWidth = True }
+        { dc | defaultValue = Just "2000", extra = Just "₽", fullWidth = True }
 
 
 view : Model -> Html Msg
@@ -137,11 +150,15 @@ view model =
             { sliderConfig
                 | value = 1
             }
+
+        labelMin =
+            format rusLocale sliderConfig.min ++ " ₽"
+
+        labelMax =
+            format rusLocale sliderConfig.max ++ " ₽"
     in
         Html.div []
-            [ Html.node "link" [ Html.Attributes.rel "stylesheet", Html.Attributes.href "mdc.css" ] []
-            , Html.node "script" [ Html.Attributes.src "mdc.js" ] []
-            , div [ style [ ( "margin", "24px" ) ] ]
+            [ div [ style [ ( "margin", "24px" ) ] ]
                 [ div [ style [ ( "width", "368px" ) ] ]
                     [ Textfield.view TextfieldMsg
                         model.textfield
@@ -149,12 +166,14 @@ view model =
                     , div [ style [ ( "position", "relative" ), ( "bottom", "8px" ) ] ]
                         [ Slider.view SliderMsg model.slider sc
                         , div [ class [ LabelsContainer ] ]
-                            [ div [ class [ Label ] ] [ text "2000" ]
-                            , div [ class [ Label ] ] [ text "4000" ]
+                            [ div [ class [ Label ] ] [ text labelMin ]
+                            , div [ class [ Label ] ] [ text labelMax ]
                             ]
                         ]
                     ]
                 ]
+            , Html.node "link" [ Html.Attributes.rel "stylesheet", Html.Attributes.href "mdc.css" ] []
+            , Html.node "script" [ Html.Attributes.src "mdc.js" ] []
             , Html.node "link"
                 [ Html.Attributes.rel "stylesheet"
                 , Html.Attributes.href "https://unpkg.com/material-components-web@latest/dist/material-components-web.min.css"
