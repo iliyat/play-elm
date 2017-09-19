@@ -26,71 +26,89 @@ type Msg
     | TextfieldMsg Textfield.Msg
 
 
+discretize : Maybe Float -> Float
+discretize value =
+    let
+        discretizedValue =
+            Slider.discretize sliderConfig.steps (value |> Maybe.withDefault 0)
+    in
+        if discretizedValue > sliderConfig.max then
+            sliderConfig.max
+        else
+            discretizedValue
+
+
+onSliderMsg : Slider.Msg Msg -> Model -> Model
+onSliderMsg msg model =
+    let
+        ( newSliderModel, _ ) =
+            Slider.update SliderMsg msg model.slider
+    in
+        case msg of
+            Internal.Slider.MouseDrag pos ->
+                let
+                    discretizedValue =
+                        discretize newSliderModel.value
+
+                    ( newTextfieldModel, _ ) =
+                        Textfield.update TextfieldMsg (Internal.Textfield.Input (toString discretizedValue)) model.textfield
+                in
+                    ({ model | textfield = newTextfieldModel, slider = newSliderModel })
+
+            _ ->
+                ({ model | slider = newSliderModel })
+
+
+onTextfieldMsg : Textfield.Msg -> Model -> Model
+onTextfieldMsg msg model =
+    let
+        ( newTextfieldModel, _ ) =
+            Textfield.update TextfieldMsg msg model.textfield
+
+        discretizedTextfieldValue =
+            discretize
+                (Just <|
+                    toFloat <|
+                        (String.toInt
+                            (newTextfieldModel.value |> Maybe.withDefault "0")
+                            |> Result.withDefault 0
+                        )
+                )
+    in
+        case msg of
+            Internal.Textfield.Blur ->
+                let
+                    ( newTextfieldModel1, _ ) =
+                        Textfield.update TextfieldMsg
+                            (Internal.Textfield.Input <| toString discretizedTextfieldValue)
+                            newTextfieldModel
+                in
+                    ({ model | textfield = newTextfieldModel1 })
+
+            Internal.Textfield.Input str ->
+                let
+                    ( newSliderModel, _ ) =
+                        Slider.update SliderMsg (Internal.Slider.SetValue discretizedTextfieldValue) model.slider
+                in
+                    ({ model
+                        | textfield = newTextfieldModel
+                        , slider =
+                            newSliderModel
+                     }
+                    )
+
+            _ ->
+                ({ model | textfield = newTextfieldModel })
+
+
 update : Msg -> Model -> ( Model, Cmd Msg )
 update action model =
     case action of
         SliderMsg msg_ ->
-            let
-                ( slider, effects ) =
-                    Slider.update SliderMsg msg_ model.slider
-
-                ( textfield, textfieldEffects ) =
-                    case msg_ of
-                        Internal.Slider.Input val ->
-                            Textfield.update (TextfieldMsg) (Internal.Textfield.Input (toString val)) model.textfield
-
-                        _ ->
-                            ( model.textfield, Cmd.none )
-            in
-                ( { model | slider = slider, textfield = textfield }
-                , Cmd.batch
-                    [ effects, textfieldEffects ]
-                )
+            ( onSliderMsg msg_ model, Cmd.none )
 
         TextfieldMsg msg_ ->
-            let
-                ( newTextfieldModel, _ ) =
-                    case msg_ of
-                        Internal.Textfield.Blur ->
-                            let
-                                { max, steps } =
-                                    sliderConfig
-
-                                discretized =
-                                    Slider.discretize sliderConfig.steps (model.slider.value |> Maybe.withDefault 0)
-
-                                result =
-                                    if discretized > max then
-                                        max
-                                    else
-                                        discretized
-                            in
-                                Textfield.update (TextfieldMsg)
-                                    (Internal.Textfield.Input (toString result))
-                                    model.textfield
-
-                        _ ->
-                            ( model.textfield, Cmd.none )
-
-                ( newSliderModel, sliderEffects ) =
-                    case msg_ of
-                        Internal.Textfield.Input str ->
-                            let
-                                textFieldValue =
-                                    String.toInt str |> Result.withDefault 0
-
-                                targetValue =
-                                    Slider.discretize sliderConfig.steps (toFloat textFieldValue)
-                            in
-                                Slider.update SliderMsg (Internal.Slider.SetValue (targetValue)) model.slider
-
-                        _ ->
-                            ( model.slider, Cmd.none )
-
-                ( textfield, effects ) =
-                    Textfield.update TextfieldMsg msg_ newTextfieldModel
-            in
-                ( { model | textfield = textfield, slider = newSliderModel }, Cmd.batch [ sliderEffects, effects ] )
+            ( onTextfieldMsg msg_ model, Cmd.none )
 
 
 sliderConfig : Slider.Config

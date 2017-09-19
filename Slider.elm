@@ -383,12 +383,12 @@ view lift model config =
              , dataAttr "steps" (toString config.steps)
              ]
                 ++ List.map activateOn downs
-                ++ List.map changeOn ups
-                ++ (if model.active then
-                        List.map inputOn (List.concat [ downs, ups, moves ])
-                    else
-                        List.map inputOn downs
-                   )
+             -- ++ List.map changeOn ups
+             -- ++ (if model.active then
+             --         List.map inputOn (List.concat [ downs, ups, moves ])
+             --     else
+             --         List.map inputOn downs
+             --    )
             )
             [ div [ class "mdc-slider__track-container" ]
                 [ div
