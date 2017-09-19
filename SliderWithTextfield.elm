@@ -113,29 +113,16 @@ update action model =
 
 sliderConfig : Slider.Config
 sliderConfig =
-    { value = 0
-    , min = 0
-    , max = 20
-    , steps = 5
-    , discrete = False
-    , trackMarkers = False
-    }
+    Slider.defaultConfig
 
 
 textfieldConfig : Textfield.Config
 textfieldConfig =
-    { labelText = Just "Сумма"
-    , labelFloat = False
-    , value = Nothing
-    , defaultValue = Nothing
-    , disabled = False
-    , asTitle = True
-    , required = False
-    , type_ = Just "text"
-    , fullWidth = False
-    , invalid = False
-    , extra = Just "₽"
-    }
+    let
+        dc =
+            Textfield.defaultConfig
+    in
+        { dc | extra = Just "₽" }
 
 
 view : Model -> Html Msg

@@ -12,8 +12,8 @@ module Textfield
 import Html exposing (Html, span, input, label, text, div, button, Attribute)
 import Html.Attributes as Attr exposing (class, classList, style)
 import Html.Events as Events
-import Json.Decode as Json exposing (Decoder)
 import Internal.Textfield exposing (Msg(..))
+import Char
 
 
 type alias Model =
@@ -42,8 +42,17 @@ update lift msg model =
             let
                 dirty =
                     str /= ""
+
+                allDigits =
+                    String.all Char.isDigit str
+
+                newValue =
+                    if allDigits then
+                        Just str
+                    else
+                        model.value
             in
-                ( { model | value = Just str, isDirty = dirty }, Cmd.none )
+                ( { model | value = newValue, isDirty = dirty }, Cmd.none )
 
         Blur ->
             ( { model | isFocused = False }, Cmd.none )
@@ -67,6 +76,7 @@ type alias Config =
     , fullWidth : Bool
     , invalid : Bool
     , extra : Maybe String
+    , numbered : Bool
     }
 
 
@@ -82,7 +92,8 @@ defaultConfig =
     , type_ = Just "text"
     , fullWidth = False
     , invalid = False
-    , extra = Just "₽"
+    , extra = Nothing
+    , numbered = False
     }
 
 

@@ -3,6 +3,7 @@ module Slider
         ( view
         , Model
         , defaultModel
+        , defaultConfig
         , Msg
         , update
         , subscriptions
@@ -26,6 +27,17 @@ import Mouse
 onInput : Decoder m -> Attribute m
 onInput =
     Events.on "input"
+
+
+defaultConfig : Config
+defaultConfig =
+    { value = 0
+    , min = 0
+    , max = 20
+    , steps = 5
+    , discrete = False
+    , trackMarkers = False
+    }
 
 
 subscriptions : Model -> Sub (Msg m)
@@ -78,11 +90,7 @@ update fwd msg model =
             ( model, Cmd.none )
 
         Input val ->
-            let
-                _ =
-                    Debug.log "Input" val
-            in
-                ( model, Cmd.none )
+            ( model, Cmd.none )
 
         SetValue val ->
             ( { model | value = Just val }, Cmd.none )
@@ -322,13 +330,6 @@ view lift model config =
         dragOn event =
             Events.on event (Json.map (Drag >> lift) decodeGeometry)
 
-        inputOn event =
-            Events.on event (Json.map (Input >> lift) targetValue)
-
-        -- Events.on event (Maybe.withDefault (Json.succeed (lift NoOp)) config.onInput)
-        changeOn event =
-            Events.on event (Json.map (Input >> lift) targetValue)
-
         ups =
             [ "mouseup"
             , "touchend"
@@ -384,12 +385,6 @@ view lift model config =
              , initOn "elm-mdc-init"
              ]
                 ++ List.map activateOn downs
-             -- ++ List.map changeOn ups
-             -- ++ (if model.active then
-             --         List.map inputOn (List.concat [ downs, ups, moves ])
-             --     else
-             --         List.map inputOn downs
-             --    )
             )
             [ div [ class "mdc-slider__track-container" ]
                 [ div
