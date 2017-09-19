@@ -1,11 +1,16 @@
 module Main exposing (..)
 
 import Html exposing (..)
-import Html.Attributes exposing (..)
+import Html.Attributes exposing (style)
 import Slider
 import Textfield
 import Internal.Textfield
 import Internal.Slider
+import SliderCss exposing (..)
+
+
+({ class } as class_) =
+    sliderNamespace
 
 
 type alias Model =
@@ -122,7 +127,7 @@ textfieldConfig =
         dc =
             Textfield.defaultConfig
     in
-        { dc | extra = Just "₽" }
+        { dc | extra = Just "₽", fullWidth = True }
 
 
 view : Model -> Html Msg
@@ -141,8 +146,12 @@ view model =
                     [ Textfield.view TextfieldMsg
                         model.textfield
                         textfieldConfig
-                    , div [ style [ ( "position", "relative" ), ( "bottom", "16px" ) ] ]
+                    , div [ style [ ( "position", "relative" ), ( "bottom", "8px" ) ] ]
                         [ Slider.view SliderMsg model.slider sc
+                        , div [ class [ LabelsContainer ] ]
+                            [ div [ class [ Label ] ] [ text "2000" ]
+                            , div [ class [ Label ] ] [ text "4000" ]
+                            ]
                         ]
                     ]
                 ]
@@ -158,6 +167,12 @@ view model =
                 []
             , Html.node "link"
                 [ Html.Attributes.rel "stylesheet", Html.Attributes.href "https://fonts.googleapis.com/css?family=Roboto:300,400,500" ]
+                []
+            , Html.node "link"
+                [ Html.Attributes.rel "stylesheet"
+                , Html.Attributes.href
+                    "slider.css"
+                ]
                 []
             ]
 

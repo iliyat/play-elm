@@ -114,7 +114,7 @@ view lift model config =
 
         height =
             if config.asTitle then
-                "68px"
+                "56px"
             else
                 "48px"
 
