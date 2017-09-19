@@ -381,6 +381,7 @@ view lift model config =
              , dataAttr "min" (toString config.min)
              , dataAttr "max" (toString config.max)
              , dataAttr "steps" (toString config.steps)
+             , initOn "elm-mdc-init"
              ]
                 ++ List.map activateOn downs
              -- ++ List.map changeOn ups

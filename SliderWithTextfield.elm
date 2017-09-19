@@ -147,7 +147,9 @@ view model =
             }
     in
         Html.div []
-            [ div [ style [ ( "margin", "24px" ) ] ]
+            [ Html.node "link" [ Html.Attributes.rel "stylesheet", Html.Attributes.href "mdc.css" ] []
+            , Html.node "script" [ Html.Attributes.src "mdc.js" ] []
+            , div [ style [ ( "margin", "24px" ) ] ]
                 [ div [ style [ ( "width", "368px" ) ] ]
                     [ Textfield.view TextfieldMsg
                         model.textfield

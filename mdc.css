@@ -1,0 +1,14 @@
+@keyframes nodeInserted {
+  from { opacity: 0.99; }
+  to { opacity: 1; }
+}
+
+.elm-mdc-slider--uninitialized,
+.elm-mdc-tab-bar--uninitialized,
+.elm-mdc-toolbar--uninitialized,
+.elm-mdc-simple-menu--uninitialized,
+.elm-mdc-grid-list--uninitialized
+{
+  animation-duration: 0.001s;
+  animation-name: nodeInserted;
+}
