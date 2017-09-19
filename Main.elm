@@ -2,45 +2,62 @@ module Main exposing (..)
 
 import Html exposing (..)
 import Html.Attributes exposing (..)
-import Html.Events exposing (..)
 import Slider
-import Dict exposing (Dict)
 import Menu
 import Textfield
+import SliderWithTextfield
 
 
 type alias Model =
-    { slider : Slider.Model
-    , menu : Menu.Model
+    { menu : Menu.Model
     , textfield : Textfield.Model
+    , sliderWithTextfield : SliderWithTextfield.Model
     }
 
 
 defaultModel : Model
 defaultModel =
-    { slider = Slider.defaultModel
-    , menu = Menu.defaultModel
+    { menu = Menu.defaultModel
     , textfield = Textfield.defaultModel
+    , sliderWithTextfield = SliderWithTextfield.defaultModel
     }
 
 
 type Msg
     = Open
-    | SliderMsg (Slider.Msg Msg)
-    | MenuMsg (Menu.Msg Msg)
+    | SliderWithTextfieldMsg SliderWithTextfield.Msg
     | TextfieldMsg Textfield.Msg
+    | MenuMsg (Menu.Msg Msg)
     | Select Int
+
+
+sliderConfig : Slider.Config
+sliderConfig =
+    let
+        sc =
+            Slider.defaultConfig
+    in
+        { sc | value = 2000, min = 2000, max = 10000, steps = 1000 }
+
+
+textfieldConfig : Textfield.Config
+textfieldConfig =
+    let
+        dc =
+            Textfield.defaultConfig
+    in
+        { dc | defaultValue = Just "2000", extra = Just "₽", fullWidth = True }
 
 
 update : Msg -> Model -> ( Model, Cmd Msg )
 update action model =
     case action of
-        SliderMsg msg_ ->
+        SliderWithTextfieldMsg msg_ ->
             let
-                ( slider, effects ) =
-                    Slider.update SliderMsg msg_ model.slider
+                ( new, effects ) =
+                    SliderWithTextfield.update SliderWithTextfieldMsg msg_ model.sliderWithTextfield
             in
-                ( { model | slider = slider }, effects )
+                ( { model | sliderWithTextfield = new }, effects )
 
         MenuMsg msg_ ->
             let
@@ -67,20 +84,10 @@ view : Model -> Html Msg
 view model =
     Html.div []
         [ div [ style [ ( "margin", "24px" ) ] ]
-            [ div [ style [ ( "width", "200px" ) ] ]
-                [ Slider.view SliderMsg model.slider Slider.defaultConfig
-                ]
-            , div [ style [ ( "height", "50px" ) ] ] []
-            , button [ Menu.attach MenuMsg ] [ text "Toggle!" ]
-            , Menu.view MenuMsg
-                model.menu
-                ([ li [ class "mdc-list-item", Menu.onSelect (Select 1) ] [ text "Редактировать" ]
-                 , li [ class "mdc-list-item" ] [ text "Отправить в архив" ]
-                 ]
-                )
-            , div [ style [ ( "height", "50px" ) ] ] []
-            , Textfield.view TextfieldMsg model.textfield
+            [ SliderWithTextfield.view SliderWithTextfieldMsg model.sliderWithTextfield
             ]
+        , Html.node "link" [ Html.Attributes.rel "stylesheet", Html.Attributes.href "mdc.css" ] []
+        , Html.node "script" [ Html.Attributes.src "mdc.js" ] []
         , Html.node "link"
             [ Html.Attributes.rel "stylesheet"
             , Html.Attributes.href "https://unpkg.com/material-components-web@latest/dist/material-components-web.min.css"
@@ -93,6 +100,12 @@ view model =
             []
         , Html.node "link"
             [ Html.Attributes.rel "stylesheet", Html.Attributes.href "https://fonts.googleapis.com/css?family=Roboto:300,400,500" ]
+            []
+        , Html.node "link"
+            [ Html.Attributes.rel "stylesheet"
+            , Html.Attributes.href
+                "slider.css"
+            ]
             []
         ]
 
@@ -116,5 +129,8 @@ subscriptions : Model -> Sub Msg
 subscriptions model =
     Sub.batch
         [ Sub.map MenuMsg (Menu.subscriptions model.menu)
-        , Sub.map SliderMsg (Slider.subscriptions model.slider)
+        , Sub.map SliderWithTextfieldMsg
+            (SliderWithTextfield.subscriptions
+                model.sliderWithTextfield
+            )
         ]

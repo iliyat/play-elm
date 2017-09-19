@@ -40,7 +40,7 @@ defaultConfig =
     }
 
 
-subscriptions : Model -> Sub (Msg m)
+subscriptions : Model -> Sub Msg
 subscriptions model =
     let
         list =
@@ -79,11 +79,11 @@ defaultModel =
     }
 
 
-type alias Msg m =
-    Internal.Slider.Msg m
+type alias Msg =
+    Internal.Slider.Msg
 
 
-update : (Msg m -> m) -> Msg m -> Model -> ( Model, Cmd m )
+update : (Msg -> m) -> Msg -> Model -> ( Model, Cmd m )
 update fwd msg model =
     case msg of
         NoOp ->
@@ -94,9 +94,6 @@ update fwd msg model =
 
         SetValue val ->
             ( { model | value = Just val }, Cmd.none )
-
-        Dispatch ms ->
-            ( model, Cmd.none )
 
         Focus ->
             ( { model | focus = True }, Cmd.none )
@@ -289,7 +286,7 @@ targetValue =
         decodeGeometry
 
 
-view : (Msg m -> m) -> Model -> Config -> Html m
+view : (Msg -> m) -> Model -> Config -> Html m
 view lift model config =
     let
         continuousValue =

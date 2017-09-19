@@ -1,4 +1,4 @@
-module Main exposing (..)
+module SliderWithTextfield exposing (..)
 
 import Html exposing (..)
 import Html.Attributes exposing (style)
@@ -34,7 +34,7 @@ defaultModel =
 
 
 type Msg
-    = SliderMsg (Slider.Msg Msg)
+    = SliderMsg Slider.Msg
     | TextfieldMsg Textfield.Msg
 
 
@@ -52,7 +52,7 @@ discretize value =
             discretizedValue
 
 
-onSliderMsg : Slider.Msg Msg -> Model -> Model
+onSliderMsg : Slider.Msg -> Model -> Model
 onSliderMsg msg model =
     let
         ( newSliderModel, _ ) =
@@ -115,9 +115,9 @@ onTextfieldMsg msg model =
                 ({ model | textfield = newTextfieldModel })
 
 
-update : Msg -> Model -> ( Model, Cmd Msg )
-update action model =
-    case action of
+update : (Msg -> m) -> Msg -> Model -> ( Model, Cmd m )
+update lift msg model =
+    case msg of
         SliderMsg msg_ ->
             ( onSliderMsg msg_ model, Cmd.none )
 
@@ -143,8 +143,8 @@ textfieldConfig =
         { dc | defaultValue = Just "2000", extra = Just "₽", fullWidth = True }
 
 
-view : Model -> Html Msg
-view model =
+view : (Msg -> m) -> Model -> Html m
+view lift model =
     let
         sc =
             { sliderConfig
@@ -160,11 +160,9 @@ view model =
         Html.div []
             [ div [ style [ ( "margin", "24px" ) ] ]
                 [ div [ style [ ( "width", "368px" ) ] ]
-                    [ Textfield.view TextfieldMsg
-                        model.textfield
-                        textfieldConfig
+                    [ Textfield.view (lift << TextfieldMsg) model.textfield textfieldConfig
                     , div [ style [ ( "position", "relative" ), ( "bottom", "8px" ) ] ]
-                        [ Slider.view SliderMsg model.slider sc
+                        [ Slider.view (lift << SliderMsg) model.slider sc
                         , div [ class [ LabelsContainer ] ]
                             [ div [ class [ Label ] ] [ text labelMin ]
                             , div [ class [ Label ] ] [ text labelMax ]
@@ -172,43 +170,7 @@ view model =
                         ]
                     ]
                 ]
-            , Html.node "link" [ Html.Attributes.rel "stylesheet", Html.Attributes.href "mdc.css" ] []
-            , Html.node "script" [ Html.Attributes.src "mdc.js" ] []
-            , Html.node "link"
-                [ Html.Attributes.rel "stylesheet"
-                , Html.Attributes.href "https://unpkg.com/material-components-web@latest/dist/material-components-web.min.css"
-                ]
-                []
-            , Html.node "link"
-                [ Html.Attributes.rel "stylesheet"
-                , Html.Attributes.href "https://fonts.googleapis.com/icon?family=Material+Icons"
-                ]
-                []
-            , Html.node "link"
-                [ Html.Attributes.rel "stylesheet", Html.Attributes.href "https://fonts.googleapis.com/css?family=Roboto:300,400,500" ]
-                []
-            , Html.node "link"
-                [ Html.Attributes.rel "stylesheet"
-                , Html.Attributes.href
-                    "slider.css"
-                ]
-                []
             ]
-
-
-init : ( Model, Cmd Msg )
-init =
-    ( defaultModel, Cmd.none )
-
-
-main : Program Never Model Msg
-main =
-    Html.program
-        { init = init
-        , view = view
-        , update = update
-        , subscriptions = subscriptions
-        }
 
 
 subscriptions : Model -> Sub Msg

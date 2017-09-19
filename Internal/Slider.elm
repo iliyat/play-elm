@@ -3,7 +3,7 @@ module Internal.Slider exposing (Msg(..), Geometry, defaultGeometry)
 import Mouse
 
 
-type Msg m
+type Msg
     = NoOp
     | Focus
     | Blur
@@ -13,7 +13,6 @@ type Msg m
     | SetValue Float
     | Up
     | Tick
-    | Dispatch (List m)
     | Init Geometry
     | Resize
     | AnimationFrame
