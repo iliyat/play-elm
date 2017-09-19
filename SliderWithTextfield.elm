@@ -65,7 +65,11 @@ onSliderMsg msg model =
                         discretize newSliderModel.value
 
                     ( newTextfieldModel, _ ) =
-                        Textfield.update TextfieldMsg (Internal.Textfield.Input (toString discretizedValue)) model.textfield
+                        Textfield.update
+                            TextfieldMsg
+                            (Internal.Textfield.Input (toString discretizedValue))
+                            model.textfield
+                            textfieldConfig
                 in
                     ({ model | textfield = newTextfieldModel, slider = newSliderModel })
 
@@ -77,7 +81,7 @@ onTextfieldMsg : Textfield.Msg -> Model -> Model
 onTextfieldMsg msg model =
     let
         ( newTextfieldModel, _ ) =
-            Textfield.update TextfieldMsg msg model.textfield
+            Textfield.update TextfieldMsg msg model.textfield textfieldConfig
 
         discretizedTextfieldValue =
             discretize
@@ -96,6 +100,7 @@ onTextfieldMsg msg model =
                         Textfield.update TextfieldMsg
                             (Internal.Textfield.Input <| toString discretizedTextfieldValue)
                             newTextfieldModel
+                            textfieldConfig
                 in
                     ({ model | textfield = newTextfieldModel1 })
 
@@ -140,7 +145,13 @@ textfieldConfig =
         dc =
             Textfield.defaultConfig
     in
-        { dc | defaultValue = Just "2000", extra = Just "₽", fullWidth = True }
+        { dc
+            | defaultValue = Just "2000"
+            , extra = Just "₽"
+            , fullWidth = True
+            , asTitle = True
+            , numbered = True
+        }
 
 
 view : (Msg -> m) -> Model -> Html m

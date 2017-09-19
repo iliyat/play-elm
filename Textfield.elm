@@ -35,8 +35,8 @@ type alias Msg =
     Internal.Textfield.Msg
 
 
-update : (Msg -> m) -> Msg -> Model -> ( Model, Cmd m )
-update lift msg model =
+update : (Msg -> m) -> Msg -> Model -> Config -> ( Model, Cmd m )
+update lift msg model config =
     case msg of
         Input str ->
             let
@@ -46,11 +46,17 @@ update lift msg model =
                 allDigits =
                     String.all Char.isDigit str
 
-                newValue =
+                numberedValue =
                     if allDigits then
                         Just str
                     else
                         model.value
+
+                newValue =
+                    if config.numbered then
+                        numberedValue
+                    else
+                        Just str
             in
                 ( { model | value = newValue, isDirty = dirty }, Cmd.none )
 
@@ -87,7 +93,7 @@ defaultConfig =
     , value = Nothing
     , defaultValue = Nothing
     , disabled = False
-    , asTitle = True
+    , asTitle = False
     , required = False
     , type_ = Just "text"
     , fullWidth = False

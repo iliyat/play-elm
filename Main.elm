@@ -46,7 +46,7 @@ textfieldConfig =
         dc =
             Textfield.defaultConfig
     in
-        { dc | defaultValue = Just "2000", extra = Just "₽", fullWidth = True }
+        dc
 
 
 update : Msg -> Model -> ( Model, Cmd Msg )
@@ -69,7 +69,10 @@ update action model =
         TextfieldMsg msg_ ->
             let
                 ( textfield, effects ) =
-                    Textfield.update TextfieldMsg msg_ model.textfield
+                    Textfield.update TextfieldMsg
+                        msg_
+                        model.textfield
+                        textfieldConfig
             in
                 ( { model | textfield = textfield }, effects )
 
@@ -85,6 +88,7 @@ view model =
     Html.div []
         [ div [ style [ ( "margin", "24px" ) ] ]
             [ SliderWithTextfield.view SliderWithTextfieldMsg model.sliderWithTextfield
+            , Textfield.view TextfieldMsg model.textfield textfieldConfig
             ]
         , Html.node "link" [ Html.Attributes.rel "stylesheet", Html.Attributes.href "mdc.css" ] []
         , Html.node "script" [ Html.Attributes.src "mdc.js" ] []
