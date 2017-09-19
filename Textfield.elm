@@ -83,6 +83,7 @@ type alias Config =
     , invalid : Bool
     , extra : Maybe String
     , numbered : Bool
+    , readonly : Bool
     }
 
 
@@ -100,6 +101,7 @@ defaultConfig =
     , invalid = False
     , extra = Nothing
     , numbered = False
+    , readonly = False
     }
 
 
@@ -140,22 +142,8 @@ view lift model config =
         extra =
             config.extra |> Maybe.withDefault ""
 
-        _ =
-            Debug.log "f" isDirty
-    in
-        div
-            [ classList
-                [ ( "mdc-textfield mdc-textfield--upgraded", True )
-                , ( "mdc-textfield--focused", isFocused )
-                , ( "mdc-textfield--disabled", config.disabled )
-                , ( "mdc-textfield--fullwidth", config.fullWidth )
-                , ( "mdc-textfield--invalid", False )
-                ]
-            , Events.onFocus <| lift Focus
-            , Events.onBlur <| lift Blur
-            , style [ ( "height", height ) ]
-            ]
-            [ input
+        inputHtml =
+            input
                 [ Attr.type_ "text"
                 , style
                     [ ( "font-size", fontSize )
@@ -169,6 +157,38 @@ view lift model config =
                 , Attr.value value
                 ]
                 []
+
+        divHtml =
+            div
+                [ style
+                    [ ( "font-size", fontSize )
+                    , ( "width", "168px" )
+                    ]
+                , classList
+                    [ ( "mdc-textfield__input", True )
+                    ]
+                ]
+                [ text value ]
+
+        contentHtml =
+            if config.readonly then
+                divHtml
+            else
+                inputHtml
+    in
+        div
+            [ classList
+                [ ( "mdc-textfield mdc-textfield--upgraded", True )
+                , ( "mdc-textfield--focused", isFocused )
+                , ( "mdc-textfield--disabled", config.disabled )
+                , ( "mdc-textfield--fullwidth", config.fullWidth )
+                , ( "mdc-textfield--invalid", False )
+                ]
+            , Events.onFocus <| lift Focus
+            , Events.onBlur <| lift Blur
+            , style [ ( "height", height ) ]
+            ]
+            [ contentHtml
             , label
                 [ classList
                     [ ( "mdc-textfield__label mdc-typography", True )

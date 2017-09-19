@@ -3,22 +3,22 @@ module Main exposing (..)
 import Html exposing (..)
 import Html.Attributes exposing (..)
 import Slider
-import Menu
 import Textfield
+import Select
 import SliderWithTextfield
 
 
 type alias Model =
-    { menu : Menu.Model
-    , textfield : Textfield.Model
+    { textfield : Textfield.Model
+    , select : Select.Model
     , sliderWithTextfield : SliderWithTextfield.Model
     }
 
 
 defaultModel : Model
 defaultModel =
-    { menu = Menu.defaultModel
-    , textfield = Textfield.defaultModel
+    { textfield = Textfield.defaultModel
+    , select = Select.defaultModel
     , sliderWithTextfield = SliderWithTextfield.defaultModel
     }
 
@@ -27,7 +27,7 @@ type Msg
     = Open
     | SliderWithTextfieldMsg SliderWithTextfield.Msg
     | TextfieldMsg Textfield.Msg
-    | MenuMsg (Menu.Msg Msg)
+    | SelectMsg Select.Msg
     | Select Int
 
 
@@ -46,6 +46,15 @@ textfieldConfig =
         dc =
             Textfield.defaultConfig
     in
+        { dc | defaultValue = Just "ololo", readonly = True }
+
+
+selectConfig : Select.Config
+selectConfig =
+    let
+        dc =
+            Select.defaultConfig
+    in
         dc
 
 
@@ -59,13 +68,6 @@ update action model =
             in
                 ( { model | sliderWithTextfield = new }, effects )
 
-        MenuMsg msg_ ->
-            let
-                ( menu, effects ) =
-                    Menu.update MenuMsg msg_ model.menu
-            in
-                ( { model | menu = menu }, effects )
-
         TextfieldMsg msg_ ->
             let
                 ( textfield, effects ) =
@@ -75,6 +77,13 @@ update action model =
                         textfieldConfig
             in
                 ( { model | textfield = textfield }, effects )
+
+        SelectMsg msg_ ->
+            let
+                ( select, effects ) =
+                    Select.update SelectMsg msg_ model.select
+            in
+                ( { model | select = select }, effects )
 
         Select n ->
             ( model, Cmd.none )
@@ -88,7 +97,9 @@ view model =
     Html.div []
         [ div [ style [ ( "margin", "24px" ) ] ]
             [ SliderWithTextfield.view SliderWithTextfieldMsg model.sliderWithTextfield
-            , Textfield.view TextfieldMsg model.textfield textfieldConfig
+
+            -- , Textfield.view TextfieldMsg model.textfield textfieldConfig
+            , Select.view SelectMsg model.select selectConfig
             ]
         , Html.node "link" [ Html.Attributes.rel "stylesheet", Html.Attributes.href "mdc.css" ] []
         , Html.node "script" [ Html.Attributes.src "mdc.js" ] []
@@ -132,9 +143,6 @@ main =
 subscriptions : Model -> Sub Msg
 subscriptions model =
     Sub.batch
-        [ Sub.map MenuMsg (Menu.subscriptions model.menu)
-        , Sub.map SliderWithTextfieldMsg
-            (SliderWithTextfield.subscriptions
-                model.sliderWithTextfield
-            )
+        [ Sub.map SelectMsg (Select.subscriptions model.select)
+        , Sub.map SliderWithTextfieldMsg (SliderWithTextfield.subscriptions model.sliderWithTextfield)
         ]

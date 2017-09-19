@@ -15,12 +15,13 @@ import Html.Events exposing (targetValue)
 import Mouse
 
 
-type Msg m
+type Msg
     = Open
     | Close
     | Toggle Geometry
     | ToggleString String
     | Click Mouse.Position
+    | Init Geometry
 
 
 type alias Geometry =

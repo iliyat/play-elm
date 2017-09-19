@@ -29,7 +29,7 @@ import Internal.Menu
 import Mouse
 
 
-subscriptions : Model -> Sub (Msg m)
+subscriptions : Model -> Sub Msg
 subscriptions model =
     Sub.batch
         [ if model.open == True then
@@ -37,6 +37,13 @@ subscriptions model =
           else
             Sub.none
         ]
+
+
+type Alignment
+    = OpenFromTopLeft
+    | OpenFromTopRight
+    | OpenFromBottomLeft
+    | OpenFromBottomRight
 
 
 
@@ -69,15 +76,15 @@ defaultModel =
     }
 
 
-type alias Msg m =
-    Internal.Menu.Msg m
+type alias Msg =
+    Internal.Menu.Msg
 
 
 
 -- UPDATE
 
 
-update : (Msg m -> m) -> Msg m -> Model -> ( Model, Cmd m )
+update : (Msg -> m) -> Msg -> Model -> ( Model, Cmd m )
 update fwd msg model =
     case msg of
         Open ->
@@ -115,12 +122,19 @@ update fwd msg model =
         ToggleString st ->
             ( model, Cmd.none )
 
+        Init geometry ->
+            ( { model
+                | geometry = Just geometry
+              }
+            , Cmd.none
+            )
+
 
 
 -- menu view
 
 
-view : (Msg m -> m) -> Model -> List (Html m) -> Html m
+view : (Msg -> m) -> Model -> List (Html m) -> Html m
 view lift { open, left, top } menuItems =
     let
         opacity =
@@ -152,9 +166,16 @@ view lift { open, left, top } menuItems =
                 "scaleY(1)"
             else
                 "scaleY(0)"
+
+        initOn event =
+            Events.on event (Json.map (Init >> lift) decoder)
     in
         div
-            [ class "mdc-simple-menu mdc-simple-menu--open"
+            [ classList
+                [ ( "mdc-simple-menu mdc-simple-menu--open", True )
+                , ( "elm-mdc-simple-menu--uninitialized", True )
+                ]
+            , initOn "elm-mdc-init"
             , style
                 [ ( "opacity", opacity )
                 , ( "transform-origin", "right top 0px" )
@@ -192,7 +213,7 @@ view lift { open, left, top } menuItems =
             ]
 
 
-attach : (Msg msg -> msg) -> Attribute msg
+attach : (Msg -> msg) -> Attribute msg
 attach lift =
     Events.on "click" (Json.map (lift << Toggle) decoder)
 
