@@ -14,6 +14,7 @@ import Html.Attributes as Attr exposing (class, classList, style)
 import Html.Events as Events
 import Internal.Textfield exposing (Msg(..))
 import Char
+import Utils exposing (..)
 
 
 type alias Model =
@@ -84,6 +85,7 @@ type alias Config =
     , extra : Maybe String
     , numbered : Bool
     , readonly : Bool
+    , plural : Maybe Some
     }
 
 
@@ -102,6 +104,7 @@ defaultConfig =
     , extra = Nothing
     , numbered = False
     , readonly = False
+    , plural = Nothing
     }
 
 
@@ -141,6 +144,16 @@ view lift model config =
 
         extra =
             config.extra |> Maybe.withDefault ""
+
+        intValue =
+            String.toInt value |> Result.withDefault 0
+
+        pl =
+            Maybe.map (flip Utils.pluralize intValue) config.plural
+                |> Maybe.withDefault ""
+
+        _ =
+            Debug.log "pl" (value ++ " " ++ pl)
 
         inputHtml =
             input
@@ -218,6 +231,6 @@ view lift model config =
                     , ( "color", "rgba(0, 0, 0, 0.38)" )
                     ]
                 ]
-                [ text extra ]
+                [ text <| extra ++ pl ]
             , div [ class "mdc-textfield__bottom-line" ] []
             ]

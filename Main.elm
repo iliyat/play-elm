@@ -6,12 +6,14 @@ import Slider
 import Textfield
 import Select
 import SliderWithTextfield
+import Utils exposing (..)
 
 
 type alias Model =
     { textfield : Textfield.Model
     , select : Select.Model
-    , sliderWithTextfield : SliderWithTextfield.Model
+    , sliderWithTextfield1 : SliderWithTextfield.Model
+    , sliderWithTextfield2 : SliderWithTextfield.Model
     }
 
 
@@ -19,68 +21,112 @@ defaultModel : Model
 defaultModel =
     { textfield = Textfield.defaultModel
     , select = Select.defaultModel
-    , sliderWithTextfield = SliderWithTextfield.defaultModel
+    , sliderWithTextfield1 = SliderWithTextfield.defaultModel
+    , sliderWithTextfield2 = SliderWithTextfield.defaultModel
     }
 
 
 type Msg
     = Open
-    | SliderWithTextfieldMsg SliderWithTextfield.Msg
+    | SliderWithTextfieldMsg1 SliderWithTextfield.Msg
+    | SliderWithTextfieldMsg2 SliderWithTextfield.Msg
     | TextfieldMsg Textfield.Msg
     | SelectMsg Select.Msg
     | Select Int
 
 
-sliderConfig1 : Slider.Config
-sliderConfig1 =
+swtConf1 : SliderWithTextfield.Config
+swtConf1 =
     let
-        sc =
+        slider =
             Slider.defaultConfig
-    in
-        { sc | value = 0, min = 2000, max = 10000, steps = 1000 }
 
-
-textfieldConfig : Textfield.Config
-textfieldConfig =
-    let
-        dc =
+        textfield =
             Textfield.defaultConfig
     in
-        { dc | defaultValue = Just "ololo", readonly = True }
+        { sliderConfig = { slider | value = 2000, min = 2000, max = 10000, steps = 1000 }
+        , textfieldConfig =
+            { textfield
+                | defaultValue = Just "2000"
+                , asTitle = True
+                , numbered = True
+                , extra = Just "₽"
+            }
+        }
 
 
-selectConfig : Select.Config
-selectConfig =
+swtConf2 : SliderWithTextfield.Config
+swtConf2 =
     let
-        dc =
-            Select.defaultConfig
+        slider =
+            Slider.defaultConfig
+
+        textfield =
+            Textfield.defaultConfig
     in
-        dc
+        { sliderConfig = { slider | value = 7, min = 7, max = 20, steps = 1 }
+        , textfieldConfig =
+            { textfield
+                | defaultValue = Just "7"
+                , asTitle = True
+                , numbered = True
+                , plural = Just (Plural "день" "дня" "дней")
+            }
+        }
+
+
+
+-- textfieldConfig : Textfield.Config
+-- textfieldConfig =
+--     let
+--         dc =
+--             Textfield.defaultConfig
+--     in
+--         { dc | defaultValue = Just "ololo", readonly = True }
+-- selectConfig : Select.Config
+-- selectConfig =
+--     let
+--         dc =
+--             Select.defaultConfig
+--     in
+--         dc
+--
 
 
 update : Msg -> Model -> ( Model, Cmd Msg )
 update action model =
     case action of
-        SliderWithTextfieldMsg msg_ ->
+        SliderWithTextfieldMsg1 msg_ ->
             let
                 ( new, effects ) =
-                    SliderWithTextfield.update SliderWithTextfieldMsg
+                    SliderWithTextfield.update SliderWithTextfieldMsg1
                         msg_
-                        model.sliderWithTextfield
-                        sliderConfig1
+                        model.sliderWithTextfield1
+                        swtConf1
             in
-                ( { model | sliderWithTextfield = new }, effects )
+                ( { model | sliderWithTextfield1 = new }, effects )
+
+        SliderWithTextfieldMsg2 msg_ ->
+            let
+                ( new, effects ) =
+                    SliderWithTextfield.update SliderWithTextfieldMsg2
+                        msg_
+                        model.sliderWithTextfield2
+                        swtConf2
+            in
+                ( { model | sliderWithTextfield2 = new }, effects )
 
         TextfieldMsg msg_ ->
-            let
-                ( textfield, effects ) =
-                    Textfield.update TextfieldMsg
-                        msg_
-                        model.textfield
-                        textfieldConfig
-            in
-                ( { model | textfield = textfield }, effects )
+            ( model, Cmd.none )
 
+        -- let
+        --     ( textfield, effects ) =
+        --         Textfield.update TextfieldMsg
+        --             msg_
+        --             model.textfield
+        --             textfieldConfig
+        -- in
+        --     ( { model | textfield = textfield }, effects )
         SelectMsg msg_ ->
             let
                 ( select, effects ) =
@@ -99,12 +145,15 @@ view : Model -> Html Msg
 view model =
     Html.div []
         [ div [ style [ ( "margin", "54px" ) ] ]
-            [ SliderWithTextfield.view SliderWithTextfieldMsg
-                model.sliderWithTextfield
-                sliderConfig1
+            [ SliderWithTextfield.view SliderWithTextfieldMsg1
+                model.sliderWithTextfield1
+                swtConf1
+            , SliderWithTextfield.view SliderWithTextfieldMsg2
+                model.sliderWithTextfield2
+                swtConf2
 
             -- , Textfield.view TextfieldMsg model.textfield textfieldConfig
-            , Select.view SelectMsg model.select selectConfig
+            -- , Select.view SelectMsg model.select selectConfig
             ]
         , Html.node "link" [ Html.Attributes.rel "stylesheet", Html.Attributes.href "mdc.css" ] []
         , Html.node "script" [ Html.Attributes.src "mdc.js" ] []
@@ -149,5 +198,12 @@ subscriptions : Model -> Sub Msg
 subscriptions model =
     Sub.batch
         [ Sub.map SelectMsg (Select.subscriptions model.select)
-        , Sub.map SliderWithTextfieldMsg (SliderWithTextfield.subscriptions model.sliderWithTextfield)
+        , Sub.map SliderWithTextfieldMsg1
+            (SliderWithTextfield.subscriptions
+                model.sliderWithTextfield1
+            )
+        , Sub.map SliderWithTextfieldMsg2
+            (SliderWithTextfield.subscriptions
+                model.sliderWithTextfield2
+            )
         ]

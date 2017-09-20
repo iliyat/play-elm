@@ -26,6 +26,12 @@ type alias Model =
     }
 
 
+type alias Config =
+    { sliderConfig : Slider.Config
+    , textfieldConfig : Textfield.Config
+    }
+
+
 defaultModel : Model
 defaultModel =
     { slider = Slider.defaultModel
@@ -52,8 +58,8 @@ discretize value sliderConfig =
             discretizedValue
 
 
-onSliderMsg : Slider.Msg -> Model -> Slider.Config -> Model
-onSliderMsg msg model sliderConfig =
+onSliderMsg : Slider.Msg -> Model -> Config -> Model
+onSliderMsg msg model { sliderConfig, textfieldConfig } =
     let
         ( newSliderModel, _ ) =
             Slider.update SliderMsg msg model.slider
@@ -77,8 +83,8 @@ onSliderMsg msg model sliderConfig =
                 ({ model | slider = newSliderModel })
 
 
-onTextfieldMsg : Textfield.Msg -> Model -> Slider.Config -> Model
-onTextfieldMsg msg model sliderConfig =
+onTextfieldMsg : Textfield.Msg -> Model -> Config -> Model
+onTextfieldMsg msg model { sliderConfig, textfieldConfig } =
     let
         ( newTextfieldModel, _ ) =
             Textfield.update TextfieldMsg msg model.textfield textfieldConfig
@@ -125,39 +131,19 @@ onTextfieldMsg msg model sliderConfig =
                 ({ model | textfield = newTextfieldModel })
 
 
-update : (Msg -> m) -> Msg -> Model -> Slider.Config -> ( Model, Cmd m )
-update lift msg model sliderConfig =
+update : (Msg -> m) -> Msg -> Model -> Config -> ( Model, Cmd m )
+update lift msg model config =
     case msg of
         SliderMsg msg_ ->
-            ( onSliderMsg msg_ model sliderConfig, Cmd.none )
+            ( onSliderMsg msg_ model config, Cmd.none )
 
         TextfieldMsg msg_ ->
-            ( onTextfieldMsg msg_ model sliderConfig, Cmd.none )
+            ( onTextfieldMsg msg_ model config, Cmd.none )
 
 
-textfieldConfig : Textfield.Config
-textfieldConfig =
+view : (Msg -> m) -> Model -> Config -> Html m
+view lift model { sliderConfig, textfieldConfig } =
     let
-        dc =
-            Textfield.defaultConfig
-    in
-        { dc
-            | defaultValue = Just "2000"
-            , extra = Just "₽"
-            , fullWidth = True
-            , asTitle = True
-            , numbered = True
-        }
-
-
-view : (Msg -> m) -> Model -> Slider.Config -> Html m
-view lift model sliderConfig =
-    let
-        sc =
-            { sliderConfig
-                | value = 1
-            }
-
         labelMin =
             format rusLocale sliderConfig.min ++ " ₽"
 
@@ -167,10 +153,14 @@ view lift model sliderConfig =
         Html.div []
             [ div [ style [] ]
                 [ div [ style [ ( "width", "368px" ) ] ]
-                    [ Textfield.view (lift << TextfieldMsg) model.textfield textfieldConfig
+                    [ Textfield.view (lift << TextfieldMsg)
+                        model.textfield
+                        textfieldConfig
                     , div
                         []
-                        [ Slider.view (lift << SliderMsg) model.slider sc
+                        [ Slider.view (lift << SliderMsg)
+                            model.slider
+                            sliderConfig
                         , div [ class [ LabelsContainer ] ]
                             [ div [ class [ Label ] ] [ text labelMin ]
                             , div [ class [ Label ] ] [ text labelMax ]
