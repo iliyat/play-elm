@@ -1,0 +1,110 @@
+$datepicker-ns: elm-datepicker-- !default;
+$datepicker-hl: #F2F2F2;
+$datepicker-arrow: #AAA;
+$datepicker-arrow-hover: #BBB;
+$datepicker-picked-fg: white;
+$datepicker-picked-bg: darkblue;
+$datepicker-border-color: #CCC;
+$datepicker-row-border-color: #F2F2F2;
+$primary-color: rgb(0, 188, 212);
+
+.#{$datepicker-ns}container {
+  position: relative;
+}
+
+.#{$datepicker-ns}input:focus {
+  outline: 0;
+}
+
+.#{$datepicker-ns}picker {
+  position: absolute;
+  border: 1px solid #CCC;
+  z-index: 10; 
+  color: rgba(0, 0, 0, 0.87);
+  background-color: rgb(255, 255, 255);
+  transition: transform 450ms cubic-bezier(0.23, 1, 0.32, 1) 0ms, opacity 450ms cubic-bezier(0.23, 1, 0.32, 1) 0ms;
+  box-sizing: border-box;
+  font-family: Roboto, sans-serif;
+  -webkit-tap-highlight-color: rgba(0, 0, 0, 0);
+  box-shadow: rgba(0, 0, 0, 0.12) 0px 1px 6px, rgba(0, 0, 0, 0.12) 0px 1px 4px;
+  border-radius: 2px;
+  position: fixed;
+  z-index: 2100;
+  opacity: 1;
+  transform: scaleY(1);
+  transform-origin: left top 0px;
+  max-height: 935px;
+  padding: 0px;
+  min-height: 434px;
+  min-width: 310px;
+}
+
+.#{$datepicker-ns}picker-header {
+  width: 100%;
+  height: auto;
+  float: none;
+  font-weight: 700;
+  display: inline-block;
+  background-color: $primary-color;
+  border-top-left-radius: 2px;
+  border-top-right-radius: 2px;
+  border-bottom-left-radius: 0px;
+  color: rgb(255, 255, 255);
+  padding: 20px;
+  box-sizing: border-box;
+}
+
+.#{$datepicker-ns}year {
+    position: relative;
+    overflow: hidden;
+    height: 16px;
+    margin: 0px 0px 10px;
+    font-size: 16px;
+    font-weight: 500;
+    line-height: 16px;
+    opacity: 0.7;
+    transition: all 450ms cubic-bezier(0.23, 1, 0.32, 1) 0ms;
+    font-weight: 500;
+    line-height: 16px;
+}
+
+.#{$datepicker-ns}current-date {
+position: relative;
+    overflow: hidden;
+    height: 38px;
+    display: block;
+    font-size: 36px;
+    line-height: 36px;
+    opacity: 1;
+    transition: all 450ms cubic-bezier(0.23, 1, 0.32, 1) 0ms;
+    width: 100%;
+    font-weight: 500;
+}
+
+.#{$datepicker-ns}picker-body {
+  display: flex;
+  flex-direction: column;
+}
+
+.#{$datepicker-ns}prev-container,
+.#{$datepicker-ns}next-container {
+  flex: 0 1 auto;
+}
+
+.#{$datepicker-ns}month-container {
+  flex: 1 1 auto;
+
+  padding: 0.5em;
+
+  display: flex;
+  flex-direction: column;
+}
+
+.#{$datepicker-ns}month,
+.#{$datepicker-ns}year {
+  flex: 1 1 auto;
+
+  cursor: default;
+  text-align: center;
+}
+

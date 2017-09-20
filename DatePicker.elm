@@ -565,20 +565,21 @@ datePicker pickedDate settings ({ focused, today } as model) =
             , onPicker "mouseup" MouseUp
             ]
             [ div [ class "picker-header" ]
-                [ div [ class "prev-container" ]
-                    [ arrow "prev" (ChangeFocus (prevMonth currentDate)) ]
-                , div [ class "month-container" ]
-                    [ span [ class "month" ]
-                        [ text <| settings.monthFormatter <| month currentMonth ]
-                    , span [ class "year" ]
-                        [ if not (yearRangeActive settings.changeYear) then
-                            text <| settings.yearFormatter <| year currentMonth
-                          else
-                            Html.Keyed.node "span" [] [ ( toString (year currentMonth), dropdownYear ) ]
-                        ]
-                    ]
-                , div [ class "next-container" ]
-                    [ arrow "next" (ChangeFocus (nextMonth currentDate)) ]
+                [ div [ class "year" ]
+                    [ text <| settings.yearFormatter <| year currentMonth ]
+                , div [ class "current-date" ]
+                    [ text "Wed, Sep 20" ]
+
+                -- div []
+                --   [ span [ class "month" ]
+                --       [ text <| settings.monthFormatter <| month currentMonth ]
+                --   , span [ class "year" ]
+                --       [ if not (yearRangeActive settings.changeYear) then
+                --           text <| settings.yearFormatter <| year currentMonth
+                --         else
+                --           Html.Keyed.node "span" [] [ ( toString (year currentMonth), dropdownYear ) ]
+                --       ]
+                --   ]
                 ]
             , div [ class "body" ]
                 [ div [ class "body-prev-next-container" ]
