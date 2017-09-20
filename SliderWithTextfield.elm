@@ -1,7 +1,7 @@
 module SliderWithTextfield exposing (..)
 
 import Html exposing (..)
-import Html.Attributes exposing (style)
+import Html.Attributes exposing (style, class)
 import Slider
 import Textfield
 import Internal.Textfield
@@ -38,8 +38,8 @@ type Msg
     | TextfieldMsg Textfield.Msg
 
 
-discretize : Maybe Float -> Float
-discretize value =
+discretize : Maybe Float -> Slider.Config -> Float
+discretize value sliderConfig =
     let
         discretizedValue =
             Slider.discretize sliderConfig.steps (value |> Maybe.withDefault 0)
@@ -52,8 +52,8 @@ discretize value =
             discretizedValue
 
 
-onSliderMsg : Slider.Msg -> Model -> Model
-onSliderMsg msg model =
+onSliderMsg : Slider.Msg -> Model -> Slider.Config -> Model
+onSliderMsg msg model sliderConfig =
     let
         ( newSliderModel, _ ) =
             Slider.update SliderMsg msg model.slider
@@ -62,7 +62,7 @@ onSliderMsg msg model =
             Internal.Slider.MouseDrag pos ->
                 let
                     discretizedValue =
-                        discretize newSliderModel.value
+                        discretize newSliderModel.value sliderConfig
 
                     ( newTextfieldModel, _ ) =
                         Textfield.update
@@ -77,8 +77,8 @@ onSliderMsg msg model =
                 ({ model | slider = newSliderModel })
 
 
-onTextfieldMsg : Textfield.Msg -> Model -> Model
-onTextfieldMsg msg model =
+onTextfieldMsg : Textfield.Msg -> Model -> Slider.Config -> Model
+onTextfieldMsg msg model sliderConfig =
     let
         ( newTextfieldModel, _ ) =
             Textfield.update TextfieldMsg msg model.textfield textfieldConfig
@@ -92,6 +92,7 @@ onTextfieldMsg msg model =
                             |> Result.withDefault 0
                         )
                 )
+                sliderConfig
     in
         case msg of
             Internal.Textfield.Blur ->
@@ -107,7 +108,11 @@ onTextfieldMsg msg model =
             Internal.Textfield.Input str ->
                 let
                     ( newSliderModel, _ ) =
-                        Slider.update SliderMsg (Internal.Slider.SetValue discretizedTextfieldValue) model.slider
+                        Slider.update SliderMsg
+                            (Internal.Slider.SetValue
+                                discretizedTextfieldValue
+                            )
+                            model.slider
                 in
                     ({ model
                         | textfield = newTextfieldModel
@@ -120,23 +125,14 @@ onTextfieldMsg msg model =
                 ({ model | textfield = newTextfieldModel })
 
 
-update : (Msg -> m) -> Msg -> Model -> ( Model, Cmd m )
-update lift msg model =
+update : (Msg -> m) -> Msg -> Model -> Slider.Config -> ( Model, Cmd m )
+update lift msg model sliderConfig =
     case msg of
         SliderMsg msg_ ->
-            ( onSliderMsg msg_ model, Cmd.none )
+            ( onSliderMsg msg_ model sliderConfig, Cmd.none )
 
         TextfieldMsg msg_ ->
-            ( onTextfieldMsg msg_ model, Cmd.none )
-
-
-sliderConfig : Slider.Config
-sliderConfig =
-    let
-        sc =
-            Slider.defaultConfig
-    in
-        { sc | value = 2000, min = 2000, max = 10000, steps = 1000 }
+            ( onTextfieldMsg msg_ model sliderConfig, Cmd.none )
 
 
 textfieldConfig : Textfield.Config
@@ -154,8 +150,8 @@ textfieldConfig =
         }
 
 
-view : (Msg -> m) -> Model -> Html m
-view lift model =
+view : (Msg -> m) -> Model -> Slider.Config -> Html m
+view lift model sliderConfig =
     let
         sc =
             { sliderConfig
@@ -169,10 +165,11 @@ view lift model =
             format rusLocale sliderConfig.max ++ " ₽"
     in
         Html.div []
-            [ div [ style [ ( "margin", "24px" ) ] ]
+            [ div [ style [] ]
                 [ div [ style [ ( "width", "368px" ) ] ]
                     [ Textfield.view (lift << TextfieldMsg) model.textfield textfieldConfig
-                    , div [ style [ ( "position", "relative" ), ( "bottom", "8px" ) ] ]
+                    , div
+                        []
                         [ Slider.view (lift << SliderMsg) model.slider sc
                         , div [ class [ LabelsContainer ] ]
                             [ div [ class [ Label ] ] [ text labelMin ]

@@ -31,13 +31,13 @@ type Msg
     | Select Int
 
 
-sliderConfig : Slider.Config
-sliderConfig =
+sliderConfig1 : Slider.Config
+sliderConfig1 =
     let
         sc =
             Slider.defaultConfig
     in
-        { sc | value = 2000, min = 2000, max = 10000, steps = 1000 }
+        { sc | value = 0, min = 2000, max = 10000, steps = 1000 }
 
 
 textfieldConfig : Textfield.Config
@@ -64,7 +64,10 @@ update action model =
         SliderWithTextfieldMsg msg_ ->
             let
                 ( new, effects ) =
-                    SliderWithTextfield.update SliderWithTextfieldMsg msg_ model.sliderWithTextfield
+                    SliderWithTextfield.update SliderWithTextfieldMsg
+                        msg_
+                        model.sliderWithTextfield
+                        sliderConfig1
             in
                 ( { model | sliderWithTextfield = new }, effects )
 
@@ -95,8 +98,10 @@ update action model =
 view : Model -> Html Msg
 view model =
     Html.div []
-        [ div [ style [ ( "margin", "24px" ) ] ]
-            [ SliderWithTextfield.view SliderWithTextfieldMsg model.sliderWithTextfield
+        [ div [ style [ ( "margin", "54px" ) ] ]
+            [ SliderWithTextfield.view SliderWithTextfieldMsg
+                model.sliderWithTextfield
+                sliderConfig1
 
             -- , Textfield.view TextfieldMsg model.textfield textfieldConfig
             , Select.view SelectMsg model.select selectConfig

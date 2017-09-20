@@ -234,6 +234,10 @@ decodeGeometry =
             )
 
 
+
+-- (DOM.target (DOM.nextSibling (DOM.childNode 1 (DOM.childNodes DOM.offsetHeight))))
+
+
 data : String -> Decoder a -> Decoder a
 data key decoder =
     Json.at [ "dataset", key ] decoder
@@ -278,10 +282,7 @@ targetValue : Decoder Float
 targetValue =
     Json.map
         (\geometry ->
-            if geometry.discrete then
-                discretize geometry.steps (computeValue geometry)
-            else
-                computeValue geometry
+            discretize geometry.steps (computeValue geometry)
         )
         decodeGeometry
 
@@ -320,12 +321,6 @@ view lift model config =
 
         initOn event =
             Events.on event (Json.map (Init >> lift) decodeGeometry)
-
-        upOn event =
-            Events.on event (Json.succeed (lift Up))
-
-        dragOn event =
-            Events.on event (Json.map (Drag >> lift) decodeGeometry)
 
         ups =
             [ "mouseup"
@@ -382,6 +377,7 @@ view lift model config =
              , initOn "elm-mdc-init"
              ]
                 ++ List.map activateOn downs
+                ++ [ style [ ( "bottom", "8px" ) ] ]
             )
             [ div [ class "mdc-slider__track-container" ]
                 [ div
