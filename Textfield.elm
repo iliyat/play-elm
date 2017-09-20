@@ -85,13 +85,13 @@ type alias Config =
     , extra : Maybe String
     , numbered : Bool
     , readonly : Bool
-    , plural : Maybe Some
+    , plural : Maybe Plural
     }
 
 
 defaultConfig : Config
 defaultConfig =
-    { labelText = Just "Сумма"
+    { labelText = Nothing
     , labelFloat = False
     , value = Nothing
     , defaultValue = Nothing
@@ -151,9 +151,6 @@ view lift model config =
         pl =
             Maybe.map (flip Utils.pluralize intValue) config.plural
                 |> Maybe.withDefault ""
-
-        _ =
-            Debug.log "pl" (value ++ " " ++ pl)
 
         inputHtml =
             input

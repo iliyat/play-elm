@@ -9,6 +9,7 @@ import Internal.Slider
 import SliderCss exposing (..)
 import FormatNumber.Locales exposing (Locale)
 import FormatNumber exposing (format)
+import Utils exposing (..)
 
 
 rusLocale : Locale
@@ -29,6 +30,8 @@ type alias Model =
 type alias Config =
     { sliderConfig : Slider.Config
     , textfieldConfig : Textfield.Config
+    , extraStatic : Maybe String
+    , extraPlural : Maybe Plural
     }
 
 
@@ -142,13 +145,17 @@ update lift msg model config =
 
 
 view : (Msg -> m) -> Model -> Config -> Html m
-view lift model { sliderConfig, textfieldConfig } =
+view lift model { sliderConfig, textfieldConfig, extraPlural, extraStatic } =
     let
+        extra =
+            (++) (extraStatic |> Maybe.withDefault "" |> (++) " ")
+                (Maybe.map (flip Utils.pluralize <| round sliderConfig.min) extraPlural |> Maybe.withDefault "")
+
         labelMin =
-            format rusLocale sliderConfig.min ++ " ₽"
+            format rusLocale sliderConfig.min ++ extra
 
         labelMax =
-            format rusLocale sliderConfig.max ++ " ₽"
+            format rusLocale sliderConfig.max ++ extra
     in
         Html.div []
             [ div [ style [] ]

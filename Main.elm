@@ -44,14 +44,24 @@ swtConf1 =
         textfield =
             Textfield.defaultConfig
     in
-        { sliderConfig = { slider | value = 2000, min = 2000, max = 10000, steps = 1000 }
+        { sliderConfig =
+            { slider
+                | value = 2000
+                , min = 2000
+                , max = 10000
+                , steps = 1000
+            }
         , textfieldConfig =
             { textfield
                 | defaultValue = Just "2000"
                 , asTitle = True
                 , numbered = True
                 , extra = Just "₽"
+                , fullWidth = True
+                , labelText = Just "Сумма"
             }
+        , extraStatic = Just "₽"
+        , extraPlural = Nothing
         }
 
 
@@ -64,25 +74,41 @@ swtConf2 =
         textfield =
             Textfield.defaultConfig
     in
-        { sliderConfig = { slider | value = 7, min = 7, max = 20, steps = 1 }
+        { sliderConfig =
+            { slider
+                | value = 7
+                , min = 7
+                , max = 20
+                , steps = 1
+            }
         , textfieldConfig =
             { textfield
                 | defaultValue = Just "7"
                 , asTitle = True
                 , numbered = True
                 , plural = Just (Plural "день" "дня" "дней")
+                , fullWidth = True
+                , labelText = Just "Срок"
             }
+        , extraPlural = Just (Plural "день" "дня" "дней")
+        , extraStatic = Nothing
+        }
+
+
+textfieldConfig : Textfield.Config
+textfieldConfig =
+    let
+        dc =
+            Textfield.defaultConfig
+    in
+        { dc
+            | defaultValue = Just "Промокод"
+            , readonly = False
+            , labelText = Just "Промокод"
         }
 
 
 
--- textfieldConfig : Textfield.Config
--- textfieldConfig =
---     let
---         dc =
---             Textfield.defaultConfig
---     in
---         { dc | defaultValue = Just "ololo", readonly = True }
 -- selectConfig : Select.Config
 -- selectConfig =
 --     let
@@ -117,16 +143,15 @@ update action model =
                 ( { model | sliderWithTextfield2 = new }, effects )
 
         TextfieldMsg msg_ ->
-            ( model, Cmd.none )
+            let
+                ( textfield, effects ) =
+                    Textfield.update TextfieldMsg
+                        msg_
+                        model.textfield
+                        textfieldConfig
+            in
+                ( { model | textfield = textfield }, effects )
 
-        -- let
-        --     ( textfield, effects ) =
-        --         Textfield.update TextfieldMsg
-        --             msg_
-        --             model.textfield
-        --             textfieldConfig
-        -- in
-        --     ( { model | textfield = textfield }, effects )
         SelectMsg msg_ ->
             let
                 ( select, effects ) =
@@ -151,8 +176,8 @@ view model =
             , SliderWithTextfield.view SliderWithTextfieldMsg2
                 model.sliderWithTextfield2
                 swtConf2
+            , Textfield.view TextfieldMsg model.textfield textfieldConfig
 
-            -- , Textfield.view TextfieldMsg model.textfield textfieldConfig
             -- , Select.view SelectMsg model.select selectConfig
             ]
         , Html.node "link" [ Html.Attributes.rel "stylesheet", Html.Attributes.href "mdc.css" ] []

@@ -1,11 +1,11 @@
 module Utils exposing (..)
 
 
-type Some
+type Plural
     = Plural String String String
 
 
-pluralize : Some -> Int -> String
+pluralize : Plural -> Int -> String
 pluralize (Plural one two five) count =
     let
         n =
