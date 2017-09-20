@@ -9,7 +9,6 @@ type Msg
     | Blur
     | Input Float
     | Activate Bool Geometry
-    | Drag Geometry
     | SetValue Float
     | Up
     | Tick

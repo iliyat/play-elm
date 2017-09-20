@@ -114,9 +114,6 @@ update fwd msg model =
             , Cmd.none
             )
 
-        Drag geometry ->
-            ( model, Cmd.none )
-
         Init geometry ->
             ( { model
                 | geometry = Just geometry
