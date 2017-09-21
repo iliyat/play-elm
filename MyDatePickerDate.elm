@@ -1,4 +1,4 @@
-module DatePicker.Date
+module MyDatePickerDate
     exposing
         ( YearRange(..)
         , initDate

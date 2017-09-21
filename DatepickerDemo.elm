@@ -1,22 +1,22 @@
 module DatepickerDemo exposing (main)
 
 import Date exposing (Date, Day(..), day, dayOfWeek, month, year)
-import DatePicker exposing (defaultSettings, DateEvent(..), moreOrLess)
+import MyDatePicker exposing (defaultSettings, DateEvent(..), moreOrLess)
 import Html exposing (Html, div, h1, text)
 import Html.Attributes
 
 
 type Msg
-    = ToDatePicker DatePicker.Msg
+    = ToDatePicker MyDatePicker.Msg
 
 
 type alias Model =
     { date : Maybe Date
-    , datePicker : DatePicker.DatePicker
+    , datePicker : MyDatePicker.DatePicker
     }
 
 
-settings : DatePicker.Settings
+settings : MyDatePicker.Settings
 settings =
     let
         isDisabled date =
@@ -32,7 +32,7 @@ init : ( Model, Cmd Msg )
 init =
     let
         ( dp, datePickerFx ) =
-            DatePicker.init
+            MyDatePicker.init
     in
         { date = Nothing
         , datePicker = dp
@@ -46,7 +46,7 @@ update msg ({ date, datePicker } as model) =
         ToDatePicker msg ->
             let
                 ( newDatePicker, datePickerFx, dateEvent ) =
-                    DatePicker.update settings msg datePicker
+                    MyDatePicker.update settings msg datePicker
 
                 newDate =
                     case dateEvent of
@@ -90,7 +90,7 @@ view ({ date, datePicker } as model) =
 
             Just date ->
                 h1 [] [ text <| formatDate date ]
-        , DatePicker.view date settings datePicker
+        , MyDatePicker.view date settings datePicker
             |> Html.map ToDatePicker
         ]
 

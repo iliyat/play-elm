@@ -1,4 +1,4 @@
-module DatePicker
+module MyDatePicker
     exposing
         ( Msg
         , Settings
@@ -6,8 +6,8 @@ module DatePicker
         , DatePicker
         , defaultSettings
         , init
-        , initFromDate
-        , initFromDates
+          -- , initFromDate
+          -- , initFromDates
         , update
         , view
         , pick
@@ -20,23 +20,8 @@ module DatePicker
         , focusedDate
         )
 
-{-| A customizable date picker component.
-
-
-# Tea ☕
-
-@docs Msg, DateEvent, DatePicker
-@docs init, initFromDate, initFromDates, update, view, isOpen, focusedDate
-
-
-# Settings
-
-@docs Settings, defaultSettings, pick, between, moreOrLess, from, to, off
-
--}
-
 import Date exposing (Date, Day(..), Month, day, month, year)
-import DatePicker.Date exposing (..)
+import MyDatePickerDate exposing (..)
 import Icons.Icon as Icon
 import Html exposing (..)
 import Html.Attributes as Attrs exposing (href, placeholder, tabindex, type_, value, selected)
@@ -44,10 +29,9 @@ import Html.Events exposing (on, onBlur, onClick, onInput, onFocus, onWithOption
 import Html.Keyed
 import Json.Decode as Json
 import Task
+import Textfield
 
 
-{-| An opaque type representing messages that are passed inside the DatePicker.
--}
 type Msg
     = CurrentDate Date
     | ChangeFocus Date
@@ -58,10 +42,9 @@ type Msg
     | Blur
     | MouseDown
     | MouseUp
+    | TextfieldMsg Textfield.Msg
 
 
-{-| The type of date picker settings.
--}
 type alias Settings =
     { placeholder : String
     , classNamespace : String
@@ -84,42 +67,17 @@ type alias Settings =
 type alias Model =
     { open : Bool
     , forceOpen : Bool
-    , focused :
-        Maybe Date
-
-    -- date currently center-focused by picker, but not necessarily chosen
-    , inputText :
-        Maybe String
-
-    -- for user input that hasn't yet been submitted
-    , today :
-        Date
-
-    -- actual, current day as far as we know
+    , focused : Maybe Date
+    , inputText : Maybe String
+    , today : Date
+    , textfield : Textfield.Model
     }
 
 
-{-| The DatePicker model. Opaque, hence no field docs.
--}
 type DatePicker
     = DatePicker Model
 
 
-{-| A record of default settings for the date picker. Extend this if
-you want to customize your date picker.
-
-    import DatePicker exposing (defaultSettings)
-
-    DatePicker.init { defaultSettings | placeholder = "Pick a date" }
-
-To disable certain dates:
-
-    import Date exposing (Day(..), dayOfWeek)
-    import DatePicker exposing (defaultSettings)
-
-    DatePicker.init { defaultSettings | isDisabled = \d -> dayOfWeek d `List.member` [ Sat, Sun ] }
-
--}
 defaultSettings : Settings
 defaultSettings =
     { placeholder = "Please pick a date..."
@@ -147,11 +105,6 @@ yearRangeActive yearRange =
     yearRange /= Off
 
 
-{-| Select a range of date to display
-
-    DatePicker.init { defaultSettings | changeYear = between 1555 2018 }
-
--}
 between : Int -> Int -> YearRange
 between start end =
     if start > end then
@@ -160,41 +113,21 @@ between start end =
         Between start end
 
 
-{-| Select a symmetric range of date to display
-
-    DatePicker.init { defaultSettings | changeYear = moreOrLess 10 }
-
--}
 moreOrLess : Int -> YearRange
 moreOrLess range =
     MoreOrLess range
 
 
-{-| Select a range from a given year to this year
-
-    DatePicker.init { defaultSettings | changeYear = from 1995 }
-
--}
 from : Int -> YearRange
 from year =
     From year
 
 
-{-| Select a range from this year to a given year
-
-    DatePicker.init { defaultSettings | changeYear = to 2020 }
-
--}
 to : Int -> YearRange
 to year =
     To year
 
 
-{-| Turn off the date range
-
-    DatePicker.init { defaultSettings | changeYear = off }
-
--}
 off : YearRange
 off =
     Off
@@ -205,63 +138,22 @@ formatCell day =
     text day
 
 
-{-| The default initial state of the Datepicker. You must execute
-the returned command (which, for the curious, sets the current date)
-for the date picker to behave correctly.
+defaultModel : Model
+defaultModel =
+    { open = True
+    , forceOpen = True
+    , focused = Just initDate
+    , inputText = Nothing
+    , today = initDate
+    , textfield = Textfield.defaultModel
+    }
 
-    init =
-        let
-            ( datePicker, datePickerFx ) =
-                DatePicker.init
-        in
-            { picker = datePicker } ! [ Cmd.map ToDatePicker datePickerfx ]
 
--}
 init : ( DatePicker, Cmd Msg )
 init =
-    ( DatePicker <|
-        { open = True
-        , forceOpen = True
-        , focused = Just initDate
-        , inputText = Nothing
-        , today = initDate
-        }
+    ( DatePicker defaultModel
     , Task.perform CurrentDate Date.now
     )
-
-
-{-| Initialize a DatePicker with a given Date
-
-    init date =
-        { picker = DatePicker.initFromDate date } ! []
-
--}
-initFromDate : Date -> DatePicker
-initFromDate date =
-    DatePicker <|
-        { open = True
-        , forceOpen = True
-        , focused = Just date
-        , inputText = Nothing
-        , today = date
-        }
-
-
-{-| Initialize a DatePicker with a date for today and Maybe a date picked
-
-    init today date =
-        { picker = DatePicker.initFromDates today date } ! []
-
--}
-initFromDates : Date -> Maybe Date -> DatePicker
-initFromDates today date =
-    DatePicker <|
-        { open = False
-        , forceOpen = False
-        , focused = date
-        , inputText = Nothing
-        , today = today
-        }
 
 
 prepareDates : Date -> Day -> { currentMonth : Date, currentDates : List Date }
@@ -278,38 +170,44 @@ prepareDates date firstDayOfWeek =
         }
 
 
-{-| Expose if the datepicker is open
--}
 isOpen : DatePicker -> Bool
 isOpen (DatePicker model) =
     True
 
 
-
--- model.open
-
-
-{-| Expose the currently focused date
--}
 focusedDate : DatePicker -> Maybe Date
 focusedDate (DatePicker model) =
     model.focused
 
 
-{-| A sugaring of `Maybe` to explicitly tell you how to interpret `Changed Nothing`, because `Just Nothing` seems somehow wrong.
-Used to represent a request, by the datepicker, to change the selected date.
--}
+textfieldConfig : Textfield.Config
+textfieldConfig =
+    let
+        dc =
+            Textfield.defaultConfig
+    in
+        { dc
+            | defaultValue = Nothing
+            , readonly = False
+            , labelText = Just "Дата"
+        }
+
+
 type DateEvent
     = NoChange
     | Changed (Maybe Date)
 
 
-{-| The date picker update function. The third tuple member represents a user action to change the
-date.
--}
 update : Settings -> Msg -> DatePicker -> ( DatePicker, Cmd Msg, DateEvent )
-update settings msg (DatePicker ({ forceOpen, focused } as model)) =
+update settings msg (DatePicker model) =
     case msg of
+        TextfieldMsg m ->
+            let
+                ( newTextfieldModel, _ ) =
+                    Textfield.update TextfieldMsg m model.textfield textfieldConfig
+            in
+                { model | textfield = newTextfieldModel } ! []
+
         CurrentDate date ->
             { model | focused = Just date, today = date } ! []
 
@@ -381,7 +279,7 @@ update settings msg (DatePicker ({ forceOpen, focused } as model)) =
             { model | open = True, forceOpen = False } ! []
 
         Blur ->
-            { model | open = forceOpen } ! []
+            { model | open = model.forceOpen } ! []
 
         MouseDown ->
             { model | forceOpen = True } ! []
@@ -390,28 +288,11 @@ update settings msg (DatePicker ({ forceOpen, focused } as model)) =
             { model | forceOpen = False } ! []
 
 
-{-| Generate a message that will act as if the user has chosen a certain date,
-so you can call `update` on the model yourself.
-Note that this is different from just changing the "current chosen" date,
-since the picker doesn't actually have internal state for that.
-Rather, it will:
-
-  - change the calendar focus
-
-  - replace the input text with the new value
-
-  - close the picker
-
-    update datepickerSettings (pick (Just someDate)) datepicker
-
--}
 pick : Maybe Date -> Msg
 pick =
     Pick
 
 
-{-| The date picker view. The Date passed is whatever date it should treat as selected.
--}
 view : Maybe Date -> Settings -> DatePicker -> Html Msg
 view pickedDate settings (DatePicker ({ open } as model)) =
     let
@@ -454,6 +335,11 @@ view pickedDate settings (DatePicker ({ open } as model)) =
                         )
                     |> value
                 ]
+
+        -- dateInput =
+        --     Textfield.view (TextfieldMsg)
+        --         model.textfield
+        --         textfieldConfig
     in
         div [ class "container" ]
             [ dateInput
