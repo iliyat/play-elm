@@ -50,65 +50,65 @@ formatDay : Date.Day -> String
 formatDay day =
     case day of
         Mon ->
-            "Mo"
+            "Пн"
 
         Tue ->
-            "Tu"
+            "Вт"
 
         Wed ->
-            "We"
+            "Ср"
 
         Thu ->
-            "Th"
+            "Чт"
 
         Fri ->
-            "Fr"
+            "Пт"
 
         Sat ->
-            "Sa"
+            "Сб"
 
         Sun ->
-            "Su"
+            "Вск"
 
 
 formatMonth : Month -> String
 formatMonth month =
     case month of
         Jan ->
-            "January"
+            "Январь"
 
         Feb ->
-            "February"
+            "Февраль"
 
         Mar ->
-            "March"
+            "Март"
 
         Apr ->
-            "April"
+            "Апрель"
 
         May ->
-            "May"
+            "Май"
 
         Jun ->
-            "June"
+            "Июнь"
 
         Jul ->
-            "July"
+            "Июль"
 
         Aug ->
-            "August"
+            "Август"
 
         Sep ->
-            "September"
+            "Сентябрь"
 
         Oct ->
-            "October"
+            "Октябрь"
 
         Nov ->
-            "November"
+            "Ноябрь"
 
         Dec ->
-            "December"
+            "Декабрь"
 
 
 trimDates : Date.Day -> List Date -> List Date
