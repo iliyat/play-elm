@@ -4,26 +4,39 @@ import Html exposing (..)
 import Html.Attributes exposing (..)
 import Slider
 import Textfield
-import Select
 import SliderWithTextfield
 import Utils exposing (..)
+import Date exposing (Date)
+import DatePicker
+    exposing
+        ( defaultSettings
+        , DateEvent(..)
+        , moreOrLess
+        )
 
 
 type alias Model =
     { textfield : Textfield.Model
-    , select : Select.Model
     , sliderWithTextfield1 : SliderWithTextfield.Model
     , sliderWithTextfield2 : SliderWithTextfield.Model
+    , datePicker : DatePicker.DatePicker
+    , date : Maybe Date
     }
 
 
-defaultModel : Model
-defaultModel =
-    { textfield = Textfield.defaultModel
-    , select = Select.defaultModel
-    , sliderWithTextfield1 = SliderWithTextfield.defaultModel
-    , sliderWithTextfield2 = SliderWithTextfield.defaultModel
-    }
+init : ( Model, Cmd Msg )
+init =
+    let
+        ( dp, datePickerFx ) =
+            DatePicker.init
+    in
+        { textfield = Textfield.defaultModel
+        , sliderWithTextfield1 = SliderWithTextfield.defaultModel
+        , sliderWithTextfield2 = SliderWithTextfield.defaultModel
+        , datePicker = dp
+        , date = Nothing
+        }
+            ! [ Cmd.map DatePickerMsg datePickerFx ]
 
 
 type Msg
@@ -31,7 +44,7 @@ type Msg
     | SliderWithTextfieldMsg1 SliderWithTextfield.Msg
     | SliderWithTextfieldMsg2 SliderWithTextfield.Msg
     | TextfieldMsg Textfield.Msg
-    | SelectMsg Select.Msg
+    | DatePickerMsg DatePicker.Msg
     | Select Int
 
 
@@ -108,20 +121,35 @@ textfieldConfig =
         }
 
 
-
--- selectConfig : Select.Config
--- selectConfig =
---     let
---         dc =
---             Select.defaultConfig
---     in
---         dc
---
+datePickerConfig : DatePicker.Settings
+datePickerConfig =
+    DatePicker.defaultSettings
 
 
 update : Msg -> Model -> ( Model, Cmd Msg )
 update action model =
     case action of
+        DatePickerMsg msg ->
+            let
+                ( newDatePicker, datePickerFx, dateEvent ) =
+                    DatePicker.update datePickerConfig
+                        msg
+                        model.datePicker
+
+                newDate =
+                    case dateEvent of
+                        Changed newDate ->
+                            newDate
+
+                        _ ->
+                            model.date
+            in
+                { model
+                    | date = newDate
+                    , datePicker = newDatePicker
+                }
+                    ! [ Cmd.map DatePickerMsg datePickerFx ]
+
         SliderWithTextfieldMsg1 msg_ ->
             let
                 ( new, effects ) =
@@ -152,13 +180,6 @@ update action model =
             in
                 ( { model | textfield = textfield }, effects )
 
-        SelectMsg msg_ ->
-            let
-                ( select, effects ) =
-                    Select.update SelectMsg msg_ model.select
-            in
-                ( { model | select = select }, effects )
-
         Select n ->
             ( model, Cmd.none )
 
@@ -169,16 +190,25 @@ update action model =
 view : Model -> Html Msg
 view model =
     Html.div []
-        [ div [ style [ ( "margin", "54px" ) ] ]
+        [ div
+            [ style
+                [ ( "margin", "54px" )
+                , ( "display", "flex" )
+                , ( "justify-content", "space-between" )
+                ]
+            ]
             [ SliderWithTextfield.view SliderWithTextfieldMsg1
                 model.sliderWithTextfield1
                 swtConf1
             , SliderWithTextfield.view SliderWithTextfieldMsg2
                 model.sliderWithTextfield2
                 swtConf2
-            , Textfield.view TextfieldMsg model.textfield textfieldConfig
-
-            -- , Select.view SelectMsg model.select selectConfig
+            , DatePicker.view
+                model.date
+                datePickerConfig
+                model.datePicker
+                |> Html.map DatePickerMsg
+            , Textfield.view model.textfield textfieldConfig |> Html.map TextfieldMsg
             ]
         , Html.node "link" [ Html.Attributes.rel "stylesheet", Html.Attributes.href "mdc.css" ] []
         , Html.node "script" [ Html.Attributes.src "mdc.js" ] []
@@ -201,12 +231,13 @@ view model =
                 "slider.css"
             ]
             []
+        , Html.node "link"
+            [ Html.Attributes.rel "stylesheet"
+            , Html.Attributes.href
+                "datepicker.css"
+            ]
+            []
         ]
-
-
-init : ( Model, Cmd Msg )
-init =
-    ( defaultModel, Cmd.none )
 
 
 main : Program Never Model Msg
@@ -222,8 +253,7 @@ main =
 subscriptions : Model -> Sub Msg
 subscriptions model =
     Sub.batch
-        [ Sub.map SelectMsg (Select.subscriptions model.select)
-        , Sub.map SliderWithTextfieldMsg1
+        [ Sub.map SliderWithTextfieldMsg1
             (SliderWithTextfield.subscriptions
                 model.sliderWithTextfield1
             )

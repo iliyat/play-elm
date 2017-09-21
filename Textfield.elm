@@ -111,8 +111,8 @@ defaultConfig =
     }
 
 
-view : (Msg -> m) -> Model -> Config -> Html m
-view lift model config =
+view : Model -> Config -> Html Msg
+view model config =
     let
         isFocused =
             model.isFocused && not config.disabled
@@ -164,9 +164,9 @@ view lift model config =
                 , classList
                     [ ( "mdc-textfield__input", True )
                     ]
-                , Events.onFocus <| lift Focus
-                , Events.onBlur <| lift Blur
-                , Events.onInput (Input >> lift)
+                , Events.onFocus <| Focus
+                , Events.onBlur <| Blur
+                , Events.onInput (Input)
                 , Attr.value value
                 ]
                 []
@@ -197,8 +197,8 @@ view lift model config =
                 , ( "mdc-textfield--fullwidth", config.fullWidth )
                 , ( "mdc-textfield--invalid", False )
                 ]
-            , Events.onFocus <| lift Focus
-            , Events.onBlur <| lift Blur
+            , Events.onFocus <| Focus
+            , Events.onBlur <| Blur
             , style [ ( "height", height ) ]
             ]
             [ contentHtml

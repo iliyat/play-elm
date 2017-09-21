@@ -160,9 +160,10 @@ view lift model { sliderConfig, textfieldConfig, extraPlural, extraStatic } =
         Html.div []
             [ div [ style [] ]
                 [ div [ style [ ( "width", "368px" ) ] ]
-                    [ Textfield.view (lift << TextfieldMsg)
+                    [ Textfield.view
                         model.textfield
                         textfieldConfig
+                        |> Html.map (lift << TextfieldMsg)
                     , div
                         []
                         [ Slider.view (lift << SliderMsg)

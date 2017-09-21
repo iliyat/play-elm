@@ -58,6 +58,7 @@ type alias Settings =
     , cellFormatter : String -> Html Msg
     , firstDayOfWeek : Day
     , changeYear : YearRange
+    , textfieldConfig : DatePickerTextfield.Config
     }
 
 
@@ -90,6 +91,7 @@ defaultSettings =
     , cellFormatter = formatCell
     , firstDayOfWeek = Mon
     , changeYear = off
+    , textfieldConfig = DatePickerTextfield.defaultConfig
     }
 
 
@@ -133,8 +135,8 @@ formatCell day =
 
 defaultModel : Model
 defaultModel =
-    { open = True
-    , forceOpen = True
+    { open = False
+    , forceOpen = False
     , focused = Just initDate
     , inputText = Nothing
     , today = initDate
@@ -165,7 +167,7 @@ prepareDates date firstDayOfWeek =
 
 isOpen : DatePicker -> Bool
 isOpen (DatePicker model) =
-    True
+    model.open
 
 
 focusedDate : DatePicker -> Maybe Date
@@ -173,17 +175,18 @@ focusedDate (DatePicker model) =
     model.focused
 
 
-textfieldConfig : DatePickerTextfield.Config
-textfieldConfig =
-    let
-        dc =
-            DatePickerTextfield.defaultConfig
-    in
-        { dc
-            | defaultValue = Nothing
-            , readonly = False
-            , labelText = Just "Дата"
-        }
+
+-- textfieldConfig : DatePickerTextfield.Config
+-- textfieldConfig =
+--     let
+--         dc =
+--             DatePickerTextfield.defaultConfig
+--     in
+--         { dc
+--             | defaultValue = Nothing
+--             , readonly = False
+--             , labelText = Just "Дата"
+--         }
 
 
 type DateEvent
@@ -197,7 +200,10 @@ update settings msg (DatePicker model) =
         TextfieldMsg tfMsg ->
             let
                 ( newTextfieldModel, _, textfieldEvent ) =
-                    DatePickerTextfield.update TextfieldMsg tfMsg model.textfield textfieldConfig
+                    DatePickerTextfield.update TextfieldMsg
+                        tfMsg
+                        model.textfield
+                        settings.textfieldConfig
 
                 newText =
                     case textfieldEvent of
@@ -248,7 +254,11 @@ update settings msg (DatePicker model) =
                             ( model.textfield, Cmd.none, DatePickerTextfield.NoChange )
 
                         Just d ->
-                            DatePickerTextfield.update TextfieldMsg (Internal.Textfield.SetValue <| formatDate d) model.textfield textfieldConfig
+                            DatePickerTextfield.update
+                                TextfieldMsg
+                                (Internal.Textfield.SetValue <| formatDate d)
+                                model.textfield
+                                settings.textfieldConfig
             in
                 ( DatePicker <|
                     { model
@@ -364,7 +374,7 @@ view pickedDate settings (DatePicker ({ open } as model)) =
                 )
                 TextfieldMsg
                 model.textfield
-                textfieldConfig
+                settings.textfieldConfig
     in
         div [ class "container" ]
             [ dateInput
@@ -480,6 +490,7 @@ datePicker pickedDate settings ({ focused, today } as model) =
             [ classList
                 [ ( "picker", True )
                 , ( "picker-closed", not model.open )
+                , ( "picker-open", model.open )
                 ]
             , onPicker "mousedown" MouseDown
             , onPicker "mouseup" MouseUp
