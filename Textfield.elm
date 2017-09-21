@@ -70,6 +70,9 @@ update lift msg model config =
         NoOp ->
             ( model, Cmd.none )
 
+        SetValue _ ->
+            ( model, Cmd.none )
+
 
 type alias Config =
     { labelText : Maybe String
