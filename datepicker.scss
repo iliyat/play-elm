@@ -46,6 +46,8 @@ $primary-color: rgb(0, 188, 212);
 .#{$datepicker-ns}picker-closed {
   transform: scaleY(0.3);
   opacity: 0;
+  z-index: -1;
+  pointer-events: none;
 }
 
 .#{$datepicker-ns}picker-header {

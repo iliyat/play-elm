@@ -31,7 +31,9 @@
 
 .elm-datepicker--picker-closed {
   transform: scaleY(0.3);
-  opacity: 0; }
+  opacity: 0;
+  z-index: -1;
+  pointer-events: none; }
 
 .elm-datepicker--picker-header {
   width: 100%;
