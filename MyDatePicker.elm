@@ -348,7 +348,6 @@ view pickedDate settings (DatePicker ({ open } as model)) =
                  , onClick Focus
                  , onFocus Focus
                  ]
-                    ++ settings.inputAttributes
                     ++ xs
                 )
                 []
@@ -369,10 +368,7 @@ view pickedDate settings (DatePicker ({ open } as model)) =
     in
         div [ class "container" ]
             [ dateInput
-            , if open then
-                datePicker pickedDate settings model
-              else
-                text ""
+            , datePicker pickedDate settings model
             ]
 
 
@@ -424,7 +420,7 @@ datePicker pickedDate settings ({ focused, today } as model) =
                     [ ( "day", True )
                     , ( "disabled", disabled )
                     , ( "picked", picked d )
-                    , ( "today", dateTuple d == dateTuple currentDate )
+                    , ( "today", dateTuple d == dateTuple today )
                     , ( "other-month", otherMonth )
                     ]
 
@@ -481,7 +477,10 @@ datePicker pickedDate settings ({ focused, today } as model) =
                 )
     in
         div
-            [ class "picker"
+            [ classList
+                [ ( "picker", True )
+                , ( "picker-closed", not model.open )
+                ]
             , onPicker "mousedown" MouseDown
             , onPicker "mouseup" MouseUp
             ]
