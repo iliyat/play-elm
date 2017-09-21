@@ -43,7 +43,7 @@ initDate =
 
 formatDate : Date -> String
 formatDate date =
-    toString (year date) ++ "/" ++ monthToString (month date) ++ "/" ++ dayToString (day date)
+    dayToString (day date) ++ "." ++ monthToString (month date) ++ "." ++ toString (year date)
 
 
 formatDay : Date.Day -> String

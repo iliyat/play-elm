@@ -73,6 +73,11 @@ view ({ date, datePicker } as model) =
             []
         , Html.node "link"
             [ Html.Attributes.rel "stylesheet"
+            , Html.Attributes.href "https://unpkg.com/material-components-web@latest/dist/material-components-web.min.css"
+            ]
+            []
+        , Html.node "link"
+            [ Html.Attributes.rel "stylesheet"
             , Html.Attributes.href "https://fonts.googleapis.com/icon?family=Material+Icons"
             ]
             []

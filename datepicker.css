@@ -7,10 +7,8 @@
 .elm-datepicker--picker {
   position: absolute;
   border: 1px solid #CCC;
-  z-index: 10;
   color: rgba(0, 0, 0, 0.87);
   background-color: white;
-  transition: transform 450ms cubic-bezier(0.23, 1, 0.32, 1) 0ms, opacity 450ms cubic-bezier(0.23, 1, 0.32, 1) 0ms;
   box-sizing: border-box;
   font-family: Roboto, sans-serif;
   -webkit-tap-highlight-color: rgba(0, 0, 0, 0);
@@ -23,8 +21,9 @@
   transform-origin: left top 0px;
   max-height: 935px;
   padding: 0px;
-  min-height: 434px;
-  min-width: 310px; }
+  min-height: 334px;
+  min-width: 310px;
+  max-width: 310px; }
 
 .elm-datepicker--picker-header {
   width: 100%;
@@ -49,40 +48,166 @@
   font-weight: 500;
   line-height: 16px;
   opacity: 0.7;
-  transition: all 450ms cubic-bezier(0.23, 1, 0.32, 1) 0ms;
   font-weight: 500;
-  line-height: 16px; }
+  line-height: 16px;
+  flex: 1 1 auto;
+  cursor: default;
+  text-align: left;
+  font-weight: 300; }
 
 .elm-datepicker--current-date {
-  position: relative;
   overflow: hidden;
   height: 38px;
   display: block;
   font-size: 36px;
   line-height: 36px;
   opacity: 1;
-  transition: all 450ms cubic-bezier(0.23, 1, 0.32, 1) 0ms;
   width: 100%;
-  font-weight: 500; }
+  font-weight: 400; }
 
-.elm-datepicker--picker-body {
+.elm-datepicker--body {
   display: flex;
   flex-direction: column; }
 
-.elm-datepicker--prev-container,
-.elm-datepicker--next-container {
-  flex: 0 1 auto; }
+.elm-datepicker--dates-and-month-container {
+  display: flex;
+  place-content: space-between;
+  flex-direction: column;
+  font-size: 12px;
+  font-weight: 400;
+  padding: 0px 8px;
+  transition: all 450ms cubic-bezier(0.23, 1, 0.32, 1) 0ms; }
+
+.elm-datepicker--dates-and-month-container-0 {
+  display: flex;
+  place-content: space-between;
+  flex-direction: column;
+  font-size: 12px;
+  font-weight: 400;
+  padding: 0px 8px; }
 
 .elm-datepicker--month-container {
-  flex: 1 1 auto;
-  padding: 0.5em;
   display: flex;
-  flex-direction: column; }
+  justify-content: space-between;
+  background-color: inherit;
+  height: 48px;
+  align-items: center; }
 
-.elm-datepicker--month,
-.elm-datepicker--year {
-  flex: 1 1 auto;
-  cursor: default;
+.elm-datepicker--month-title-container {
+  position: relative;
+  overflow: hidden;
+  height: 100%;
+  font-size: 14px;
+  font-weight: 500;
+  text-align: center;
+  width: 100%;
+  margin: 0 auto;
+  vertical-align: middle;
+  line-height: 46px; }
+
+.elm-datepicker--weekdays {
+  display: flex;
+  flex-direction: row;
+  justify-content: space-between;
+  font-weight: 500;
+  height: 20px;
+  line-height: 15px;
+  opacity: 0.5;
   text-align: center; }
+
+.elm-datepicker--weekday {
+  width: 42px; }
+
+.elm-datepicker--dates {
+  position: relative;
+  overflow: hidden;
+  height: 220px; }
+
+.elm-datepicker--dates-0 {
+  position: absolute;
+  height: 100%;
+  width: 100%;
+  top: 0px;
+  left: 0px;
+  transition: transform 450ms cubic-bezier(0.23, 1, 0.32, 1) 0ms, opacity 450ms cubic-bezier(0.23, 1, 0.32, 1) 0ms;
+  opacity: 1;
+  transform: translate(0px, 0px); }
+
+.elm-datepicker--dates-0-0 {
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-start;
+  font-weight: 400;
+  height: 228px;
+  line-height: 2;
+  position: relative;
+  text-align: center; }
+
+.elm-datepicker--date-row {
+  display: flex;
+  flex-direction: row;
+  justify-content: space-around;
+  height: 34px;
+  margin-bottom: 2px; }
+
+.elm-datepicker--other-month {
+  box-sizing: border-box;
+  font-weight: 400;
+  padding: 4px 0px;
+  position: relative;
+  -webkit-tap-highlight-color: rgba(0, 0, 0, 0);
+  width: 42px;
+  opacity: 0;
+  cursor: default !important; }
+
+.elm-datepicker--day {
+  border: 10px;
+  box-sizing: border-box;
+  display: inline-block;
+  font-family: Roboto, sans-serif;
+  -webkit-tap-highlight-color: rgba(0, 0, 0, 0);
+  text-decoration: none;
+  margin: 0px;
+  padding: 4px 0px;
+  outline: none;
+  font-size: inherit;
+  font-weight: 400;
+  position: relative;
+  z-index: 1;
+  width: 42px;
+  background: none;
+  cursor: pointer; }
+  .elm-datepicker--day:hover .elm-datepicker--day-0 {
+    transform: scale(1);
+    opacity: 0.6; }
+  .elm-datepicker--day:hover .elm-datepicker--day-text {
+    color: white;
+    font-weight: 300; }
+
+.elm-datepicker--day-0 {
+  background-color: #0097a7;
+  border-radius: 50%;
+  height: 34px;
+  left: 4px;
+  position: absolute;
+  top: 0px;
+  transform: scale(0);
+  transition: all 450ms cubic-bezier(0.23, 1, 0.32, 1) 0ms;
+  width: 34px; }
+
+.elm-datepicker--day-text {
+  color: rgba(0, 0, 0, 0.87);
+  font-weight: 400;
+  position: relative; }
+
+.elm-datepicker--picked .elm-datepicker--day-0 {
+  transform: scale(1);
+  opacity: 1; }
+.elm-datepicker--picked .elm-datepicker--day-text {
+  color: white !important;
+  font-weight: 300; }
+
+.elm-datepicker--today .elm-datepicker--day-text {
+  color: #00bcd4; }
 
 /*# sourceMappingURL=datepicker.css.map */

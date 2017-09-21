@@ -491,11 +491,8 @@ datePicker pickedDate settings ({ focused, today } as model) =
                 ]
                 []
 
-        dow d =
-            td [ class "dow" ] [ text <| settings.dayFormatter d ]
-
-        dow_span d =
-            span [ class "dow_span" ] [ text <| settings.dayFormatter d ]
+        weekDay d =
+            span [ class "weekday" ] [ text <| settings.dayFormatter d ]
 
         picked d =
             pickedDate
@@ -508,27 +505,39 @@ datePicker pickedDate settings ({ focused, today } as model) =
                 disabled =
                     settings.isDisabled d
 
+                otherMonth =
+                    month currentMonth /= month d
+
+                classList_ =
+                    [ ( "day", True )
+                    , ( "disabled", disabled )
+                    , ( "picked", picked d )
+                    , ( "today", dateTuple d == dateTuple currentDate )
+                    , ( "other-month", otherMonth )
+                    ]
+
+                text =
+                    settings.cellFormatter <| toString <| Date.day d
+
+                element =
+                    if otherMonth then
+                        span ([ classList classList_ ]) [ text ]
+                    else
+                        button ([ classList classList_ ] ++ props)
+                            [ div [ class "day-0" ] []
+                            , span [ class "day-text" ] [ text ]
+                            ]
+
                 props =
                     if not disabled then
                         [ onClick (Pick (Just d)) ]
                     else
                         []
             in
-                td
-                    ([ classList
-                        [ ( "day", True )
-                        , ( "disabled", disabled )
-                        , ( "picked", picked d )
-                        , ( "today", dateTuple d == dateTuple currentDate )
-                        , ( "other-month", month currentMonth /= month d )
-                        ]
-                     ]
-                        ++ props
-                    )
-                    [ settings.cellFormatter <| toString <| Date.day d ]
+                element
 
         row days =
-            tr [ class "row" ] (List.map day days)
+            div [ class "date-row" ] (List.map day days)
 
         days =
             List.map row (groupDates currentDates)
@@ -568,72 +577,39 @@ datePicker pickedDate settings ({ focused, today } as model) =
                 [ div [ class "year" ]
                     [ text <| settings.yearFormatter <| year currentMonth ]
                 , div [ class "current-date" ]
-                    [ text "Wed, Sep 20" ]
-
-                -- div []
-                --   [ span [ class "month" ]
-                --       [ text <| settings.monthFormatter <| month currentMonth ]
-                --   , span [ class "year" ]
-                --       [ if not (yearRangeActive settings.changeYear) then
-                --           text <| settings.yearFormatter <| year currentMonth
-                --         else
-                --           Html.Keyed.node "span" [] [ ( toString (year currentMonth), dropdownYear ) ]
-                --       ]
-                --   ]
+                    [ text <| settings.dateFormatter <| today ]
                 ]
             , div [ class "body" ]
-                [ div [ class "body-prev-next-container" ]
-                    [ div [ class "body-prev-next-container-0" ]
-                        [ Icon.asButton "keyboard_arrow_left"
-                            [ onClick <| ChangeFocus (prevMonth currentDate)
-                            ]
-
-                        -- arrow "prev" (ChangeFocus (prevMonth currentDate))
-                        , div [ class "body-prev-next-container-0-month" ]
-                            [ div [ class "body-prev-next-container-0-month-0" ]
-                                [ div
-                                    [ class
-                                        "body-prev-next-container-0-month-0-text"
-                                    ]
-                                    [ text "September 2017"
-                                    ]
+                [ div [ class "dates-and-month-container" ]
+                    [ div [ class "dates-and-month-container-0" ]
+                        [ div [ class "month-container" ]
+                            [ Icon.asButton "keyboard_arrow_left"
+                                [ onClick <| ChangeFocus (prevMonth currentDate)
+                                ]
+                            , div [ class "month-title-container" ]
+                                [ div [] [ text <| settings.monthFormatter <| month currentMonth ]
+                                ]
+                            , Icon.asButton "keyboard_arrow_right"
+                                [ onClick <| ChangeFocus (nextMonth currentDate)
                                 ]
                             ]
-                        , Icon.asButton "keyboard_arrow_right"
-                            [ onClick <| ChangeFocus (nextMonth currentDate)
+                        , div [ class "weekdays" ]
+                            [ weekDay <| firstDay
+                            , weekDay <| addDows 1 firstDay
+                            , weekDay <| addDows 2 firstDay
+                            , weekDay <| addDows 3 firstDay
+                            , weekDay <| addDows 4 firstDay
+                            , weekDay <| addDows 5 firstDay
+                            , weekDay <| addDows 6 firstDay
                             ]
-
-                        -- , arrow "next" (ChangeFocus (nextMonth currentDate))
+                        , div [ class "dates" ]
+                            [ div [ class "dates-0" ]
+                                [ div [ class "dates-0-0" ] days
+                                ]
+                            ]
                         ]
-                    ]
-                , div [ class "body-dates-container" ]
-                    [ div [ class "weekdays" ]
-                        [ dow_span <| firstDay
-                        , dow_span <| addDows 1 firstDay
-                        , dow_span <| addDows 2 firstDay
-                        , dow_span <| addDows 3 firstDay
-                        , dow_span <| addDows 4 firstDay
-                        , dow_span <| addDows 5 firstDay
-                        , dow_span <| addDows 6 firstDay
-                        ]
-                    , div [ class "days" ] []
                     ]
                 ]
-
-            -- , table [ class "table" ]
-            --     [ thead [ class "weekdays" ]
-            --         [ tr []
-            --             [ dow <| firstDay
-            --             , dow <| addDows 1 firstDay
-            --             , dow <| addDows 2 firstDay
-            --             , dow <| addDows 3 firstDay
-            --             , dow <| addDows 4 firstDay
-            --             , dow <| addDows 5 firstDay
-            --             , dow <| addDows 6 firstDay
-            --             ]
-            --         ]
-            --     , tbody [ class "days" ] days
-            --     ]
             ]
 
 

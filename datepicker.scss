@@ -19,10 +19,8 @@ $primary-color: rgb(0, 188, 212);
 .#{$datepicker-ns}picker {
   position: absolute;
   border: 1px solid #CCC;
-  z-index: 10; 
   color: rgba(0, 0, 0, 0.87);
   background-color: rgb(255, 255, 255);
-  transition: transform 450ms cubic-bezier(0.23, 1, 0.32, 1) 0ms, opacity 450ms cubic-bezier(0.23, 1, 0.32, 1) 0ms;
   box-sizing: border-box;
   font-family: Roboto, sans-serif;
   -webkit-tap-highlight-color: rgba(0, 0, 0, 0);
@@ -35,8 +33,9 @@ $primary-color: rgb(0, 188, 212);
   transform-origin: left top 0px;
   max-height: 935px;
   padding: 0px;
-  min-height: 434px;
+  min-height: 334px;
   min-width: 310px;
+  max-width: 310px;
 }
 
 .#{$datepicker-ns}picker-header {
@@ -55,56 +54,209 @@ $primary-color: rgb(0, 188, 212);
 }
 
 .#{$datepicker-ns}year {
-    position: relative;
-    overflow: hidden;
-    height: 16px;
-    margin: 0px 0px 10px;
-    font-size: 16px;
-    font-weight: 500;
-    line-height: 16px;
-    opacity: 0.7;
-    transition: all 450ms cubic-bezier(0.23, 1, 0.32, 1) 0ms;
-    font-weight: 500;
-    line-height: 16px;
+  position: relative;
+  overflow: hidden;
+  height: 16px;
+  margin: 0px 0px 10px;
+  font-size: 16px;
+  font-weight: 500;
+  line-height: 16px;
+  opacity: 0.7;
+  font-weight: 500;
+  line-height: 16px;
+  flex: 1 1 auto;
+  cursor: default;
+  text-align: left;
+  font-weight: 300;
 }
 
 .#{$datepicker-ns}current-date {
-position: relative;
-    overflow: hidden;
-    height: 38px;
-    display: block;
-    font-size: 36px;
-    line-height: 36px;
-    opacity: 1;
-    transition: all 450ms cubic-bezier(0.23, 1, 0.32, 1) 0ms;
-    width: 100%;
-    font-weight: 500;
+  overflow: hidden;
+  height: 38px;
+  display: block;
+  font-size: 36px;
+  line-height: 36px;
+  opacity: 1;
+  width: 100%;
+  font-weight: 400;
 }
 
-.#{$datepicker-ns}picker-body {
+.#{$datepicker-ns}body {
   display: flex;
   flex-direction: column;
 }
 
-.#{$datepicker-ns}prev-container,
-.#{$datepicker-ns}next-container {
-  flex: 0 1 auto;
+.#{$datepicker-ns}dates-and-month-container {
+  display: flex;
+  place-content: space-between;
+  flex-direction: column;
+  font-size: 12px;
+  font-weight: 400;
+  padding: 0px 8px;
+  transition: all 450ms cubic-bezier(0.23, 1, 0.32, 1) 0ms;
+}
+
+.#{$datepicker-ns}dates-and-month-container-0 {
+  display: flex;
+  place-content: space-between;
+  flex-direction: column;
+  font-size: 12px;
+  font-weight: 400;
+  padding: 0px 8px;
 }
 
 .#{$datepicker-ns}month-container {
-  flex: 1 1 auto;
-
-  padding: 0.5em;
-
   display: flex;
-  flex-direction: column;
+  justify-content: space-between;
+  background-color: inherit;
+  height: 48px;
+  align-items: center;
 }
 
-.#{$datepicker-ns}month,
-.#{$datepicker-ns}year {
-  flex: 1 1 auto;
+.#{$datepicker-ns}month-title-container {
+  position: relative;
+  overflow: hidden;
+  height: 100%;
+  font-size: 14px;
+  font-weight: 500;
+  text-align: center;
+  width: 100%;
+  margin: 0 auto;
+  vertical-align: middle;
+  line-height: 46px;
+}
 
-  cursor: default;
+.#{$datepicker-ns}weekdays {
+  display: flex;
+  flex-direction: row;
+  justify-content: space-between;
+  font-weight: 500;
+  height: 20px;
+  line-height: 15px;
+  opacity: 0.5;
   text-align: center;
 }
 
+.#{$datepicker-ns}weekday {
+  width: 42px;
+}
+
+.#{$datepicker-ns}dates {
+  position: relative;
+  overflow: hidden;
+  height: 220px;
+}
+
+.#{$datepicker-ns}dates-0 {
+  position: absolute;
+  height: 100%;
+  width: 100%;
+  top: 0px;
+  left: 0px;
+  transition: transform 450ms cubic-bezier(0.23, 1, 0.32, 1) 0ms, opacity 450ms cubic-bezier(0.23, 1, 0.32, 1) 0ms;
+  opacity: 1;
+  transform: translate(0px, 0px);
+}
+
+.#{$datepicker-ns}dates-0-0 {
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-start;
+  font-weight: 400;
+  height: 228px;
+  line-height: 2;
+  position: relative;
+  text-align: center;
+}
+
+.#{$datepicker-ns}date-row {
+  display: flex;
+  flex-direction: row;
+  justify-content: space-around;
+  height: 34px;
+  margin-bottom: 2px;
+}
+
+.#{$datepicker-ns}other-month {
+  box-sizing: border-box;
+  font-weight: 400;
+  padding: 4px 0px;
+  position: relative;
+  -webkit-tap-highlight-color: rgba(0, 0, 0, 0);
+  width: 42px;
+  opacity: 0;
+  cursor: default !important;
+}
+
+.#{$datepicker-ns}day {
+  border: 10px;
+  box-sizing: border-box;
+  display: inline-block;
+  font-family: Roboto, sans-serif;
+  -webkit-tap-highlight-color: rgba(0, 0, 0, 0);
+  text-decoration: none;
+  margin: 0px;
+  padding: 4px 0px;
+  outline: none;
+  font-size: inherit;
+  font-weight: 400;
+  position: relative;
+  z-index: 1;
+  width: 42px;
+  background: none;
+  cursor: pointer;
+
+  &:hover {
+    & .#{$datepicker-ns}day-0 {
+      transform: scale(1);
+      opacity: 0.6;
+    }
+
+    & .#{$datepicker-ns}day-text {
+      color: rgb(255, 255, 255);
+      font-weight: 300;
+    }
+  }
+}
+
+.#{$datepicker-ns}day-0 {
+  background-color: rgb(0, 151, 167);
+  border-radius: 50%;
+  height: 34px;
+  left: 4px;
+  position: absolute;
+  top: 0px;
+  transform: scale(0);
+  transition: all 450ms cubic-bezier(0.23, 1, 0.32, 1) 0ms;
+  width: 34px;
+}
+
+.#{$datepicker-ns}day-text {
+  color: rgba(0, 0, 0, 0.87);
+  font-weight: 400;
+  position: relative;
+}
+
+.#{$datepicker-ns}picked {
+  & .#{$datepicker-ns}day-0 {
+    transform: scale(1);
+    opacity: 1;
+  }
+
+  & .#{$datepicker-ns}day-text {
+    color: rgb(255, 255, 255) !important;
+    font-weight: 300;
+  }
+}
+
+.#{$datepicker-ns}today {
+  & .#{$datepicker-ns}day-text {
+    color: $primary-color;
+  }
+}
+
+.#{$datepicker-ns} {}
+
+.#{$datepicker-ns} {}
+
+.#{$datepicker-ns} {}
