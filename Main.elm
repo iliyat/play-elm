@@ -152,39 +152,39 @@ update action model =
 
         SliderWithTextfieldMsg1 msg_ ->
             let
-                ( new, effects ) =
-                    SliderWithTextfield.update SliderWithTextfieldMsg1
+                ( new, _ ) =
+                    SliderWithTextfield.update
                         msg_
                         model.sliderWithTextfield1
                         swtConf1
             in
-                ( { model | sliderWithTextfield1 = new }, effects )
+                { model | sliderWithTextfield1 = new } ! []
 
         SliderWithTextfieldMsg2 msg_ ->
             let
-                ( new, effects ) =
-                    SliderWithTextfield.update SliderWithTextfieldMsg2
+                ( new, _ ) =
+                    SliderWithTextfield.update
                         msg_
                         model.sliderWithTextfield2
                         swtConf2
             in
-                ( { model | sliderWithTextfield2 = new }, effects )
+                { model | sliderWithTextfield2 = new } ! []
 
         TextfieldMsg msg_ ->
             let
                 ( textfield, effects ) =
-                    Textfield.update TextfieldMsg
+                    Textfield.update
                         msg_
                         model.textfield
                         textfieldConfig
             in
-                ( { model | textfield = textfield }, effects )
+                { model | textfield = textfield } ! []
 
         Select n ->
-            ( model, Cmd.none )
+            model ! []
 
         Open ->
-            ( model, Cmd.none )
+            model ! []
 
 
 view : Model -> Html Msg
@@ -197,12 +197,14 @@ view model =
                 , ( "justify-content", "space-between" )
                 ]
             ]
-            [ SliderWithTextfield.view SliderWithTextfieldMsg1
+            [ SliderWithTextfield.view
                 model.sliderWithTextfield1
                 swtConf1
-            , SliderWithTextfield.view SliderWithTextfieldMsg2
+                |> Html.map SliderWithTextfieldMsg1
+            , SliderWithTextfield.view
                 model.sliderWithTextfield2
                 swtConf2
+                |> Html.map SliderWithTextfieldMsg2
             , DatePicker.view
                 model.date
                 datePickerConfig

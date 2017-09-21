@@ -65,7 +65,7 @@ onSliderMsg : Slider.Msg -> Model -> Config -> Model
 onSliderMsg msg model { sliderConfig, textfieldConfig } =
     let
         ( newSliderModel, _ ) =
-            Slider.update SliderMsg msg model.slider
+            Slider.update msg model.slider
     in
         case msg of
             Internal.Slider.MouseDrag pos ->
@@ -75,7 +75,6 @@ onSliderMsg msg model { sliderConfig, textfieldConfig } =
 
                     ( newTextfieldModel, _ ) =
                         Textfield.update
-                            TextfieldMsg
                             (Internal.Textfield.Input (toString discretizedValue))
                             model.textfield
                             textfieldConfig
@@ -90,7 +89,7 @@ onTextfieldMsg : Textfield.Msg -> Model -> Config -> Model
 onTextfieldMsg msg model { sliderConfig, textfieldConfig } =
     let
         ( newTextfieldModel, _ ) =
-            Textfield.update TextfieldMsg msg model.textfield textfieldConfig
+            Textfield.update msg model.textfield textfieldConfig
 
         discretizedTextfieldValue =
             discretize
@@ -107,7 +106,7 @@ onTextfieldMsg msg model { sliderConfig, textfieldConfig } =
             Internal.Textfield.Blur ->
                 let
                     ( newTextfieldModel1, _ ) =
-                        Textfield.update TextfieldMsg
+                        Textfield.update
                             (Internal.Textfield.Input <| toString discretizedTextfieldValue)
                             newTextfieldModel
                             textfieldConfig
@@ -117,7 +116,7 @@ onTextfieldMsg msg model { sliderConfig, textfieldConfig } =
             Internal.Textfield.Input str ->
                 let
                     ( newSliderModel, _ ) =
-                        Slider.update SliderMsg
+                        Slider.update
                             (Internal.Slider.SetValue
                                 discretizedTextfieldValue
                             )
@@ -134,8 +133,8 @@ onTextfieldMsg msg model { sliderConfig, textfieldConfig } =
                 ({ model | textfield = newTextfieldModel })
 
 
-update : (Msg -> m) -> Msg -> Model -> Config -> ( Model, Cmd m )
-update lift msg model config =
+update : Msg -> Model -> Config -> ( Model, Cmd Msg )
+update msg model config =
     case msg of
         SliderMsg msg_ ->
             ( onSliderMsg msg_ model config, Cmd.none )
@@ -144,8 +143,8 @@ update lift msg model config =
             ( onTextfieldMsg msg_ model config, Cmd.none )
 
 
-view : (Msg -> m) -> Model -> Config -> Html m
-view lift model { sliderConfig, textfieldConfig, extraPlural, extraStatic } =
+view : Model -> Config -> Html Msg
+view model { sliderConfig, textfieldConfig, extraPlural, extraStatic } =
     let
         extra =
             (++) (extraStatic |> Maybe.withDefault "" |> (++) " ")
@@ -163,12 +162,13 @@ view lift model { sliderConfig, textfieldConfig, extraPlural, extraStatic } =
                     [ Textfield.view
                         model.textfield
                         textfieldConfig
-                        |> Html.map (lift << TextfieldMsg)
+                        |> Html.map TextfieldMsg
                     , div
                         []
-                        [ Slider.view (lift << SliderMsg)
+                        [ Slider.view
                             model.slider
                             sliderConfig
+                            |> Html.map SliderMsg
                         , div [ class [ LabelsContainer ] ]
                             [ div [ class [ Label ] ] [ text labelMin ]
                             , div [ class [ Label ] ] [ text labelMax ]

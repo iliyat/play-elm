@@ -36,8 +36,8 @@ type alias Msg =
     Internal.Textfield.Msg
 
 
-update : (Msg -> m) -> Msg -> Model -> Config -> ( Model, Cmd m )
-update lift msg model config =
+update : Msg -> Model -> Config -> ( Model, Cmd Msg )
+update msg model config =
     case msg of
         Input str ->
             let

@@ -83,8 +83,8 @@ type alias Msg =
     Internal.Slider.Msg
 
 
-update : (Msg -> m) -> Msg -> Model -> ( Model, Cmd m )
-update fwd msg model =
+update : Msg -> Model -> ( Model, Cmd Msg )
+update msg model =
     case msg of
         NoOp ->
             ( model, Cmd.none )
@@ -284,8 +284,8 @@ targetValue =
         decodeGeometry
 
 
-view : (Msg -> m) -> Model -> Config -> Html m
-view lift model config =
+view : Model -> Config -> Html Msg
+view model config =
     let
         continuousValue =
             model.value
@@ -314,10 +314,10 @@ view lift model config =
                     |> Maybe.withDefault 0
 
         activateOn event =
-            Events.on event (Json.map (Activate True >> lift) decodeGeometry)
+            Events.on event (Json.map (Activate True) decodeGeometry)
 
         initOn event =
-            Events.on event (Json.map (Init >> lift) decodeGeometry)
+            Events.on event (Json.map (Init) decodeGeometry)
 
         ups =
             [ "mouseup"
@@ -349,7 +349,7 @@ view lift model config =
                 { stopPropagation = True
                 , preventDefault = False
                 }
-                (Json.map (Activate False >> lift) decodeGeometry)
+                (Json.map (Activate False) decodeGeometry)
 
         trackScale =
             if config.max - config.min == 0 then
@@ -366,8 +366,8 @@ view lift model config =
                 , ( "mdc-slider--off", value <= config.min )
                 ]
              , tabindex 0
-             , Events.on "focus" (Json.succeed (lift Focus))
-             , Events.on "blur" (Json.succeed (lift Blur))
+             , Events.on "focus" (Json.succeed Focus)
+             , Events.on "blur" (Json.succeed Blur)
              , dataAttr "min" (toString config.min)
              , dataAttr "max" (toString config.max)
              , dataAttr "steps" (toString config.steps)
@@ -389,7 +389,7 @@ view lift model config =
                 ]
             , div
                 [ class "mdc-slider__thumb-container"
-                , onMouseDown (Activate False >> lift)
+                , onMouseDown (Activate False)
                 , style
                     [ ( "transform", "translateX(" ++ toString translateX ++ "px) translateX(-50%)" )
                     ]
