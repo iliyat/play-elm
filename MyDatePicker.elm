@@ -24,7 +24,7 @@ import Date exposing (Date, Day(..), Month, day, month, year)
 import MyDatePickerDate exposing (..)
 import Icons.Icon as Icon
 import Html exposing (..)
-import Html.Attributes as Attrs exposing (href, placeholder, tabindex, type_, value, selected)
+import Html.Attributes as Attrs exposing (href, tabindex, type_, value, selected)
 import Html.Events exposing (on, onBlur, onClick, onInput, onFocus, onWithOptions, targetValue)
 import Html.Keyed
 import Json.Decode as Json
@@ -47,11 +47,7 @@ type Msg
 
 
 type alias Settings =
-    { placeholder : String
-    , classNamespace : String
-    , inputClassList : List ( String, Bool )
-    , inputName : Maybe String
-    , inputId : Maybe String
+    { classNamespace : String
     , inputAttributes : List (Html.Attribute Msg)
     , isDisabled : Date -> Bool
     , parser : String -> Result String Date
@@ -81,11 +77,7 @@ type DatePicker
 
 defaultSettings : Settings
 defaultSettings =
-    { placeholder = "Please pick a date..."
-    , classNamespace = "elm-datepicker--"
-    , inputClassList = []
-    , inputName = Nothing
-    , inputId = Nothing
+    { classNamespace = "elm-datepicker--"
     , inputAttributes =
         [ Attrs.required False
         ]
@@ -96,7 +88,7 @@ defaultSettings =
     , monthFormatter = formatMonth
     , yearFormatter = toString
     , cellFormatter = formatCell
-    , firstDayOfWeek = Sun
+    , firstDayOfWeek = Mon
     , changeYear = off
     }
 
@@ -343,19 +335,12 @@ view pickedDate settings (DatePicker ({ open } as model)) =
         class =
             mkClass settings
 
-        potentialInputId =
-            settings.inputId
-                |> Maybe.map Attrs.id
-                |> (List.singleton >> List.filterMap identity)
-
         inputClasses =
             [ ( settings.classNamespace ++ "input", True ) ]
-                ++ settings.inputClassList
 
         inputCommon xs =
             input
                 ([ Attrs.classList inputClasses
-                 , Attrs.name (settings.inputName ?> "")
                  , type_ "text"
                  , on "change" (Json.succeed SubmitText)
                  , onInput Text
@@ -364,21 +349,10 @@ view pickedDate settings (DatePicker ({ open } as model)) =
                  , onFocus Focus
                  ]
                     ++ settings.inputAttributes
-                    ++ potentialInputId
                     ++ xs
                 )
                 []
 
-        -- dateInput =
-        --     inputCommon
-        --         [ placeholder settings.placeholder
-        --         , model.inputText
-        --             |> Maybe.withDefault
-        --                 (Maybe.map settings.dateFormatter pickedDate
-        --                     |> Maybe.withDefault ""
-        --                 )
-        --             |> value
-        --         ]
         dateInput =
             DatePickerTextfield.view
                 (Just <|
