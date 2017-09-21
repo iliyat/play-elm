@@ -29,7 +29,8 @@ import Html.Events exposing (on, onBlur, onClick, onInput, onFocus, onWithOption
 import Html.Keyed
 import Json.Decode as Json
 import Task
-import Textfield
+import DatePickerTextfield
+import Internal.Textfield
 
 
 type Msg
@@ -42,7 +43,7 @@ type Msg
     | Blur
     | MouseDown
     | MouseUp
-    | TextfieldMsg Textfield.Msg
+    | TextfieldMsg DatePickerTextfield.Msg
 
 
 type alias Settings =
@@ -70,7 +71,7 @@ type alias Model =
     , focused : Maybe Date
     , inputText : Maybe String
     , today : Date
-    , textfield : Textfield.Model
+    , textfield : DatePickerTextfield.Model
     }
 
 
@@ -145,7 +146,7 @@ defaultModel =
     , focused = Just initDate
     , inputText = Nothing
     , today = initDate
-    , textfield = Textfield.defaultModel
+    , textfield = DatePickerTextfield.defaultModel
     }
 
 
@@ -180,11 +181,11 @@ focusedDate (DatePicker model) =
     model.focused
 
 
-textfieldConfig : Textfield.Config
+textfieldConfig : DatePickerTextfield.Config
 textfieldConfig =
     let
         dc =
-            Textfield.defaultConfig
+            DatePickerTextfield.defaultConfig
     in
         { dc
             | defaultValue = Nothing
@@ -201,12 +202,45 @@ type DateEvent
 update : Settings -> Msg -> DatePicker -> ( DatePicker, Cmd Msg, DateEvent )
 update settings msg (DatePicker model) =
     case msg of
-        TextfieldMsg m ->
+        TextfieldMsg tfMsg ->
             let
-                ( newTextfieldModel, _ ) =
-                    Textfield.update TextfieldMsg m model.textfield textfieldConfig
+                ( newTextfieldModel, _, textfieldEvent ) =
+                    DatePickerTextfield.update TextfieldMsg tfMsg model.textfield textfieldConfig
+
+                newText =
+                    case textfieldEvent of
+                        DatePickerTextfield.Changed newString ->
+                            newString
+
+                        _ ->
+                            model.inputText
+
+                open =
+                    case tfMsg of
+                        Internal.Textfield.Focus ->
+                            True
+
+                        Internal.Textfield.Blur ->
+                            model.forceOpen
+
+                        _ ->
+                            model.open
+
+                forceOpen =
+                    case tfMsg of
+                        Internal.Textfield.Focus ->
+                            False
+
+                        _ ->
+                            model.forceOpen
             in
-                { model | textfield = newTextfieldModel } ! []
+                { model
+                    | textfield = newTextfieldModel
+                    , inputText = newText
+                    , open = open
+                    , forceOpen = forceOpen
+                }
+                    ! []
 
         CurrentDate date ->
             { model | focused = Just date, today = date } ! []
@@ -215,15 +249,25 @@ update settings msg (DatePicker model) =
             { model | focused = Just date } ! []
 
         Pick date ->
-            ( DatePicker <|
-                { model
-                    | open = False
-                    , inputText = Nothing
-                    , focused = Nothing
-                }
-            , Cmd.none
-            , Changed date
-            )
+            let
+                ( newTextfieldModel, _, textfieldEvent ) =
+                    case date of
+                        Nothing ->
+                            ( model.textfield, Cmd.none, DatePickerTextfield.NoChange )
+
+                        Just d ->
+                            DatePickerTextfield.update TextfieldMsg (Internal.Textfield.SetValue <| formatDate d) model.textfield textfieldConfig
+            in
+                ( DatePicker <|
+                    { model
+                        | textfield = newTextfieldModel
+                        , open = False
+                        , inputText = Nothing
+                        , focused = Nothing
+                    }
+                , Cmd.none
+                , Changed date
+                )
 
         Text text ->
             { model | inputText = Just text } ! []
@@ -325,21 +369,29 @@ view pickedDate settings (DatePicker ({ open } as model)) =
                 )
                 []
 
-        dateInput =
-            inputCommon
-                [ placeholder settings.placeholder
-                , model.inputText
-                    |> Maybe.withDefault
-                        (Maybe.map settings.dateFormatter pickedDate
-                            |> Maybe.withDefault ""
-                        )
-                    |> value
-                ]
-
         -- dateInput =
-        --     Textfield.view (TextfieldMsg)
-        --         model.textfield
-        --         textfieldConfig
+        --     inputCommon
+        --         [ placeholder settings.placeholder
+        --         , model.inputText
+        --             |> Maybe.withDefault
+        --                 (Maybe.map settings.dateFormatter pickedDate
+        --                     |> Maybe.withDefault ""
+        --                 )
+        --             |> value
+        --         ]
+        dateInput =
+            DatePickerTextfield.view
+                (Just <|
+                    (model.inputText
+                        |> Maybe.withDefault
+                            (Maybe.map settings.dateFormatter pickedDate
+                                |> Maybe.withDefault ""
+                            )
+                    )
+                )
+                TextfieldMsg
+                model.textfield
+                textfieldConfig
     in
         div [ class "container" ]
             [ dateInput

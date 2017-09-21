@@ -1,7 +1,12 @@
 module DatepickerDemo exposing (main)
 
 import Date exposing (Date, Day(..), day, dayOfWeek, month, year)
-import MyDatePicker exposing (defaultSettings, DateEvent(..), moreOrLess)
+import MyDatePicker
+    exposing
+        ( defaultSettings
+        , DateEvent(..)
+        , moreOrLess
+        )
 import Html exposing (Html, div, h1, text)
 import Html.Attributes
 
@@ -89,15 +94,10 @@ view ({ date, datePicker } as model) =
                 h1 [] [ text "Pick a date" ]
 
             Just date ->
-                h1 [] [ text <| formatDate date ]
+                h1 [] [ text "Selected" ]
         , MyDatePicker.view date settings datePicker
             |> Html.map ToDatePicker
         ]
-
-
-formatDate : Date -> String
-formatDate d =
-    toString (month d) ++ " " ++ toString (day d) ++ ", " ++ toString (year d)
 
 
 main : Program Never Model Msg
