@@ -1,4 +1,4 @@
-module MyDatePicker
+module DatePicker
     exposing
         ( Msg
         , Settings
@@ -21,7 +21,7 @@ module MyDatePicker
         )
 
 import Date exposing (Date, Day(..), Month, day, month, year)
-import MyDatePickerDate exposing (..)
+import DatePickerDate exposing (..)
 import Icons.Icon as Icon
 import Html exposing (..)
 import Html.Attributes as Attrs exposing (href, tabindex, type_, value, selected)

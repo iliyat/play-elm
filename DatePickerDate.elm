@@ -1,4 +1,4 @@
-module MyDatePickerDate
+module DatePickerDate
     exposing
         ( YearRange(..)
         , initDate
