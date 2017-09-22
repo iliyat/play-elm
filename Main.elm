@@ -5,8 +5,12 @@ import Html.Attributes exposing (..)
 import Slider
 import Textfield
 import SliderWithTextfield
+import RadioButton
+import Ripple
+import Dict exposing (Dict)
 import Utils exposing (..)
 import Date exposing (Date)
+import Options exposing (styled, cs, css, when)
 import DatePicker
     exposing
         ( defaultSettings
@@ -21,6 +25,9 @@ type alias Model =
     , sliderWithTextfield2 : SliderWithTextfield.Model
     , datePicker : DatePicker.DatePicker
     , date : Maybe Date
+    , radios : Dict String String
+    , radioModel : RadioButton.Model
+    , ripple : Ripple.Model
     }
 
 
@@ -35,6 +42,9 @@ init =
         , sliderWithTextfield2 = SliderWithTextfield.defaultModel
         , datePicker = dp
         , date = Nothing
+        , radios = Dict.fromList []
+        , radioModel = RadioButton.defaultModel
+        , ripple = Ripple.defaultModel
         }
             ! [ Cmd.map DatePickerMsg datePickerFx ]
 
@@ -46,6 +56,9 @@ type Msg
     | TextfieldMsg Textfield.Msg
     | DatePickerMsg DatePicker.Msg
     | Select Int
+    | OnRadioClick String String
+    | RadioButtonMsg RadioButton.Msg
+    | RippleMsg Ripple.Msg
 
 
 swtConf1 : SliderWithTextfield.Config
@@ -129,6 +142,39 @@ datePickerConfig =
 update : Msg -> Model -> ( Model, Cmd Msg )
 update action model =
     case action of
+        RippleMsg msg_ ->
+            let
+                ( new, effects ) =
+                    Ripple.update msg_ model.ripple
+            in
+                ( { model | ripple = new }, effects |> Cmd.map RippleMsg )
+
+        RadioButtonMsg msg_ ->
+            let
+                ( new, radioEffects ) =
+                    RadioButton.update RadioButtonMsg msg_ model.radioModel
+
+                r =
+                    case new of
+                        Nothing ->
+                            model.radioModel
+
+                        Just a ->
+                            a
+            in
+                ( { model | radioModel = r }, radioEffects )
+
+        OnRadioClick group value ->
+            let
+                radio =
+                    Dict.get group model.radios
+                        |> Maybe.withDefault ""
+            in
+                { model
+                    | radios = Dict.insert group value model.radios
+                }
+                    ! []
+
         DatePickerMsg msg ->
             let
                 ( newDatePicker, datePickerFx, dateEvent ) =
@@ -189,57 +235,105 @@ update action model =
 
 view : Model -> Html Msg
 view model =
-    Html.div []
-        [ div
-            [ style
-                [ ( "margin", "54px" )
-                , ( "display", "flex" )
-                , ( "justify-content", "space-between" )
+    let
+        ( rippleOptions, rippleStyles ) =
+            Ripple.view False (RippleMsg) model.ripple () ()
+
+        isSelected isDef group name =
+            Dict.get group model.radios
+                |> Maybe.map ((==) name)
+                |> Maybe.withDefault isDef
+
+        demoSurface =
+            Options.many
+                [ cs "demo-surface"
+                , css "display" "flex"
+                , css "align-items" "center"
+                , css "justify-content" "center"
+                , css "width" "200px"
+                , css "height" "50px"
+                , css "padding" "1rem"
+                , css "cursor" "pointer"
+                , css "user-select" "none"
+                , css "-webkit-user-select" "none"
                 ]
+    in
+        Html.div []
+            [ div
+                [ style
+                    [ ( "margin", "54px" )
+                    ]
+                ]
+                [ -- [ styled Html.div
+                  --     [ demoSurface
+                  --     , rippleOptions
+                  --     , cs "mdc-ripple-surface"
+                  --     , cs "mdc-elevation--z2"
+                  --     ]
+                  --     [ rippleStyles
+                  --     , text "Test"
+                  --     ]
+                  RadioButton.view (RadioButtonMsg)
+                    model.radioModel
+                    [ Options.onClick ((OnRadioClick "group-1" "name-1"))
+                    , RadioButton.selected |> when (isSelected True "group-1" "name-1")
+                    , RadioButton.name "name-1"
+                    ]
+                    []
+                , RadioButton.view (RadioButtonMsg)
+                    model.radioModel
+                    [ Options.onClick ((OnRadioClick "group-1" "name-2"))
+                    , RadioButton.selected |> when (isSelected True "group-1" "name-2")
+                    , RadioButton.name "name-1"
+                    ]
+                    []
+
+                --   SliderWithTextfield.view
+                --     model.sliderWithTextfield1
+                --     swtConf1
+                --     |> Html.map SliderWithTextfieldMsg1
+                -- , SliderWithTextfield.view
+                --     model.sliderWithTextfield2
+                --     swtConf2
+                --     |> Html.map SliderWithTextfieldMsg2
+                -- , DatePicker.view
+                --     model.date
+                --     datePickerConfig
+                --     model.datePicker
+                --     |> Html.map DatePickerMsg
+                -- Textfield.view
+                -- model.textfield
+                -- textfieldConfig
+                -- |> Html.map TextfieldMsg
+                ]
+            , Html.node "link" [ Html.Attributes.rel "stylesheet", Html.Attributes.href "mdc.css" ] []
+            , Html.node "script" [ Html.Attributes.src "mdc.js" ] []
+            , Html.node "link"
+                [ Html.Attributes.rel "stylesheet"
+                , Html.Attributes.href "https://unpkg.com/material-components-web@latest/dist/material-components-web.min.css"
+                ]
+                []
+            , Html.node "link"
+                [ Html.Attributes.rel "stylesheet"
+                , Html.Attributes.href "https://fonts.googleapis.com/icon?family=Material+Icons"
+                ]
+                []
+            , Html.node "link"
+                [ Html.Attributes.rel "stylesheet", Html.Attributes.href "https://fonts.googleapis.com/css?family=Roboto:300,400,500" ]
+                []
+            , Html.node "link"
+                [ Html.Attributes.rel "stylesheet"
+                , Html.Attributes.href
+                    "slider.css"
+                ]
+                []
+            , Html.node "link"
+                [ Html.Attributes.rel "stylesheet"
+                , Html.Attributes.href
+                    "datepicker.css"
+                ]
+                []
             ]
-            [ SliderWithTextfield.view
-                model.sliderWithTextfield1
-                swtConf1
-                |> Html.map SliderWithTextfieldMsg1
-            , SliderWithTextfield.view
-                model.sliderWithTextfield2
-                swtConf2
-                |> Html.map SliderWithTextfieldMsg2
-            , DatePicker.view
-                model.date
-                datePickerConfig
-                model.datePicker
-                |> Html.map DatePickerMsg
-            , Textfield.view model.textfield textfieldConfig |> Html.map TextfieldMsg
-            ]
-        , Html.node "link" [ Html.Attributes.rel "stylesheet", Html.Attributes.href "mdc.css" ] []
-        , Html.node "script" [ Html.Attributes.src "mdc.js" ] []
-        , Html.node "link"
-            [ Html.Attributes.rel "stylesheet"
-            , Html.Attributes.href "https://unpkg.com/material-components-web@latest/dist/material-components-web.min.css"
-            ]
-            []
-        , Html.node "link"
-            [ Html.Attributes.rel "stylesheet"
-            , Html.Attributes.href "https://fonts.googleapis.com/icon?family=Material+Icons"
-            ]
-            []
-        , Html.node "link"
-            [ Html.Attributes.rel "stylesheet", Html.Attributes.href "https://fonts.googleapis.com/css?family=Roboto:300,400,500" ]
-            []
-        , Html.node "link"
-            [ Html.Attributes.rel "stylesheet"
-            , Html.Attributes.href
-                "slider.css"
-            ]
-            []
-        , Html.node "link"
-            [ Html.Attributes.rel "stylesheet"
-            , Html.Attributes.href
-                "datepicker.css"
-            ]
-            []
-        ]
 
 
 main : Program Never Model Msg
