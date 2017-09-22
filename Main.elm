@@ -31,6 +31,7 @@ type alias Model =
     , radioModel1 : RadioButton.Model
     , radioModel2 : RadioButton.Model
     , ripple : Ripple.Model
+    , textInput : Maybe String
     }
 
 
@@ -41,6 +42,7 @@ init =
             DatePicker.init
     in
         { textfield = Textfield.defaultModel
+        , textInput = Nothing
         , sliderWithTextfield1 = SliderWithTextfield.defaultModel
         , sliderWithTextfield2 = SliderWithTextfield.defaultModel
         , datePicker = dp
@@ -57,7 +59,7 @@ type Msg
     = Open
     | SliderWithTextfieldMsg1 SliderWithTextfield.Msg
     | SliderWithTextfieldMsg2 SliderWithTextfield.Msg
-      -- | TextfieldMsg Textfield.Msg
+    | TextfieldMsg Textfield.Msg
     | DatePickerMsg DatePicker.Msg
     | Select Int
     | OnRadioClick String String
@@ -236,15 +238,17 @@ update action model =
             in
                 { model | sliderWithTextfield2 = new } ! []
 
-        -- TextfieldMsg msg_ ->
-        --     let
-        --         ( textfield, effects ) =
-        --             Textfield.update
-        --                 msg_
-        --                 model.textfield
-        --                 textfieldConfig
-        --     in
-        --         { model | textfield = textfield } ! []
+        TextfieldMsg msg_ ->
+            let
+                ( newTextfieldModel, newText ) =
+                    Textfield.externalUpdate
+                        msg_
+                        model.textfield
+                        textfieldConfig
+                        model.textInput
+            in
+                { model | textfield = newTextfieldModel, textInput = newText } ! []
+
         --
         Select n ->
             model ! []
@@ -306,12 +310,17 @@ view model =
                         datePickerConfig
                         model.datePicker
                         |> Html.map DatePickerMsg
-
-                    -- , Textfield.view
-                    --     model.textfield
-                    --     textfieldConfig
-                    --     |> Html.map TextfieldMsg
+                    , Textfield.view model.textInput
+                        model.textfield
+                        textfieldConfig
+                        |> Html.map TextfieldMsg
                     ]
+                ]
+            , styled Html.div
+                [ cs "main-container"
+                , Elevation.z1
+                ]
+                [ styled div [ Typography.headline ] [ text "Расчет займа" ]
                 ]
             , Html.node "link" [ Html.Attributes.rel "stylesheet", Html.Attributes.href "mdc.css" ] []
             , Html.node "script" [ Html.Attributes.src "mdc.js" ] []

@@ -198,7 +198,7 @@ update settings msg (DatePicker model) =
         TextfieldMsg tfMsg ->
             let
                 ( newTextfieldModel, _, textfieldEvent ) =
-                    Textfield.update TextfieldMsg
+                    Textfield.update
                         tfMsg
                         model.textfield
                         settings.textfieldConfig
@@ -253,7 +253,6 @@ update settings msg (DatePicker model) =
 
                         Just d ->
                             Textfield.update
-                                TextfieldMsg
                                 (Internal.Textfield.SetValue <| formatDate d)
                                 model.textfield
                                 settings.textfieldConfig

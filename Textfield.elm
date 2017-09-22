@@ -9,6 +9,7 @@ module Textfield
         , defaultConfig
         , TextfieldEvent
         , TextfieldEvent(..)
+        , externalUpdate
         )
 
 import Html exposing (Html, span, input, label, text, div, button, Attribute)
@@ -41,8 +42,28 @@ type TextfieldEvent
     | Changed (Maybe String)
 
 
-update : (Msg -> m) -> Msg -> Model -> Config -> ( Model, Cmd m, TextfieldEvent )
-update lift msg model config =
+externalUpdate : Msg -> Model -> Config -> Maybe String -> ( Model, Maybe String )
+externalUpdate msg model textfieldConfig previousText =
+    let
+        ( newTextfieldModel, _, textfieldEvent ) =
+            update
+                msg
+                model
+                textfieldConfig
+
+        newText =
+            case textfieldEvent of
+                Changed newString ->
+                    newString
+
+                _ ->
+                    previousText
+    in
+        ( newTextfieldModel, newText )
+
+
+update : Msg -> Model -> Config -> ( Model, Cmd m, TextfieldEvent )
+update msg model config =
     case msg of
         Input str ->
             let
@@ -208,12 +229,20 @@ view value_ model config =
                 [ ( "mdc-textfield mdc-textfield--upgraded", True )
                 , ( "mdc-textfield--focused", isFocused )
                 , ( "mdc-textfield--disabled", config.disabled )
-                , ( "mdc-textfield--fullwidth", config.fullWidth )
+                , ( "mdc-textfield--fullwidth", False )
                 , ( "mdc-textfield--invalid", False )
                 ]
             , Events.onFocus <| Focus
             , Events.onBlur <| Blur
-            , style [ ( "height", height ) ]
+            , style
+                [ ( "height", height )
+                , ( "width"
+                  , if config.fullWidth then
+                        "100%"
+                    else
+                        "initial"
+                  )
+                ]
             ]
             [ contentHtml
             , label

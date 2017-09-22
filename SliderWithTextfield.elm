@@ -63,24 +63,25 @@ discretize value sliderConfig =
             discretizedValue
 
 
-newTf : Textfield.Msg -> Model -> Textfield.Config -> ( Textfield.Model, Maybe String )
-newTf msg model textfieldConfig =
-    let
-        ( newTextfieldModel, _, textfieldEvent ) =
-            Textfield.update TextfieldMsg
-                msg
-                model.textfield
-                textfieldConfig
 
-        newText =
-            case textfieldEvent of
-                Textfield.Changed newString ->
-                    newString
-
-                _ ->
-                    model.inputText
-    in
-        ( newTextfieldModel, newText )
+-- newTf : Textfield.Msg -> Model -> Textfield.Config -> ( Textfield.Model, Maybe String )
+-- newTf msg model textfieldConfig =
+--     let
+--         ( newTextfieldModel, _, textfieldEvent ) =
+--             Textfield.update
+--                 msg
+--                 model.textfield
+--                 textfieldConfig
+--
+--         newText =
+--             case textfieldEvent of
+--                 Textfield.Changed newString ->
+--                     newString
+--
+--                 _ ->
+--                     model.inputText
+--     in
+--         ( newTextfieldModel, newText )
 
 
 onSliderMsg : Slider.Msg -> Model -> Config -> Model
@@ -96,14 +97,15 @@ onSliderMsg msg model { sliderConfig, textfieldConfig } =
                         discretize newSliderModel.value sliderConfig
 
                     ( newTextfieldModel, newText ) =
-                        newTf
+                        Textfield.externalUpdate
                             (Internal.Textfield.Input
                                 (toString
                                     discretizedValue
                                 )
                             )
-                            model
+                            model.textfield
                             textfieldConfig
+                            model.inputText
                 in
                     ({ model
                         | textfield = newTextfieldModel
@@ -121,7 +123,10 @@ onTextfieldMsg : Textfield.Msg -> Model -> Config -> Model
 onTextfieldMsg msg model { sliderConfig, textfieldConfig } =
     let
         ( newTextfieldModel, newText ) =
-            newTf msg model textfieldConfig
+            Textfield.externalUpdate msg
+                model.textfield
+                textfieldConfig
+                model.inputText
 
         discretizedTextfieldValue =
             discretize
@@ -138,10 +143,11 @@ onTextfieldMsg msg model { sliderConfig, textfieldConfig } =
             Internal.Textfield.Blur ->
                 let
                     ( newTextfieldModel1, newText ) =
-                        newTf
+                        Textfield.externalUpdate
                             (Internal.Textfield.Input <| toString discretizedTextfieldValue)
-                            model
+                            newTextfieldModel
                             textfieldConfig
+                            model.inputText
                 in
                     ({ model
                         | textfield = newTextfieldModel1
@@ -153,10 +159,11 @@ onTextfieldMsg msg model { sliderConfig, textfieldConfig } =
             Internal.Textfield.Input str ->
                 let
                     ( newTextfieldModel1, newText ) =
-                        newTf
+                        Textfield.externalUpdate
                             (Internal.Textfield.Input <| str)
-                            model
+                            model.textfield
                             textfieldConfig
+                            model.inputText
 
                     ( newSliderModel, _ ) =
                         Slider.update
@@ -201,7 +208,12 @@ view model { sliderConfig, textfieldConfig, extraPlural, extraStatic } =
     in
         Html.div []
             [ div [ style [] ]
-                [ div [ style [ ( "width", "368px" ) ] ]
+                [ div
+                    [ style
+                        [ ( "width", "368px" )
+                        , ( "bottom", "4px" )
+                        ]
+                    ]
                     [ Textfield.view
                         model.inputText
                         model.textfield
