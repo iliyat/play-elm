@@ -75,17 +75,6 @@ update msg model =
             let
                 isVisible =
                     model.active || model.animating
-
-                _ =
-                    Debug.log "Activate"
-                        (event
-                            ++ " ___ "
-                            ++ toString geometry
-                            ++ " ___ "
-                            ++ toString active_
-                            ++ " ___ "
-                            ++ toString isVisible
-                        )
             in
                 if isVisible then
                     ( { model
@@ -116,9 +105,6 @@ update msg model =
 
         Deactivate event ->
             let
-                _ =
-                    Debug.log "Deactivate" event
-
                 sameEvent =
                     case model.geometry.event.type_ of
                         "keydown" ->
@@ -191,8 +177,10 @@ view isUnbounded lift model _ _ =
         surfaceDiameter =
             sqrt ((geometry.frame.width ^ 2) + (geometry.frame.height ^ 2))
 
+        -- maxRadius =
+        --     surfaceDiameter + 10
         maxRadius =
-            surfaceDiameter + 10
+            surfaceDiameter - 10
 
         fgScale =
             toString (maxRadius / initialSize)

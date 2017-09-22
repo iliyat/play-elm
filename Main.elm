@@ -10,6 +10,8 @@ import Ripple
 import Dict exposing (Dict)
 import Utils exposing (..)
 import Date exposing (Date)
+import Elevation
+import Typography
 import Options exposing (styled, cs, css, when)
 import DatePicker
     exposing
@@ -26,7 +28,8 @@ type alias Model =
     , datePicker : DatePicker.DatePicker
     , date : Maybe Date
     , radios : Dict String String
-    , radioModel : RadioButton.Model
+    , radioModel1 : RadioButton.Model
+    , radioModel2 : RadioButton.Model
     , ripple : Ripple.Model
     }
 
@@ -43,7 +46,8 @@ init =
         , datePicker = dp
         , date = Nothing
         , radios = Dict.fromList []
-        , radioModel = RadioButton.defaultModel
+        , radioModel1 = RadioButton.defaultModel
+        , radioModel2 = RadioButton.defaultModel
         , ripple = Ripple.defaultModel
         }
             ! [ Cmd.map DatePickerMsg datePickerFx ]
@@ -57,7 +61,8 @@ type Msg
     | DatePickerMsg DatePicker.Msg
     | Select Int
     | OnRadioClick String String
-    | RadioButtonMsg RadioButton.Msg
+    | RadioButtonMsg1 RadioButton.Msg
+    | RadioButtonMsg2 RadioButton.Msg
     | RippleMsg Ripple.Msg
 
 
@@ -136,7 +141,7 @@ textfieldConfig =
 
 datePickerConfig : DatePicker.Settings
 datePickerConfig =
-    DatePicker.defaultSettings
+    DatePicker.withLabel "Дата погашения"
 
 
 update : Msg -> Model -> ( Model, Cmd Msg )
@@ -149,20 +154,35 @@ update action model =
             in
                 ( { model | ripple = new }, effects |> Cmd.map RippleMsg )
 
-        RadioButtonMsg msg_ ->
+        RadioButtonMsg1 msg_ ->
             let
                 ( new, radioEffects ) =
-                    RadioButton.update RadioButtonMsg msg_ model.radioModel
+                    RadioButton.update RadioButtonMsg1 msg_ model.radioModel1
 
                 r =
                     case new of
                         Nothing ->
-                            model.radioModel
+                            model.radioModel1
 
                         Just a ->
                             a
             in
-                ( { model | radioModel = r }, radioEffects )
+                ( { model | radioModel1 = r }, radioEffects )
+
+        RadioButtonMsg2 msg_ ->
+            let
+                ( new, radioEffects ) =
+                    RadioButton.update RadioButtonMsg2 msg_ model.radioModel2
+
+                r =
+                    case new of
+                        Nothing ->
+                            model.radioModel2
+
+                        Just a ->
+                            a
+            in
+                ( { model | radioModel2 = r }, radioEffects )
 
         OnRadioClick group value ->
             let
@@ -243,68 +263,54 @@ view model =
             Dict.get group model.radios
                 |> Maybe.map ((==) name)
                 |> Maybe.withDefault isDef
-
-        demoSurface =
-            Options.many
-                [ cs "demo-surface"
-                , css "display" "flex"
-                , css "align-items" "center"
-                , css "justify-content" "center"
-                , css "width" "200px"
-                , css "height" "50px"
-                , css "padding" "1rem"
-                , css "cursor" "pointer"
-                , css "user-select" "none"
-                , css "-webkit-user-select" "none"
-                ]
     in
         Html.div []
-            [ div
-                [ style
-                    [ ( "margin", "54px" )
-                    ]
+            [ styled Html.div
+                [ cs "main-container"
+                , Elevation.z1
                 ]
-                [ -- [ styled Html.div
-                  --     [ demoSurface
-                  --     , rippleOptions
-                  --     , cs "mdc-ripple-surface"
-                  --     , cs "mdc-elevation--z2"
-                  --     ]
-                  --     [ rippleStyles
-                  --     , text "Test"
-                  --     ]
-                  RadioButton.view (RadioButtonMsg)
-                    model.radioModel
-                    [ Options.onClick ((OnRadioClick "group-1" "name-1"))
-                    , RadioButton.selected |> when (isSelected True "group-1" "name-1")
-                    , RadioButton.name "name-1"
+                [ styled div [ Typography.headline ] [ text "Параметры" ]
+                , styled div
+                    [ cs "params" ]
+                    [ div []
+                        [ RadioButton.view RadioButtonMsg1
+                            model.radioModel1
+                            [ Options.onClick (OnRadioClick "group-1" "name-1")
+                            , RadioButton.selected |> when (isSelected True "group-1" "name-1")
+                            , RadioButton.name "name-1"
+                            ]
+                            [ label [] [ text "Первичный клиент" ] ]
+                        ]
+                    , div []
+                        [ RadioButton.view RadioButtonMsg2
+                            model.radioModel2
+                            [ Options.onClick (OnRadioClick "group-1" "name-2")
+                            , RadioButton.selected |> when (isSelected True "group-1" "name-2")
+                            , RadioButton.name "name-1"
+                            ]
+                            [ label [] [ text "Повторный клиент" ] ]
+                        ]
                     ]
-                    []
-                , RadioButton.view (RadioButtonMsg)
-                    model.radioModel
-                    [ Options.onClick ((OnRadioClick "group-1" "name-2"))
-                    , RadioButton.selected |> when (isSelected True "group-1" "name-2")
-                    , RadioButton.name "name-1"
+                , styled div
+                    [ cs "fields" ]
+                    [ SliderWithTextfield.view
+                        model.sliderWithTextfield1
+                        swtConf1
+                        |> Html.map SliderWithTextfieldMsg1
+                    , SliderWithTextfield.view
+                        model.sliderWithTextfield2
+                        swtConf2
+                        |> Html.map SliderWithTextfieldMsg2
+                    , DatePicker.view
+                        model.date
+                        datePickerConfig
+                        model.datePicker
+                        |> Html.map DatePickerMsg
+                    , Textfield.view
+                        model.textfield
+                        textfieldConfig
+                        |> Html.map TextfieldMsg
                     ]
-                    []
-
-                --   SliderWithTextfield.view
-                --     model.sliderWithTextfield1
-                --     swtConf1
-                --     |> Html.map SliderWithTextfieldMsg1
-                -- , SliderWithTextfield.view
-                --     model.sliderWithTextfield2
-                --     swtConf2
-                --     |> Html.map SliderWithTextfieldMsg2
-                -- , DatePicker.view
-                --     model.date
-                --     datePickerConfig
-                --     model.datePicker
-                --     |> Html.map DatePickerMsg
-                -- Textfield.view
-                -- model.textfield
-                -- textfieldConfig
-                -- |> Html.map TextfieldMsg
                 ]
             , Html.node "link" [ Html.Attributes.rel "stylesheet", Html.Attributes.href "mdc.css" ] []
             , Html.node "script" [ Html.Attributes.src "mdc.js" ] []
@@ -331,6 +337,12 @@ view model =
                 [ Html.Attributes.rel "stylesheet"
                 , Html.Attributes.href
                     "datepicker.css"
+                ]
+                []
+            , Html.node "link"
+                [ Html.Attributes.rel "stylesheet"
+                , Html.Attributes.href
+                    "main.css"
                 ]
                 []
             ]

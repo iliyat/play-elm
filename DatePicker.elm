@@ -18,6 +18,7 @@ module DatePicker
         , from
         , to
         , focusedDate
+        , withLabel
         )
 
 import Date exposing (Date, Day(..), Month, day, month, year)
@@ -93,6 +94,17 @@ defaultSettings =
     , changeYear = off
     , textfieldConfig = DatePickerTextfield.defaultConfig
     }
+
+
+withLabel : String -> Settings
+withLabel label =
+    let
+        setLabel tfConfig =
+            { tfConfig | labelText = Just label }
+    in
+        { defaultSettings
+            | textfieldConfig = setLabel defaultSettings.textfieldConfig
+        }
 
 
 yearRangeActive : YearRange -> Bool
@@ -173,20 +185,6 @@ isOpen (DatePicker model) =
 focusedDate : DatePicker -> Maybe Date
 focusedDate (DatePicker model) =
     model.focused
-
-
-
--- textfieldConfig : DatePickerTextfield.Config
--- textfieldConfig =
---     let
---         dc =
---             DatePickerTextfield.defaultConfig
---     in
---         { dc
---             | defaultValue = Nothing
---             , readonly = False
---             , labelText = Just "Дата"
---         }
 
 
 type DateEvent

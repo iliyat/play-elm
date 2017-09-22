@@ -1,0 +1,26 @@
+body {
+  background-color: rgb(237, 239, 241);
+}
+
+.main-container {
+  background: white;
+  width: 1216px;
+  margin: 50px auto;
+  padding: 20px 32px;
+}
+
+.header {
+  font-family: Roboto;
+  font-size: 20px;
+  color: #2b333f;
+  font-weight: 400;
+  /* padding-bottom: 20px; */
+}
+
+.params {
+  display: flex;
+}
+.fields {
+  display: flex;
+  justify-content: space-between;
+}

@@ -49,7 +49,7 @@ component-level API for state modification.
 -}
 
 import Html.Attributes as Html
-import Html exposing (Html, text)
+import Html exposing (Html, text, div)
 import Json.Decode as Json
 import Internal.Helpers as Helpers exposing (map1st, map2nd, blurOn, filter, noAttr)
 import Internal.Options as Internal
@@ -161,7 +161,7 @@ name value =
 
 
 view : (Msg -> m) -> Model -> List (Property m) -> List (Html m) -> Html m
-view lift model options _ =
+view lift model options ch =
     let
         ({ config } as summary) =
             Internal.collect defaultConfig options
@@ -169,31 +169,36 @@ view lift model options _ =
         ( rippleOptions, rippleStyle ) =
             Ripple.view True (RippleMsg >> lift) model.ripple [] []
     in
-        Internal.applyContainer summary
-            Html.div
-            [ cs "mdc-radio"
-            , Internal.attribute <| blurOn "mouseup"
-            , rippleOptions
-            ]
-            [ Internal.applyInput summary
-                Html.input
-                [ cs "mdc-radio__native-control"
-                , Internal.attribute <| Html.type_ "radio"
-                , Internal.attribute <| Html.checked config.value
-                , Internal.on1 "focus" lift (SetFocus True)
-                , Internal.on1 "blur" lift (SetFocus False)
-                , Options.onWithOptions "click"
-                    { preventDefault = True
-                    , stopPropagation = False
-                    }
-                    (Json.succeed (lift NoOp))
+        styled div
+            [ cs "mdc-form-field" ]
+            ([ Internal.applyContainer summary
+                div
+                [ cs "mdc-radio"
+                , Internal.attribute <| blurOn "mouseup"
+                , rippleOptions
                 ]
-                []
-            , styled Html.div
-                [ cs "mdc-radio__background"
+                [ Internal.applyInput summary
+                    Html.input
+                    [ cs "mdc-radio__native-control"
+                    , Internal.attribute <| Html.type_ "radio"
+                    , Internal.attribute <| Html.checked config.value
+                    , Internal.on1 "focus" lift (SetFocus True)
+                    , Internal.on1 "blur" lift (SetFocus False)
+                    , Options.onWithOptions "click"
+                        { preventDefault = True
+                        , stopPropagation = False
+                        }
+                        (Json.succeed (lift NoOp))
+                    ]
+                    []
+                , styled Html.div
+                    [ cs "mdc-radio__background"
+                    ]
+                    [ styled Html.div [ cs "mdc-radio__inner-circle" ] []
+                    , styled Html.div [ cs "mdc-radio__outer-circle" ] []
+                    ]
+                , rippleStyle
                 ]
-                [ styled Html.div [ cs "mdc-radio__inner-circle" ] []
-                , styled Html.div [ cs "mdc-radio__outer-circle" ] []
-                ]
-            , rippleStyle
-            ]
+             ]
+                ++ ch
+            )
