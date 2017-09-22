@@ -24,6 +24,7 @@ rusLocale =
 type alias Model =
     { slider : Slider.Model
     , textfield : Textfield.Model
+    , inputText : Maybe String
     }
 
 
@@ -39,6 +40,7 @@ defaultModel : Model
 defaultModel =
     { slider = Slider.defaultModel
     , textfield = Textfield.defaultModel
+    , inputText = Nothing
     }
 
 
@@ -61,6 +63,26 @@ discretize value sliderConfig =
             discretizedValue
 
 
+newTf : Textfield.Msg -> Model -> Textfield.Config -> ( Textfield.Model, Maybe String )
+newTf msg model textfieldConfig =
+    let
+        ( newTextfieldModel, _, textfieldEvent ) =
+            Textfield.update TextfieldMsg
+                msg
+                model.textfield
+                textfieldConfig
+
+        newText =
+            case textfieldEvent of
+                Textfield.Changed newString ->
+                    newString
+
+                _ ->
+                    model.inputText
+    in
+        ( newTextfieldModel, newText )
+
+
 onSliderMsg : Slider.Msg -> Model -> Config -> Model
 onSliderMsg msg model { sliderConfig, textfieldConfig } =
     let
@@ -73,13 +95,23 @@ onSliderMsg msg model { sliderConfig, textfieldConfig } =
                     discretizedValue =
                         discretize newSliderModel.value sliderConfig
 
-                    ( newTextfieldModel, _ ) =
-                        Textfield.update
-                            (Internal.Textfield.Input (toString discretizedValue))
-                            model.textfield
+                    ( newTextfieldModel, newText ) =
+                        newTf
+                            (Internal.Textfield.Input
+                                (toString
+                                    discretizedValue
+                                )
+                            )
+                            model
                             textfieldConfig
                 in
-                    ({ model | textfield = newTextfieldModel, slider = newSliderModel })
+                    ({ model
+                        | textfield = newTextfieldModel
+                        , slider =
+                            newSliderModel
+                        , inputText = newText
+                     }
+                    )
 
             _ ->
                 ({ model | slider = newSliderModel })
@@ -88,15 +120,15 @@ onSliderMsg msg model { sliderConfig, textfieldConfig } =
 onTextfieldMsg : Textfield.Msg -> Model -> Config -> Model
 onTextfieldMsg msg model { sliderConfig, textfieldConfig } =
     let
-        ( newTextfieldModel, _ ) =
-            Textfield.update msg model.textfield textfieldConfig
+        ( newTextfieldModel, newText ) =
+            newTf msg model textfieldConfig
 
         discretizedTextfieldValue =
             discretize
                 (Just <|
                     toFloat <|
                         (String.toInt
-                            (newTextfieldModel.value |> Maybe.withDefault "0")
+                            (newText |> Maybe.withDefault "0")
                             |> Result.withDefault 0
                         )
                 )
@@ -105,16 +137,27 @@ onTextfieldMsg msg model { sliderConfig, textfieldConfig } =
         case msg of
             Internal.Textfield.Blur ->
                 let
-                    ( newTextfieldModel1, _ ) =
-                        Textfield.update
+                    ( newTextfieldModel1, newText ) =
+                        newTf
                             (Internal.Textfield.Input <| toString discretizedTextfieldValue)
-                            newTextfieldModel
+                            model
                             textfieldConfig
                 in
-                    ({ model | textfield = newTextfieldModel1 })
+                    ({ model
+                        | textfield = newTextfieldModel1
+                        , inputText =
+                            newText
+                     }
+                    )
 
             Internal.Textfield.Input str ->
                 let
+                    ( newTextfieldModel1, newText ) =
+                        newTf
+                            (Internal.Textfield.Input <| str)
+                            model
+                            textfieldConfig
+
                     ( newSliderModel, _ ) =
                         Slider.update
                             (Internal.Slider.SetValue
@@ -124,8 +167,8 @@ onTextfieldMsg msg model { sliderConfig, textfieldConfig } =
                 in
                     ({ model
                         | textfield = newTextfieldModel
-                        , slider =
-                            newSliderModel
+                        , slider = newSliderModel
+                        , inputText = newText
                      }
                     )
 
@@ -160,6 +203,7 @@ view model { sliderConfig, textfieldConfig, extraPlural, extraStatic } =
             [ div [ style [] ]
                 [ div [ style [ ( "width", "368px" ) ] ]
                     [ Textfield.view
+                        model.inputText
                         model.textfield
                         textfieldConfig
                         |> Html.map TextfieldMsg

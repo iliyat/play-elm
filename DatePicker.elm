@@ -30,7 +30,7 @@ import Html.Events exposing (on, onBlur, onClick, onInput, onFocus, onWithOption
 import Html.Keyed
 import Json.Decode as Json
 import Task
-import DatePickerTextfield
+import Textfield
 import Internal.Textfield
 
 
@@ -44,7 +44,7 @@ type Msg
     | Blur
     | MouseDown
     | MouseUp
-    | TextfieldMsg DatePickerTextfield.Msg
+    | TextfieldMsg Textfield.Msg
 
 
 type alias Settings =
@@ -59,7 +59,7 @@ type alias Settings =
     , cellFormatter : String -> Html Msg
     , firstDayOfWeek : Day
     , changeYear : YearRange
-    , textfieldConfig : DatePickerTextfield.Config
+    , textfieldConfig : Textfield.Config
     }
 
 
@@ -69,7 +69,7 @@ type alias Model =
     , focused : Maybe Date
     , inputText : Maybe String
     , today : Date
-    , textfield : DatePickerTextfield.Model
+    , textfield : Textfield.Model
     }
 
 
@@ -92,7 +92,7 @@ defaultSettings =
     , cellFormatter = formatCell
     , firstDayOfWeek = Mon
     , changeYear = off
-    , textfieldConfig = DatePickerTextfield.defaultConfig
+    , textfieldConfig = Textfield.defaultConfig
     }
 
 
@@ -152,7 +152,7 @@ defaultModel =
     , focused = Just initDate
     , inputText = Nothing
     , today = initDate
-    , textfield = DatePickerTextfield.defaultModel
+    , textfield = Textfield.defaultModel
     }
 
 
@@ -198,14 +198,14 @@ update settings msg (DatePicker model) =
         TextfieldMsg tfMsg ->
             let
                 ( newTextfieldModel, _, textfieldEvent ) =
-                    DatePickerTextfield.update TextfieldMsg
+                    Textfield.update TextfieldMsg
                         tfMsg
                         model.textfield
                         settings.textfieldConfig
 
                 newText =
                     case textfieldEvent of
-                        DatePickerTextfield.Changed newString ->
+                        Textfield.Changed newString ->
                             newString
 
                         _ ->
@@ -249,10 +249,10 @@ update settings msg (DatePicker model) =
                 ( newTextfieldModel, _, textfieldEvent ) =
                     case date of
                         Nothing ->
-                            ( model.textfield, Cmd.none, DatePickerTextfield.NoChange )
+                            ( model.textfield, Cmd.none, Textfield.NoChange )
 
                         Just d ->
-                            DatePickerTextfield.update
+                            Textfield.update
                                 TextfieldMsg
                                 (Internal.Textfield.SetValue <| formatDate d)
                                 model.textfield
@@ -361,7 +361,7 @@ view pickedDate settings (DatePicker ({ open } as model)) =
                 []
 
         dateInput =
-            DatePickerTextfield.view
+            Textfield.view
                 (Just <|
                     (model.inputText
                         |> Maybe.withDefault
@@ -370,9 +370,9 @@ view pickedDate settings (DatePicker ({ open } as model)) =
                             )
                     )
                 )
-                TextfieldMsg
                 model.textfield
                 settings.textfieldConfig
+                |> Html.map TextfieldMsg
     in
         div [ class "container" ]
             [ dateInput

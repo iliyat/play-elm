@@ -23,14 +23,7 @@ type alias Model =
 
 settings : DatePicker.Settings
 settings =
-    let
-        isDisabled date =
-            dayOfWeek date
-                |> flip List.member [ Sat, Sun ]
-    in
-        { defaultSettings
-            | isDisabled = always False
-        }
+    DatePicker.withLabel "Дата погашения"
 
 
 init : ( Model, Cmd Msg )

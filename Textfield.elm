@@ -7,6 +7,8 @@ module Textfield
         , update
         , Config
         , defaultConfig
+        , TextfieldEvent
+        , TextfieldEvent(..)
         )
 
 import Html exposing (Html, span, input, label, text, div, button, Attribute)
@@ -20,7 +22,6 @@ import Utils exposing (..)
 type alias Model =
     { isFocused : Bool
     , isDirty : Bool
-    , value : Maybe String
     }
 
 
@@ -28,7 +29,6 @@ defaultModel : Model
 defaultModel =
     { isFocused = False
     , isDirty = False
-    , value = Nothing
     }
 
 
@@ -36,13 +36,18 @@ type alias Msg =
     Internal.Textfield.Msg
 
 
-update : Msg -> Model -> Config -> ( Model, Cmd Msg )
-update msg model config =
+type TextfieldEvent
+    = NoChange
+    | Changed (Maybe String)
+
+
+update : (Msg -> m) -> Msg -> Model -> Config -> ( Model, Cmd m, TextfieldEvent )
+update lift msg model config =
     case msg of
         Input str ->
             let
                 dirty =
-                    str /= ""
+                    str /= (config.defaultValue |> Maybe.withDefault "")
 
                 allDigits =
                     String.all Char.isDigit str
@@ -51,7 +56,7 @@ update msg model config =
                     if allDigits then
                         Just str
                     else
-                        model.value
+                        Nothing
 
                 newValue =
                     if config.numbered then
@@ -59,19 +64,28 @@ update msg model config =
                     else
                         Just str
             in
-                ( { model | value = newValue, isDirty = dirty }, Cmd.none )
+                ( { model | isDirty = dirty }, Cmd.none, Changed newValue )
+
+        SetValue str ->
+            let
+                dirty =
+                    case config.defaultValue of
+                        Just a ->
+                            a /= str
+
+                        _ ->
+                            True
+            in
+                { model | isDirty = dirty } ! []
 
         Blur ->
-            ( { model | isFocused = False }, Cmd.none )
+            { model | isFocused = False } ! []
 
         Focus ->
-            ( { model | isFocused = True }, Cmd.none )
+            { model | isFocused = True } ! []
 
         NoOp ->
-            ( model, Cmd.none )
-
-        SetValue _ ->
-            ( model, Cmd.none )
+            model ! []
 
 
 type alias Config =
@@ -111,8 +125,8 @@ defaultConfig =
     }
 
 
-view : Model -> Config -> Html Msg
-view model config =
+view : Maybe String -> Model -> Config -> Html Msg
+view value_ model config =
     let
         isFocused =
             model.isFocused && not config.disabled
@@ -139,7 +153,7 @@ view model config =
                 "18px"
 
         value =
-            model.value
+            value_
                 |> Maybe.withDefault
                     (config.defaultValue
                         |> Maybe.withDefault ""
@@ -234,3 +248,8 @@ view model config =
                 [ text <| extra ++ pl ]
             , div [ class "mdc-textfield__bottom-line" ] []
             ]
+
+
+(!) : Model -> List (Cmd m) -> ( Model, Cmd m, TextfieldEvent )
+(!) m cs =
+    ( m, Cmd.batch cs, NoChange )

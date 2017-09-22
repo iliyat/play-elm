@@ -57,7 +57,7 @@ type Msg
     = Open
     | SliderWithTextfieldMsg1 SliderWithTextfield.Msg
     | SliderWithTextfieldMsg2 SliderWithTextfield.Msg
-    | TextfieldMsg Textfield.Msg
+      -- | TextfieldMsg Textfield.Msg
     | DatePickerMsg DatePicker.Msg
     | Select Int
     | OnRadioClick String String
@@ -236,16 +236,16 @@ update action model =
             in
                 { model | sliderWithTextfield2 = new } ! []
 
-        TextfieldMsg msg_ ->
-            let
-                ( textfield, effects ) =
-                    Textfield.update
-                        msg_
-                        model.textfield
-                        textfieldConfig
-            in
-                { model | textfield = textfield } ! []
-
+        -- TextfieldMsg msg_ ->
+        --     let
+        --         ( textfield, effects ) =
+        --             Textfield.update
+        --                 msg_
+        --                 model.textfield
+        --                 textfieldConfig
+        --     in
+        --         { model | textfield = textfield } ! []
+        --
         Select n ->
             model ! []
 
@@ -306,10 +306,11 @@ view model =
                         datePickerConfig
                         model.datePicker
                         |> Html.map DatePickerMsg
-                    , Textfield.view
-                        model.textfield
-                        textfieldConfig
-                        |> Html.map TextfieldMsg
+
+                    -- , Textfield.view
+                    --     model.textfield
+                    --     textfieldConfig
+                    --     |> Html.map TextfieldMsg
                     ]
                 ]
             , Html.node "link" [ Html.Attributes.rel "stylesheet", Html.Attributes.href "mdc.css" ] []
