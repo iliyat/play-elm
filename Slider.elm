@@ -374,7 +374,7 @@ view model config =
              , initOn "elm-mdc-init"
              ]
                 ++ List.map activateOn downs
-                ++ [ style [ ( "bottom", "8px" ) ] ]
+                ++ [ style [ ( "bottom", "8px" ), ( "height", "inherit" ) ] ]
             )
             [ div [ class "mdc-slider__track-container" ]
                 [ div
@@ -392,6 +392,7 @@ view model config =
                 , onMouseDown (Activate False)
                 , style
                     [ ( "transform", "translateX(" ++ toString translateX ++ "px) translateX(-50%)" )
+                    , ( "top", "7px" )
                     ]
                 ]
                 [ Svg.svg

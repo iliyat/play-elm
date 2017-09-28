@@ -1,12 +1,12 @@
 .sliderLabelsContainer {
-    display: flex;
-    justify-content: space-between;
-    position: relative;
-    bottom: 15px;
+  display: flex;
+  justify-content: space-between;
+  position: relative;
+  bottom: 13px;
 }
 
 .sliderLabel {
-    color: #afbec5;
-    font-family: "Roboto";
-    font-size: 14px;
+  color: #afbec5;
+  font-family: "Roboto";
+  font-size: 14px;
 }

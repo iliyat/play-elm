@@ -220,7 +220,7 @@ view model { sliderConfig, textfieldConfig, extraPlural, extraStatic } =
                         textfieldConfig
                         |> Html.map TextfieldMsg
                     , div
-                        []
+                        [ style [ ( "height", "32px" ) ] ]
                         [ Slider.view
                             model.slider
                             sliderConfig
