@@ -99,6 +99,16 @@ swtConf1 =
         }
 
 
+sumSliderPrimaryConfig : SliderWithTextfield.Config
+sumSliderPrimaryConfig =
+    SliderWithTextfield.withLimits swtConf1 2000 10000 1000
+
+
+sumSliderSecondaryConfig : SliderWithTextfield.Config
+sumSliderSecondaryConfig =
+    SliderWithTextfield.withLimits swtConf1 2000 30000 1000
+
+
 swtConf2 : SliderWithTextfield.Config
 swtConf2 =
     let
@@ -145,6 +155,17 @@ textfieldConfig =
 datePickerConfig : DatePicker.Settings
 datePickerConfig =
     DatePicker.withLabel "Дата погашения"
+
+
+isPrimarySelected : Model -> Bool
+isPrimarySelected model =
+    let
+        isSelected isDef group name =
+            Dict.get group model.radios
+                |> Maybe.map ((==) name)
+                |> Maybe.withDefault isDef
+    in
+        isSelected True "clientGroup" "primary"
 
 
 update : Msg -> Model -> ( Model, Cmd Msg )
@@ -225,7 +246,11 @@ update action model =
                     SliderWithTextfield.update
                         msg_
                         model.sliderWithTextfield1
-                        swtConf1
+                        (if isPrimarySelected model then
+                            sumSliderPrimaryConfig
+                         else
+                            sumSliderSecondaryConfig
+                        )
             in
                 { model | sliderWithTextfield1 = new } ! []
 
@@ -263,11 +288,6 @@ view model =
     let
         ( rippleOptions, rippleStyles ) =
             Ripple.view False (RippleMsg) model.ripple () ()
-
-        isSelected isDef group name =
-            Dict.get group model.radios
-                |> Maybe.map ((==) name)
-                |> Maybe.withDefault isDef
     in
         Html.div []
             [ styled Html.div
@@ -280,12 +300,16 @@ view model =
                     [ div []
                         [ RadioButton.view RadioButtonMsg1
                             model.radioModel1
-                            [ Options.onClick (OnRadioClick "group1" "name1")
-                            , RadioButton.selected |> when (isSelected True "group1" "name1")
-                            , RadioButton.name "name1"
+                            [ Options.onClick (OnRadioClick "clientGroup" "primary")
+                            , RadioButton.selected
+                                |> when
+                                    (isPrimarySelected
+                                        model
+                                    )
+                            , RadioButton.name "primary"
                             ]
                             [ label
-                                [ Events.onClick (OnRadioClick "group1" "name1")
+                                [ Events.onClick (OnRadioClick "clientGroup" "primary")
                                 ]
                                 [ text "Первичный клиент" ]
                             ]
@@ -293,12 +317,17 @@ view model =
                     , div []
                         [ RadioButton.view RadioButtonMsg2
                             model.radioModel2
-                            [ Options.onClick (OnRadioClick "group1" "name2")
-                            , RadioButton.selected |> when (isSelected False "group1" "name2")
-                            , RadioButton.name "name2"
+                            [ Options.onClick (OnRadioClick "clientGroup" "secondary")
+                            , RadioButton.selected
+                                |> when
+                                    (not <|
+                                        isPrimarySelected
+                                            model
+                                    )
+                            , RadioButton.name "secondary"
                             ]
                             [ label
-                                [ Events.onClick (OnRadioClick "group1" "name2")
+                                [ Events.onClick (OnRadioClick "clientGroup" "secondary")
                                 ]
                                 [ text "Повторный клиент" ]
                             ]
@@ -308,7 +337,11 @@ view model =
                     [ cs "fields" ]
                     [ SliderWithTextfield.view
                         model.sliderWithTextfield1
-                        swtConf1
+                        (if isPrimarySelected model then
+                            sumSliderPrimaryConfig
+                         else
+                            sumSliderSecondaryConfig
+                        )
                         |> Html.map SliderWithTextfieldMsg1
                     , SliderWithTextfield.view
                         model.sliderWithTextfield2

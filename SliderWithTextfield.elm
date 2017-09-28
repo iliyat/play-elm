@@ -36,6 +36,52 @@ type alias Config =
     }
 
 
+withLimits : Config -> Float -> Float -> Int -> Config
+withLimits config min max steps =
+    let
+        slider =
+            config.sliderConfig
+
+        updatedSlider =
+            { slider
+                | min = min
+                , max = max
+                , steps = steps
+            }
+    in
+        { config | sliderConfig = updatedSlider }
+
+
+defaultConfig : Config
+defaultConfig =
+    let
+        slider =
+            Slider.defaultConfig
+
+        textfield =
+            Textfield.defaultConfig
+    in
+        { sliderConfig =
+            { slider
+                | value = 2000
+                , min = 2000
+                , max = 10000
+                , steps = 1000
+            }
+        , textfieldConfig =
+            { textfield
+                | defaultValue = Just "2000"
+                , asTitle = True
+                , numbered = True
+                , extra = Just "₽"
+                , fullWidth = True
+                , labelText = Just "Сумма"
+            }
+        , extraStatic = Just "₽"
+        , extraPlural = Nothing
+        }
+
+
 defaultModel : Model
 defaultModel =
     { slider = Slider.defaultModel
