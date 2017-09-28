@@ -1,12 +1,13 @@
 $datepicker-ns: elm-datepicker-- !default;
-$datepicker-hl: #F2F2F2;
-$datepicker-arrow: #AAA;
-$datepicker-arrow-hover: #BBB;
+$datepicker-hl: #f2f2f2;
+$datepicker-arrow: #aaa;
+$datepicker-arrow-hover: #bbb;
 $datepicker-picked-fg: white;
 $datepicker-picked-bg: darkblue;
-$datepicker-border-color: #CCC;
-$datepicker-row-border-color: #F2F2F2;
-$primary-color: rgb(0, 188, 212);
+$datepicker-border-color: #ccc;
+$datepicker-row-border-color: #f2f2f2;
+$primary-color: rgb(63, 81, 180);
+$grey-78-color: #78909c;
 
 .#{$datepicker-ns}container {
   position: relative;
@@ -18,7 +19,7 @@ $primary-color: rgb(0, 188, 212);
 
 .#{$datepicker-ns}picker {
   position: absolute;
-  border: 1px solid #CCC;
+  border: 1px solid #ccc;
   color: rgba(0, 0, 0, 0.87);
   background-color: rgb(255, 255, 255);
   box-sizing: border-box;
@@ -232,10 +233,10 @@ $primary-color: rgb(0, 188, 212);
 }
 
 .#{$datepicker-ns}day-0 {
-  background-color: rgb(0, 151, 167);
+  background-color: $primary-color;
   border-radius: 50%;
   height: 34px;
-  left: 4px;
+  left: 3px;
   position: absolute;
   top: 0px;
   transform: scale(0);

@@ -339,19 +339,6 @@ view pickedDate settings (DatePicker ({ open } as model)) =
         inputClasses =
             [ ( settings.classNamespace ++ "input", True ) ]
 
-        inputCommon xs =
-            input
-                ([ Attrs.classList inputClasses
-                 , type_ "text"
-                 , onInput Text
-                 , onBlur Blur
-                 , onClick Focus
-                 , onFocus Focus
-                 ]
-                    ++ xs
-                )
-                []
-
         dateInput =
             Textfield.view
                 (Just <|

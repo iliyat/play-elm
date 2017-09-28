@@ -2,6 +2,7 @@ module Main exposing (..)
 
 import Html exposing (..)
 import Html.Attributes exposing (..)
+import Html.Events as Events
 import Slider
 import Textfield
 import SliderWithTextfield
@@ -279,20 +280,28 @@ view model =
                     [ div []
                         [ RadioButton.view RadioButtonMsg1
                             model.radioModel1
-                            [ Options.onClick (OnRadioClick "group-1" "name-1")
-                            , RadioButton.selected |> when (isSelected True "group-1" "name-1")
-                            , RadioButton.name "name-1"
+                            [ Options.onClick (OnRadioClick "group1" "name1")
+                            , RadioButton.selected |> when (isSelected True "group1" "name1")
+                            , RadioButton.name "name1"
                             ]
-                            [ label [] [ text "Первичный клиент" ] ]
+                            [ label
+                                [ Events.onClick (OnRadioClick "group1" "name1")
+                                ]
+                                [ text "Первичный клиент" ]
+                            ]
                         ]
                     , div []
                         [ RadioButton.view RadioButtonMsg2
                             model.radioModel2
-                            [ Options.onClick (OnRadioClick "group-1" "name-2")
-                            , RadioButton.selected |> when (isSelected True "group-1" "name-2")
-                            , RadioButton.name "name-1"
+                            [ Options.onClick (OnRadioClick "group1" "name2")
+                            , RadioButton.selected |> when (isSelected False "group1" "name2")
+                            , RadioButton.name "name2"
                             ]
-                            [ label [] [ text "Повторный клиент" ] ]
+                            [ label
+                                [ Events.onClick (OnRadioClick "group1" "name2")
+                                ]
+                                [ text "Повторный клиент" ]
+                            ]
                         ]
                     ]
                 , styled div

@@ -6,7 +6,7 @@ body {
   background: white;
   width: 1216px;
   margin: 50px auto;
-  padding: 20px 32px;
+  padding: 20px 32px 32px 32px;
 }
 
 .header {
@@ -27,4 +27,7 @@ body {
   display: flex;
   justify-content: space-between;
   align-items: baseline;
+}
+.mdc-form-field label {
+  cursor: pointer;
 }

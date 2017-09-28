@@ -6,7 +6,7 @@
 
 .elm-datepicker--picker {
   position: absolute;
-  border: 1px solid #CCC;
+  border: 1px solid #ccc;
   color: rgba(0, 0, 0, 0.87);
   background-color: white;
   box-sizing: border-box;
@@ -41,7 +41,7 @@
   float: none;
   font-weight: 700;
   display: inline-block;
-  background-color: #00bcd4;
+  background-color: #3f51b4;
   border-top-left-radius: 2px;
   border-top-right-radius: 2px;
   border-bottom-left-radius: 0px;
@@ -195,10 +195,10 @@
     font-weight: 300; }
 
 .elm-datepicker--day-0 {
-  background-color: #0097a7;
+  background-color: #3f51b4;
   border-radius: 50%;
   height: 34px;
-  left: 4px;
+  left: 3px;
   position: absolute;
   top: 0px;
   transform: scale(0);
@@ -218,6 +218,6 @@
   font-weight: 300; }
 
 .elm-datepicker--today .elm-datepicker--day-text {
-  color: #00bcd4; }
+  color: #3f51b4; }
 
 /*# sourceMappingURL=datepicker.css.map */
