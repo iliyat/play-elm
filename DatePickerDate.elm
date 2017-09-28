@@ -15,6 +15,7 @@ module DatePickerDate
         , nextMonth
         , newYear
         , yearRange
+        , formatCalendarHeaderDate
         )
 
 import Date exposing (Date, Day(..), Month(..), year, month, day)
@@ -46,6 +47,16 @@ formatDate date =
     dayToString (day date) ++ "." ++ monthToString (month date) ++ "." ++ toString (year date)
 
 
+formatCalendarHeaderDate : Date -> String
+formatCalendarHeaderDate date =
+    formatDay (Date.dayOfWeek date)
+        ++ ", "
+        ++ dayToString (day date)
+        ++ " "
+        ++ formatMonth1 (month date)
+        ++ "."
+
+
 formatDay : Date.Day -> String
 formatDay day =
     case day of
@@ -69,6 +80,46 @@ formatDay day =
 
         Sun ->
             "Вск"
+
+
+formatMonth1 : Month -> String
+formatMonth1 month =
+    case month of
+        Jan ->
+            "янв"
+
+        Feb ->
+            "фев"
+
+        Mar ->
+            "мар"
+
+        Apr ->
+            "апр"
+
+        May ->
+            "май"
+
+        Jun ->
+            "июн"
+
+        Jul ->
+            "июл"
+
+        Aug ->
+            "авг"
+
+        Sep ->
+            "сент"
+
+        Oct ->
+            "окт"
+
+        Nov ->
+            "ноя"
+
+        Dec ->
+            "дек"
 
 
 formatMonth : Month -> String

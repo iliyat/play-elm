@@ -17,6 +17,7 @@ import Html.Attributes as Attr exposing (class, classList, style)
 import Html.Events as Events
 import Internal.Textfield exposing (Msg(..))
 import Char
+import Json.Decode as Json
 import Utils exposing (..)
 
 
@@ -104,6 +105,9 @@ update msg model config =
 
         Focus ->
             { model | isFocused = True } ! []
+
+        SubmitText ->
+            model ! []
 
         NoOp ->
             model ! []
@@ -201,7 +205,8 @@ view value_ model config =
                     ]
                 , Events.onFocus <| Focus
                 , Events.onBlur <| Blur
-                , Events.onInput (Input)
+                , Events.onInput Input
+                , Events.on "change" (Json.succeed SubmitText)
                 , Attr.value value
                 ]
                 []

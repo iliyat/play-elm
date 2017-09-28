@@ -39,7 +39,6 @@ type Msg
     | ChangeFocus Date
     | Pick (Maybe Date)
     | Text String
-    | SubmitText
     | Focus
     | Blur
     | MouseDown
@@ -197,19 +196,12 @@ update settings msg (DatePicker model) =
     case msg of
         TextfieldMsg tfMsg ->
             let
-                ( newTextfieldModel, _, textfieldEvent ) =
-                    Textfield.update
+                ( newTextfieldModel, newText ) =
+                    Textfield.externalUpdate
                         tfMsg
                         model.textfield
                         settings.textfieldConfig
-
-                newText =
-                    case textfieldEvent of
-                        Textfield.Changed newString ->
-                            newString
-
-                        _ ->
-                            model.inputText
+                        model.inputText
 
                 open =
                     case tfMsg of
@@ -230,13 +222,62 @@ update settings msg (DatePicker model) =
                         _ ->
                             model.forceOpen
             in
-                { model
-                    | textfield = newTextfieldModel
-                    , inputText = newText
-                    , open = open
-                    , forceOpen = forceOpen
-                }
-                    ! []
+                case tfMsg of
+                    Internal.Textfield.SubmitText ->
+                        let
+                            isWhitespace =
+                                String.trim >> String.isEmpty
+
+                            dateEvent =
+                                let
+                                    text =
+                                        model.inputText ?> ""
+                                in
+                                    if isWhitespace text then
+                                        Changed Nothing
+                                    else
+                                        text
+                                            |> settings.parser
+                                            |> Result.map
+                                                (Changed
+                                                    << (\date ->
+                                                            if settings.isDisabled date then
+                                                                Nothing
+                                                            else
+                                                                Just date
+                                                       )
+                                                )
+                                            |> Result.withDefault NoChange
+                        in
+                            ( DatePicker <|
+                                { model
+                                    | inputText =
+                                        case dateEvent of
+                                            Changed _ ->
+                                                Nothing
+
+                                            NoChange ->
+                                                model.inputText
+                                    , focused =
+                                        case dateEvent of
+                                            Changed _ ->
+                                                Nothing
+
+                                            NoChange ->
+                                                model.focused
+                                }
+                            , Cmd.none
+                            , dateEvent
+                            )
+
+                    _ ->
+                        { model
+                            | textfield = newTextfieldModel
+                            , inputText = newText
+                            , open = open
+                            , forceOpen = forceOpen
+                        }
+                            ! []
 
         CurrentDate date ->
             { model | focused = Just date, today = date } ! []
@@ -271,53 +312,6 @@ update settings msg (DatePicker model) =
         Text text ->
             { model | inputText = Just text } ! []
 
-        SubmitText ->
-            let
-                isWhitespace =
-                    String.trim >> String.isEmpty
-
-                dateEvent =
-                    let
-                        text =
-                            model.inputText ?> ""
-                    in
-                        if isWhitespace text then
-                            Changed Nothing
-                        else
-                            text
-                                |> settings.parser
-                                |> Result.map
-                                    (Changed
-                                        << (\date ->
-                                                if settings.isDisabled date then
-                                                    Nothing
-                                                else
-                                                    Just date
-                                           )
-                                    )
-                                |> Result.withDefault NoChange
-            in
-                ( DatePicker <|
-                    { model
-                        | inputText =
-                            case dateEvent of
-                                Changed _ ->
-                                    Nothing
-
-                                NoChange ->
-                                    model.inputText
-                        , focused =
-                            case dateEvent of
-                                Changed _ ->
-                                    Nothing
-
-                                NoChange ->
-                                    model.focused
-                    }
-                , Cmd.none
-                , dateEvent
-                )
-
         Focus ->
             { model | open = True, forceOpen = False } ! []
 
@@ -349,7 +343,6 @@ view pickedDate settings (DatePicker ({ open } as model)) =
             input
                 ([ Attrs.classList inputClasses
                  , type_ "text"
-                 , on "change" (Json.succeed SubmitText)
                  , onInput Text
                  , onBlur Blur
                  , onClick Focus
@@ -496,7 +489,7 @@ datePicker pickedDate settings ({ focused, today } as model) =
                 [ div [ class "year" ]
                     [ text <| settings.yearFormatter <| year currentMonth ]
                 , div [ class "current-date" ]
-                    [ text <| settings.dateFormatter <| today ]
+                    [ text <| formatCalendarHeaderDate today ]
                 ]
             , div [ class "body" ]
                 [ div [ class "dates-and-month-container" ]
