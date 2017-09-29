@@ -36,6 +36,14 @@ type alias Model =
     , radioModel2 : RadioButton.Model
     , ripple : Ripple.Model
     , textInput : Maybe String
+    , forPay : Textfield.Model
+    , forPayTextInput : Maybe String
+    , percent : Textfield.Model
+    , percentTextInput : Maybe String
+    , perDayPercent : Textfield.Model
+    , perDayPercentTextInput : Maybe String
+    , perDayAmount : Textfield.Model
+    , perDayAmountTextInput : Maybe String
     }
 
 
@@ -57,6 +65,14 @@ init =
         , radioModel1 = RadioButton.defaultModel
         , radioModel2 = RadioButton.defaultModel
         , ripple = Ripple.defaultModel
+        , forPay = Textfield.defaultModel
+        , percent = Textfield.defaultModel
+        , perDayPercent = Textfield.defaultModel
+        , perDayAmount = Textfield.defaultModel
+        , forPayTextInput = Nothing
+        , percentTextInput = Nothing
+        , perDayPercentTextInput = Nothing
+        , perDayAmountTextInput = Nothing
         }
             ! [ Cmd.map DatePickerMsg datePickerFx ]
 
@@ -417,6 +433,41 @@ view model =
     let
         ( rippleOptions, rippleStyles ) =
             Ripple.view False (RippleMsg) model.ripple () ()
+
+        defaultTextfield =
+            Textfield.defaultConfig
+
+        forPayConfig =
+            { defaultTextfield
+                | readonly = True
+                , defaultValue = Just "4000 ₽"
+                , labelText = Just "К выплате"
+                , asTitle = True
+            }
+
+        percentConfig =
+            { defaultTextfield
+                | readonly = True
+                , defaultValue = Just "1 896 ₽"
+                , labelText = Just "Процент по займу"
+                , asTitle = True
+            }
+
+        perDayPercentConfig =
+            { defaultTextfield
+                | readonly = True
+                , defaultValue = Just "1 896 %"
+                , labelText = Just "В среднем в день (%)"
+                , asTitle = True
+            }
+
+        perDayAmountConfig =
+            { defaultTextfield
+                | readonly = True
+                , defaultValue = Just "12 ₽"
+                , labelText = Just "В среднем в день (₽)"
+                , asTitle = True
+            }
     in
         Html.div []
             [ styled Html.div
@@ -490,6 +541,37 @@ view model =
                 , Elevation.z1
                 ]
                 [ styled div [ Typography.headline ] [ text "Расчет займа" ]
+                , styled div
+                    [ cs "loan-wrapper" ]
+                    [ div []
+                        [ Textfield.view
+                            model.forPayTextInput
+                            model.forPay
+                            forPayConfig
+                            |> Html.map TextfieldMsg
+                        ]
+                    , div []
+                        [ Textfield.view
+                            model.percentTextInput
+                            model.percent
+                            percentConfig
+                            |> Html.map TextfieldMsg
+                        ]
+                    , div []
+                        [ Textfield.view
+                            model.perDayPercentTextInput
+                            model.perDayPercent
+                            perDayPercentConfig
+                            |> Html.map TextfieldMsg
+                        ]
+                    , div []
+                        [ Textfield.view
+                            model.perDayAmountTextInput
+                            model.perDayAmount
+                            perDayAmountConfig
+                            |> Html.map TextfieldMsg
+                        ]
+                    ]
                 ]
             , Html.node "link" [ Html.Attributes.rel "stylesheet", Html.Attributes.href "mdc.css" ] []
             , Html.node "script" [ Html.Attributes.src "mdc.js" ] []

@@ -6,7 +6,7 @@ body {
   background: white;
   width: 1216px;
   margin: 50px auto;
-  padding: 20px 32px 32px 32px;
+  padding: 20px 32px;
 }
 
 .header {
@@ -27,11 +27,20 @@ body {
   display: flex;
   justify-content: space-between;
   align-items: baseline;
-  -webkit-user-select: none;
-  -moz-user-select: none;
-  -ms-user-select: none;
   user-select: none;
+  padding-bottom: 14px;
 }
 .mdc-form-field label {
   cursor: pointer;
+}
+.ui-textfield--readonly::after {
+  height: 0px !important;
+}
+.loan-wrapper {
+  display: flex;
+  padding-top: 12px;
+}
+
+.loan-wrapper > div {
+  padding-right: 32px;
 }

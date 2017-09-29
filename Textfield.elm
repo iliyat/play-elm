@@ -234,6 +234,7 @@ view value_ model config =
                 [ ( "mdc-textfield mdc-textfield--upgraded", True )
                 , ( "mdc-textfield--focused", isFocused )
                 , ( "mdc-textfield--disabled", config.disabled )
+                , ( "ui-textfield--readonly", config.readonly )
                 , ( "mdc-textfield--fullwidth", False )
                 , ( "mdc-textfield--invalid", False )
                 ]
