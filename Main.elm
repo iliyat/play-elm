@@ -114,6 +114,11 @@ sumSliderSecondaryConfig =
     SliderWithTextfield.withLimits swtConf1 2000 30000 1000
 
 
+periodSliderConfig : SliderWithTextfield.Config
+periodSliderConfig =
+    SliderWithTextfield.withLimits swtConf2 7 20 1
+
+
 swtConf2 : SliderWithTextfield.Config
 swtConf2 =
     let
@@ -179,6 +184,34 @@ currentSliderConfig model =
         sumSliderPrimaryConfig
     else
         sumSliderSecondaryConfig
+
+
+calculatePeriodSliderConfig : Model -> SliderWithTextfield.Config
+calculatePeriodSliderConfig model =
+    let
+        sum =
+            String.toInt (model.sumInputText |> Maybe.withDefault "0")
+                |> Result.withDefault 0
+
+        lessThan1000 =
+            if sum <= 10000 then
+                True
+            else
+                False
+
+        min =
+            if lessThan1000 then
+                7
+            else
+                20
+
+        max =
+            if lessThan1000 then
+                20
+            else
+                30
+    in
+        SliderWithTextfield.withLimits swtConf2 min max 1
 
 
 update : Msg -> Model -> ( Model, Cmd Msg )
@@ -251,39 +284,60 @@ update action model =
                 case value of
                     "primary" ->
                         let
-                            newValue =
+                            newSumInputText =
                                 checkLimit model.sumInputText sumSliderPrimaryConfig
 
-                            ( newSwtModel, newStr ) =
+                            newPeriodInputText =
+                                checkLimit model.periodInputText periodSliderConfig
+
+                            ( newSumSliderModel, _ ) =
                                 SliderWithTextfield.update
-                                    (SliderWithTextfield.TextfieldMsg (Internal.Textfield.Input (newValue |> Maybe.withDefault "0")))
+                                    (SliderWithTextfield.TextfieldMsg
+                                        (Internal.Textfield.Input (newSumInputText |> Maybe.withDefault "0"))
+                                    )
                                     model.sliderWithTextfield1
                                     sumSliderPrimaryConfig
                                     model.sumInputText
+
+                            ( newPeriodSliderModel, _ ) =
+                                SliderWithTextfield.update
+                                    (SliderWithTextfield.TextfieldMsg
+                                        (Internal.Textfield.Input (newPeriodInputText |> Maybe.withDefault "0"))
+                                    )
+                                    model.sliderWithTextfield1
+                                    periodSliderConfig
+                                    model.periodInputText
                         in
                             { model
                                 | radios = radios
-                                , sliderWithTextfield1 = newSwtModel
-                                , sumInputText = newStr
+                                , sliderWithTextfield1 = newSumSliderModel
+                                , sliderWithTextfield2 = newPeriodSliderModel
+                                , sumInputText = newSumInputText
                             }
                                 ! []
 
                     _ ->
                         let
-                            newValue =
-                                checkLimit model.sumInputText sumSliderSecondaryConfig
+                            newPeriodSliderConfig =
+                                calculatePeriodSliderConfig model
 
-                            ( newSwtModel, newStr ) =
+                            newPeriodInputText =
+                                checkLimit model.periodInputText
+                                    newPeriodSliderConfig
+
+                            ( newPeriodSliderModel, _ ) =
                                 SliderWithTextfield.update
-                                    (SliderWithTextfield.TextfieldMsg (Internal.Textfield.Input (newValue |> Maybe.withDefault "0")))
-                                    model.sliderWithTextfield1
-                                    sumSliderSecondaryConfig
-                                    model.sumInputText
+                                    (SliderWithTextfield.TextfieldMsg
+                                        (Internal.Textfield.Input (newPeriodInputText |> Maybe.withDefault "0"))
+                                    )
+                                    model.sliderWithTextfield2
+                                    newPeriodSliderConfig
+                                    model.periodInputText
                         in
                             { model
                                 | radios = radios
-                                , sliderWithTextfield1 = newSwtModel
-                                , sumInputText = newStr
+                                , sliderWithTextfield2 = newPeriodSliderModel
+                                , periodInputText = newPeriodInputText
                             }
                                 ! []
 
@@ -310,7 +364,7 @@ update action model =
 
         SliderWithTextfieldMsg1 msg_ ->
             let
-                ( newModel, newText ) =
+                ( newSumSliderModel, newText ) =
                     SliderWithTextfield.update
                         msg_
                         model.sliderWithTextfield1
@@ -318,7 +372,7 @@ update action model =
                         model.sumInputText
             in
                 { model
-                    | sliderWithTextfield1 = newModel
+                    | sliderWithTextfield1 = newSumSliderModel
                     , sumInputText =
                         newText
                 }
@@ -330,7 +384,7 @@ update action model =
                     SliderWithTextfield.update
                         msg_
                         model.sliderWithTextfield2
-                        swtConf2
+                        (calculatePeriodSliderConfig model)
                         model.periodInputText
             in
                 { model
@@ -418,7 +472,7 @@ view model =
                     , SliderWithTextfield.view
                         model.periodInputText
                         model.sliderWithTextfield2
-                        swtConf2
+                        (calculatePeriodSliderConfig model)
                         |> Html.map SliderWithTextfieldMsg2
                     , DatePicker.view
                         model.date
