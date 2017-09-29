@@ -27,6 +27,10 @@ body {
   display: flex;
   justify-content: space-between;
   align-items: baseline;
+  -webkit-user-select: none;
+  -moz-user-select: none;
+  -ms-user-select: none;
+  user-select: none;
 }
 .mdc-form-field label {
   cursor: pointer;

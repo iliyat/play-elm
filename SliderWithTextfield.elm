@@ -146,8 +146,6 @@ onSliderMsg msg model { sliderConfig, textfieldConfig } previousInputText =
                         | textfield = newTextfieldModel
                         , slider =
                             newSliderModel
-
-                        -- , inputText = newText
                       }
                     , newText
                     )
