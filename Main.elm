@@ -13,6 +13,7 @@ import Utils exposing (..)
 import Date exposing (Date)
 import Elevation
 import Typography
+import Internal.Textfield
 import Options exposing (styled, cs, css, when)
 import DatePicker
     exposing
@@ -26,6 +27,8 @@ type alias Model =
     { textfield : Textfield.Model
     , sliderWithTextfield1 : SliderWithTextfield.Model
     , sliderWithTextfield2 : SliderWithTextfield.Model
+    , sumInputText : Maybe String
+    , periodInputText : Maybe String
     , datePicker : DatePicker.DatePicker
     , date : Maybe Date
     , radios : Dict String String
@@ -46,6 +49,8 @@ init =
         , textInput = Nothing
         , sliderWithTextfield1 = SliderWithTextfield.defaultModel
         , sliderWithTextfield2 = SliderWithTextfield.defaultModel
+        , sumInputText = Just "2000"
+        , periodInputText = Just "2000"
         , datePicker = dp
         , date = Nothing
         , radios = Dict.fromList []
@@ -168,6 +173,14 @@ isPrimarySelected model =
         isSelected True "clientGroup" "primary"
 
 
+currentSliderConfig : Model -> SliderWithTextfield.Config
+currentSliderConfig model =
+    if isPrimarySelected model then
+        sumSliderPrimaryConfig
+    else
+        sumSliderSecondaryConfig
+
+
 update : Msg -> Model -> ( Model, Cmd Msg )
 update action model =
     case action of
@@ -213,11 +226,66 @@ update action model =
                 radio =
                     Dict.get group model.radios
                         |> Maybe.withDefault ""
+
+                checkLimit stringValue sliderConfig =
+                    let
+                        min =
+                            .min <| .sliderConfig <| sliderConfig
+
+                        max =
+                            .max <| .sliderConfig <| sliderConfig
+
+                        v =
+                            toFloat <| (String.toInt (stringValue |> Maybe.withDefault "0") |> Result.withDefault 0)
+                    in
+                        if v > max then
+                            Just <| toString max
+                        else if v < min then
+                            Just <| toString min
+                        else
+                            stringValue
+
+                radios =
+                    Dict.insert group value model.radios
             in
-                { model
-                    | radios = Dict.insert group value model.radios
-                }
-                    ! []
+                case value of
+                    "primary" ->
+                        let
+                            newValue =
+                                checkLimit model.sumInputText sumSliderPrimaryConfig
+
+                            ( newSwtModel, newStr ) =
+                                SliderWithTextfield.update
+                                    (SliderWithTextfield.TextfieldMsg (Internal.Textfield.Input (newValue |> Maybe.withDefault "0")))
+                                    model.sliderWithTextfield1
+                                    sumSliderPrimaryConfig
+                                    model.sumInputText
+                        in
+                            { model
+                                | radios = radios
+                                , sliderWithTextfield1 = newSwtModel
+                                , sumInputText = newStr
+                            }
+                                ! []
+
+                    _ ->
+                        let
+                            newValue =
+                                checkLimit model.sumInputText sumSliderSecondaryConfig
+
+                            ( newSwtModel, newStr ) =
+                                SliderWithTextfield.update
+                                    (SliderWithTextfield.TextfieldMsg (Internal.Textfield.Input (newValue |> Maybe.withDefault "0")))
+                                    model.sliderWithTextfield1
+                                    sumSliderSecondaryConfig
+                                    model.sumInputText
+                        in
+                            { model
+                                | radios = radios
+                                , sliderWithTextfield1 = newSwtModel
+                                , sumInputText = newStr
+                            }
+                                ! []
 
         DatePickerMsg msg ->
             let
@@ -242,27 +310,35 @@ update action model =
 
         SliderWithTextfieldMsg1 msg_ ->
             let
-                ( new, _ ) =
+                ( newModel, newText ) =
                     SliderWithTextfield.update
                         msg_
                         model.sliderWithTextfield1
-                        (if isPrimarySelected model then
-                            sumSliderPrimaryConfig
-                         else
-                            sumSliderSecondaryConfig
-                        )
+                        (currentSliderConfig model)
+                        model.sumInputText
             in
-                { model | sliderWithTextfield1 = new } ! []
+                { model
+                    | sliderWithTextfield1 = newModel
+                    , sumInputText =
+                        newText
+                }
+                    ! []
 
         SliderWithTextfieldMsg2 msg_ ->
             let
-                ( new, _ ) =
+                ( newModel, newText ) =
                     SliderWithTextfield.update
                         msg_
                         model.sliderWithTextfield2
                         swtConf2
+                        model.periodInputText
             in
-                { model | sliderWithTextfield2 = new } ! []
+                { model
+                    | sliderWithTextfield2 = newModel
+                    , periodInputText =
+                        newText
+                }
+                    ! []
 
         TextfieldMsg msg_ ->
             let
@@ -335,14 +411,12 @@ view model =
                 , styled div
                     [ cs "fields" ]
                     [ SliderWithTextfield.view
+                        model.sumInputText
                         model.sliderWithTextfield1
-                        (if isPrimarySelected model then
-                            sumSliderPrimaryConfig
-                         else
-                            sumSliderSecondaryConfig
-                        )
+                        (currentSliderConfig model)
                         |> Html.map SliderWithTextfieldMsg1
                     , SliderWithTextfield.view
+                        model.periodInputText
                         model.sliderWithTextfield2
                         swtConf2
                         |> Html.map SliderWithTextfieldMsg2

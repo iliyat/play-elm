@@ -24,7 +24,6 @@ rusLocale =
 type alias Model =
     { slider : Slider.Model
     , textfield : Textfield.Model
-    , inputText : Maybe String
     }
 
 
@@ -60,10 +59,6 @@ withLimits config min max steps =
                 , steps = steps
                 , value = value
             }
-
-        -- { textfieldConfig
-        --     | defaultValue = Just "2000"
-        -- }
     in
         { config | sliderConfig = updatedSlider }
 
@@ -102,7 +97,6 @@ defaultModel : Model
 defaultModel =
     { slider = Slider.defaultModel
     , textfield = Textfield.defaultModel
-    , inputText = Nothing
     }
 
 
@@ -125,8 +119,8 @@ discretize value sliderConfig =
             discretizedValue
 
 
-onSliderMsg : Slider.Msg -> Model -> Config -> Model
-onSliderMsg msg model { sliderConfig, textfieldConfig } =
+onSliderMsg : Slider.Msg -> Model -> Config -> Maybe String -> ( Model, Maybe String )
+onSliderMsg msg model { sliderConfig, textfieldConfig } previousInputText =
     let
         ( newSliderModel, _ ) =
             Slider.update msg model.slider
@@ -146,28 +140,35 @@ onSliderMsg msg model { sliderConfig, textfieldConfig } =
                             )
                             model.textfield
                             textfieldConfig
-                            model.inputText
+                            previousInputText
                 in
-                    ({ model
+                    ( { model
                         | textfield = newTextfieldModel
                         , slider =
                             newSliderModel
-                        , inputText = newText
-                     }
+
+                        -- , inputText = newText
+                      }
+                    , newText
                     )
 
             _ ->
-                ({ model | slider = newSliderModel })
+                ( { model | slider = newSliderModel }, previousInputText )
 
 
-onTextfieldMsg : Textfield.Msg -> Model -> Config -> Model
-onTextfieldMsg msg model { sliderConfig, textfieldConfig } =
+onTextfieldMsg :
+    Textfield.Msg
+    -> Model
+    -> Config
+    -> Maybe String
+    -> ( Model, Maybe String )
+onTextfieldMsg msg model { sliderConfig, textfieldConfig } previousInputText =
     let
         ( newTextfieldModel, newText ) =
             Textfield.externalUpdate msg
                 model.textfield
                 textfieldConfig
-                model.inputText
+                previousInputText
 
         discretizedTextfieldValue =
             discretize
@@ -188,13 +189,12 @@ onTextfieldMsg msg model { sliderConfig, textfieldConfig } =
                             (Internal.Textfield.Input <| toString discretizedTextfieldValue)
                             newTextfieldModel
                             textfieldConfig
-                            model.inputText
+                            previousInputText
                 in
-                    ({ model
+                    ( { model
                         | textfield = newTextfieldModel1
-                        , inputText =
-                            newText
-                     }
+                      }
+                    , newText
                     )
 
             Internal.Textfield.Input str ->
@@ -204,7 +204,7 @@ onTextfieldMsg msg model { sliderConfig, textfieldConfig } =
                             (Internal.Textfield.Input <| str)
                             model.textfield
                             textfieldConfig
-                            model.inputText
+                            previousInputText
 
                     ( newSliderModel, _ ) =
                         Slider.update
@@ -213,29 +213,29 @@ onTextfieldMsg msg model { sliderConfig, textfieldConfig } =
                             )
                             model.slider
                 in
-                    ({ model
+                    ( { model
                         | textfield = newTextfieldModel
                         , slider = newSliderModel
-                        , inputText = newText
-                     }
+                      }
+                    , newText
                     )
 
             _ ->
-                ({ model | textfield = newTextfieldModel })
+                ( { model | textfield = newTextfieldModel }, previousInputText )
 
 
-update : Msg -> Model -> Config -> ( Model, Cmd Msg )
-update msg model config =
+update : Msg -> Model -> Config -> Maybe String -> ( Model, Maybe String )
+update msg model config previousInputText =
     case msg of
         SliderMsg msg_ ->
-            ( onSliderMsg msg_ model config, Cmd.none )
+            onSliderMsg msg_ model config previousInputText
 
         TextfieldMsg msg_ ->
-            ( onTextfieldMsg msg_ model config, Cmd.none )
+            onTextfieldMsg msg_ model config previousInputText
 
 
-view : Model -> Config -> Html Msg
-view model { sliderConfig, textfieldConfig, extraPlural, extraStatic } =
+view : Maybe String -> Model -> Config -> Html Msg
+view inputText model { sliderConfig, textfieldConfig, extraPlural, extraStatic } =
     let
         extra =
             (++) (extraStatic |> Maybe.withDefault "" |> (++) " ")
@@ -256,7 +256,7 @@ view model { sliderConfig, textfieldConfig, extraPlural, extraStatic } =
                         ]
                     ]
                     [ Textfield.view
-                        model.inputText
+                        inputText
                         model.textfield
                         textfieldConfig
                         |> Html.map TextfieldMsg
