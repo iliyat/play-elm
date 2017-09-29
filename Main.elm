@@ -440,7 +440,9 @@ view model =
         forPayConfig =
             { defaultTextfield
                 | readonly = True
-                , defaultValue = Just "4000 ₽"
+                , numbered = True
+                , extraInside = Just "₽"
+                , defaultValue = Just "40000"
                 , labelText = Just "К выплате"
                 , asTitle = True
             }
@@ -448,7 +450,9 @@ view model =
         percentConfig =
             { defaultTextfield
                 | readonly = True
-                , defaultValue = Just "1 896 ₽"
+                , extraInside = Just "₽"
+                , numbered = True
+                , defaultValue = Just "1896"
                 , labelText = Just "Процент по займу"
                 , asTitle = True
             }
@@ -456,7 +460,9 @@ view model =
         perDayPercentConfig =
             { defaultTextfield
                 | readonly = True
-                , defaultValue = Just "1 896 %"
+                , extraInside = Just "%"
+                , numbered = True
+                , defaultValue = Just "1896"
                 , labelText = Just "В среднем в день (%)"
                 , asTitle = True
             }
@@ -464,7 +470,9 @@ view model =
         perDayAmountConfig =
             { defaultTextfield
                 | readonly = True
-                , defaultValue = Just "12 ₽"
+                , extraInside = Just "₽"
+                , numbered = True
+                , defaultValue = Just "12"
                 , labelText = Just "В среднем в день (₽)"
                 , asTitle = True
             }

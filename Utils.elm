@@ -1,4 +1,4 @@
-module Utils exposing (rusLocale, pluralize)
+module Utils exposing (rusLocale, pluralize, Plural, Plural(..))
 
 import FormatNumber.Locales exposing (Locale)
 

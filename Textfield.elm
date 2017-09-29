@@ -18,7 +18,9 @@ import Html.Events as Events
 import Internal.Textfield exposing (Msg(..))
 import Char
 import Json.Decode as Json
+import Regex
 import Utils exposing (..)
+import FormatNumber exposing (format)
 
 
 type alias Model =
@@ -71,18 +73,12 @@ update msg model config =
                 dirty =
                     str /= (config.defaultValue |> Maybe.withDefault "")
 
-                allDigits =
-                    String.all Char.isDigit str
-
-                numberedValue =
-                    if allDigits then
-                        Just str
-                    else
-                        Nothing
+                numerize =
+                    Regex.replace Regex.All (Regex.regex "\\D") (\_ -> "")
 
                 newValue =
                     if config.numbered then
-                        numberedValue
+                        Just <| numerize str
                     else
                         Just str
             in
@@ -125,6 +121,7 @@ type alias Config =
     , fullWidth : Bool
     , invalid : Bool
     , extra : Maybe String
+    , extraInside : Maybe String
     , numbered : Bool
     , readonly : Bool
     , plural : Maybe Plural
@@ -147,6 +144,7 @@ defaultConfig =
     , numbered = False
     , readonly = False
     , plural = Nothing
+    , extraInside = Nothing
     }
 
 
@@ -187,8 +185,20 @@ view value_ model config =
         extra =
             config.extra |> Maybe.withDefault ""
 
+        extraInside =
+            Maybe.map (\e -> " " ++ e) config.extraInside |> Maybe.withDefault ""
+
         intValue =
             String.toInt value |> Result.withDefault 0
+
+        floatValue =
+            intValue |> toFloat
+
+        displayValue =
+            if config.numbered then
+                (format rusLocale floatValue)
+            else
+                value
 
         pl =
             Maybe.map (flip Utils.pluralize intValue) config.plural
@@ -207,7 +217,7 @@ view value_ model config =
                 , Events.onBlur <| Blur
                 , Events.onInput Input
                 , Events.on "change" (Json.succeed SubmitText)
-                , Attr.value value
+                , Attr.value displayValue
                 ]
                 []
 
@@ -221,7 +231,7 @@ view value_ model config =
                     [ ( "mdc-textfield__input", True )
                     ]
                 ]
-                [ text value ]
+                [ text <| displayValue ++ extraInside ]
 
         contentHtml =
             if config.readonly then

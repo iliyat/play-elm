@@ -8,7 +8,7 @@ import Internal.Textfield
 import Internal.Slider
 import SliderCss exposing (..)
 import FormatNumber exposing (format)
-import Utils exposing (rusLocale)
+import Utils exposing (rusLocale, Plural)
 
 
 ({ class } as class_) =
