@@ -1,8 +1,15 @@
-module Utils exposing (..)
+module Utils exposing (rusLocale, pluralize)
+
+import FormatNumber.Locales exposing (Locale)
 
 
 type Plural
     = Plural String String String
+
+
+rusLocale : Locale
+rusLocale =
+    Locale 0 " " "." "-" ""
 
 
 pluralize : Plural -> Int -> String

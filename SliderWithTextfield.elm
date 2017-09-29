@@ -7,14 +7,8 @@ import Textfield
 import Internal.Textfield
 import Internal.Slider
 import SliderCss exposing (..)
-import FormatNumber.Locales exposing (Locale)
 import FormatNumber exposing (format)
-import Utils exposing (..)
-
-
-rusLocale : Locale
-rusLocale =
-    Locale 0 " " "." "-" ""
+import Utils exposing (rusLocale)
 
 
 ({ class } as class_) =
