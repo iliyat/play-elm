@@ -39,15 +39,31 @@ type alias Config =
 withLimits : Config -> Float -> Float -> Int -> Config
 withLimits config min max steps =
     let
-        slider =
+        sliderConfig =
             config.sliderConfig
 
+        textfieldConfig =
+            config.textfieldConfig
+
+        value =
+            if sliderConfig.value > max then
+                max
+            else if sliderConfig.value < min then
+                min
+            else
+                sliderConfig.value
+
         updatedSlider =
-            { slider
+            { sliderConfig
                 | min = min
                 , max = max
                 , steps = steps
+                , value = value
             }
+
+        -- { textfieldConfig
+        --     | defaultValue = Just "2000"
+        -- }
     in
         { config | sliderConfig = updatedSlider }
 
@@ -107,27 +123,6 @@ discretize value sliderConfig =
             sliderConfig.min
         else
             discretizedValue
-
-
-
--- newTf : Textfield.Msg -> Model -> Textfield.Config -> ( Textfield.Model, Maybe String )
--- newTf msg model textfieldConfig =
---     let
---         ( newTextfieldModel, _, textfieldEvent ) =
---             Textfield.update
---                 msg
---                 model.textfield
---                 textfieldConfig
---
---         newText =
---             case textfieldEvent of
---                 Textfield.Changed newString ->
---                     newString
---
---                 _ ->
---                     model.inputText
---     in
---         ( newTextfieldModel, newText )
 
 
 onSliderMsg : Slider.Msg -> Model -> Config -> Model

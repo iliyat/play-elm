@@ -275,7 +275,6 @@ update action model =
             in
                 { model | textfield = newTextfieldModel, textInput = newText } ! []
 
-        --
         Select n ->
             model ! []
 
