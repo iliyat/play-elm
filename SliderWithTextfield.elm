@@ -124,31 +124,27 @@ onSliderMsg msg model { sliderConfig, textfieldConfig } previousInputText =
     let
         ( newSliderModel, _ ) =
             Slider.update msg model.slider
+
+        discretizedValue =
+            discretize newSliderModel.value sliderConfig
+
+        ( newTextfieldModel, newText ) =
+            Textfield.externalUpdate
+                (Internal.Textfield.Input
+                    (toString
+                        discretizedValue
+                    )
+                )
+                model.textfield
+                textfieldConfig
+                previousInputText
     in
         case msg of
             Internal.Slider.MouseDrag pos ->
-                let
-                    discretizedValue =
-                        discretize newSliderModel.value sliderConfig
+                ( { model | textfield = newTextfieldModel, slider = newSliderModel }, newText )
 
-                    ( newTextfieldModel, newText ) =
-                        Textfield.externalUpdate
-                            (Internal.Textfield.Input
-                                (toString
-                                    discretizedValue
-                                )
-                            )
-                            model.textfield
-                            textfieldConfig
-                            previousInputText
-                in
-                    ( { model
-                        | textfield = newTextfieldModel
-                        , slider =
-                            newSliderModel
-                      }
-                    , newText
-                    )
+            Internal.Slider.MouseUp pos ->
+                ( { model | textfield = newTextfieldModel, slider = newSliderModel }, newText )
 
             _ ->
                 ( { model | slider = newSliderModel }, previousInputText )
