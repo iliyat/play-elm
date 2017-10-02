@@ -30,6 +30,7 @@ import Ui.DatePickerDate exposing (..)
 import Ui.Textfield as Textfield
 import Ui.Internal.Textfield as InternalTextfield
 import Icons.Icon as Icon
+import Regex
 
 
 type Msg
@@ -81,7 +82,7 @@ defaultSettings =
         [ Attrs.required False
         ]
     , isDisabled = always False
-    , parser = Date.fromString
+    , parser = fromString
     , dateFormatter = formatDate
     , dayFormatter = formatDay
     , monthFormatter = formatMonth
@@ -97,7 +98,10 @@ withLabel : String -> Settings
 withLabel label =
     let
         setLabel tfConfig =
-            { tfConfig | labelText = Just label }
+            { tfConfig
+                | labelText = Just label
+                , mask = Just "##.##.####"
+            }
     in
         { defaultSettings
             | textfieldConfig = setLabel defaultSettings.textfieldConfig
@@ -230,22 +234,15 @@ update settings msg (DatePicker model) =
                                 let
                                     text =
                                         model.inputText ?> ""
+
+                                    inputDate =
+                                        Result.withDefault model.today
+                                            (fromString <| text)
                                 in
                                     if isWhitespace text then
                                         Changed Nothing
                                     else
-                                        text
-                                            |> settings.parser
-                                            |> Result.map
-                                                (Changed
-                                                    << (\date ->
-                                                            if settings.isDisabled date then
-                                                                Nothing
-                                                            else
-                                                                Just date
-                                                       )
-                                                )
-                                            |> Result.withDefault NoChange
+                                        Changed (Just inputDate)
                         in
                             ( DatePicker <|
                                 { model
@@ -337,6 +334,9 @@ view pickedDate settings (DatePicker ({ open } as model)) =
         inputClasses =
             [ ( settings.classNamespace ++ "input", True ) ]
 
+        replaceDots =
+            Regex.replace Regex.All (Regex.regex "\\.") (\_ -> "")
+
         dateInput =
             Textfield.view
                 (Just <|
@@ -345,6 +345,7 @@ view pickedDate settings (DatePicker ({ open } as model)) =
                             (Maybe.map settings.dateFormatter pickedDate
                                 |> Maybe.withDefault ""
                             )
+                        |> replaceDots
                     )
                 )
                 model.textfield

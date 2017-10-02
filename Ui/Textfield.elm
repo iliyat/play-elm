@@ -15,16 +15,18 @@ module Ui.Textfield
 import Html exposing (Html, span, input, label, text, div, button, Attribute)
 import Html.Attributes as Attr exposing (class, classList, style)
 import Html.Events as Events
-import Ui.Internal.Textfield exposing (Msg(..))
+import Ui.Internal.Textfield as InternalTextfield exposing (..)
 import Json.Decode as Json
 import Regex
 import Utils.General as Utils exposing (..)
 import FormatNumber exposing (format)
+import MaskedInput.Text as MaskedText
 
 
 type alias Model =
     { isFocused : Bool
     , isDirty : Bool
+    , maskedState : MaskedText.State
     }
 
 
@@ -32,11 +34,12 @@ defaultModel : Model
 defaultModel =
     { isFocused = False
     , isDirty = False
+    , maskedState = MaskedText.initialState
     }
 
 
 type alias Msg =
-    Ui.Internal.Textfield.Msg
+    InternalTextfield.Msg
 
 
 type TextfieldEvent
@@ -66,46 +69,53 @@ externalUpdate msg model textfieldConfig previousText =
 
 update : Msg -> Model -> Config -> ( Model, Cmd m, TextfieldEvent )
 update msg model config =
-    case msg of
-        Input str ->
-            let
-                dirty =
-                    str /= (config.defaultValue |> Maybe.withDefault "")
+    let
+        numerize =
+            Regex.replace Regex.All (Regex.regex "[^0-9]") (\_ -> "")
 
-                numerize =
-                    Regex.replace Regex.All (Regex.regex "\\D") (\_ -> "")
+        numberedValue str =
+            if config.numbered || config.mask /= Nothing then
+                Just <| numerize str
+            else
+                Just str
+    in
+        case msg of
+            Input str ->
+                let
+                    dirty =
+                        str /= (config.defaultValue |> Maybe.withDefault "")
+                in
+                    ( { model | isDirty = dirty }, Cmd.none, Changed (numberedValue str) )
 
-                newValue =
-                    if config.numbered then
-                        Just <| numerize str
-                    else
-                        Just str
-            in
-                ( { model | isDirty = dirty }, Cmd.none, Changed newValue )
+            SetValue str ->
+                let
+                    dirty =
+                        case config.defaultValue of
+                            Just a ->
+                                a /= str
 
-        SetValue str ->
-            let
-                dirty =
-                    case config.defaultValue of
-                        Just a ->
-                            a /= str
+                            _ ->
+                                True
+                in
+                    { model | isDirty = dirty } ! []
 
-                        _ ->
-                            True
-            in
-                { model | isDirty = dirty } ! []
+            Blur ->
+                { model | isFocused = False } ! []
 
-        Blur ->
-            { model | isFocused = False } ! []
+            Focus ->
+                { model | isFocused = True } ! []
 
-        Focus ->
-            { model | isFocused = True } ! []
+            InputStateChanged state ->
+                { model | maskedState = state } ! []
 
-        SubmitText ->
-            model ! []
+            FocusChanged bool ->
+                model ! []
 
-        NoOp ->
-            model ! []
+            SubmitText ->
+                model ! []
+
+            NoOp ->
+                model ! []
 
 
 type alias Config =
@@ -124,6 +134,7 @@ type alias Config =
     , numbered : Bool
     , readonly : Bool
     , plural : Maybe Plural
+    , mask : Maybe String
     }
 
 
@@ -144,7 +155,23 @@ defaultConfig =
     , readonly = False
     , plural = Nothing
     , extraInside = Nothing
+    , mask = Nothing
     }
+
+
+maskedInputOptions : Config -> MaskedText.Options Msg
+maskedInputOptions config =
+    let
+        defaultOptions =
+            MaskedText.defaultOptions Input InputStateChanged
+
+        mask =
+            config.mask |> Maybe.withDefault ""
+    in
+        { defaultOptions
+            | pattern = mask
+            , hasFocus = Just FocusChanged
+        }
 
 
 view : Maybe String -> Model -> Config -> Html Msg
@@ -203,15 +230,24 @@ view value_ model config =
             Maybe.map (flip Utils.pluralize intValue) config.plural
                 |> Maybe.withDefault ""
 
+        maskedInputHtml =
+            MaskedText.input
+                (maskedInputOptions config)
+                [ classList
+                    [ ( "mdc-textfield__input", True )
+                    ]
+                , Events.on "change" (Json.succeed SubmitText)
+                , Events.onFocus <| Focus
+                , Events.onBlur <| Blur
+                ]
+                model.maskedState
+                value
+
         inputHtml =
             input
                 [ Attr.type_ "text"
-                , style
-                    [ ( "font-size", fontSize )
-                    ]
-                , classList
-                    [ ( "mdc-textfield__input", True )
-                    ]
+                , style [ ( "font-size", fontSize ) ]
+                , classList [ ( "mdc-textfield__input", True ) ]
                 , Events.onFocus <| Focus
                 , Events.onBlur <| Blur
                 , Events.onInput Input
@@ -235,6 +271,8 @@ view value_ model config =
         contentHtml =
             if config.readonly then
                 divHtml
+            else if config.mask /= Nothing then
+                maskedInputHtml
             else
                 inputHtml
     in

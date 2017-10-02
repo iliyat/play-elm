@@ -1,5 +1,7 @@
 module Ui.Internal.Textfield exposing (Msg(..))
 
+import MaskedInput.Text as MaskedText
+
 
 type Msg
     = Blur
@@ -8,3 +10,5 @@ type Msg
     | SubmitText
     | SetValue String
     | NoOp
+    | FocusChanged Bool
+    | InputStateChanged MaskedText.State

@@ -16,9 +16,11 @@ module Ui.DatePickerDate
         , newYear
         , yearRange
         , formatCalendarHeaderDate
+        , fromString
         )
 
 import Date exposing (Date, Day(..), Month(..), year, month, day)
+import Regex
 
 
 type alias Year =
@@ -35,6 +37,42 @@ type YearRange
     | Between Year Year
     | From Year
     | To Year
+
+
+distruct : String -> ( String, String, String )
+distruct text =
+    let
+        addDot d =
+            if String.length d > 1 then
+                d ++ "."
+            else
+                d
+
+        day =
+            String.left 2 text
+
+        month =
+            (String.dropLeft 2 >> String.left 2) text
+
+        year =
+            (String.dropLeft 4 >> String.left 4) text
+    in
+        ( addDot day, addDot month, year )
+
+
+fromString : String -> Result String Date
+fromString text_ =
+    let
+        numerize =
+            Regex.replace Regex.All (Regex.regex "[^0-9]") (\_ -> "")
+
+        text =
+            numerize text_
+
+        parsed ( day, month, year ) =
+            month ++ day ++ year
+    in
+        Date.fromString <| parsed <| distruct text
 
 
 initDate : Date
