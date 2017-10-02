@@ -91,7 +91,7 @@ defaultSettings =
     , yearFormatter = toString
     , cellFormatter = formatCell
     , firstDayOfWeek = Mon
-    , changeYear = between 2000 2030
+    , changeYear = between 1990 2050
     , textfieldConfig = Textfield.defaultConfig
     }
 

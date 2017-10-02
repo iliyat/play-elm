@@ -172,8 +172,7 @@ textfieldConfig =
             Textfield.defaultConfig
     in
         { dc
-            | defaultValue = Just "Промокод"
-            , readonly = False
+            | readonly = False
             , labelText = Just "Промокод"
         }
 
