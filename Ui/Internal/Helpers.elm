@@ -1,4 +1,4 @@
-module Internal.Helpers
+module Ui.Internal.Helpers
     exposing
         ( filter
         , blurOn

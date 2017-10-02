@@ -1,4 +1,4 @@
-module Dispatch
+module Ui.Dispatch
     exposing
         ( Config
         , toAttributes
@@ -48,7 +48,7 @@ To see how they are used in [elm-mdl](http://package.elm-lang.org/packages/deboi
 import Html
 import Html.Events
 import Json.Decode as Json exposing (Decoder)
-import Internal.Dispatch exposing (Config(..))
+import Ui.Internal.Dispatch exposing (Config(..))
 import Task
 
 
@@ -58,7 +58,7 @@ import Task
 {-| Dispatch configuration type
 -}
 type alias Config msg =
-    Internal.Dispatch.Config msg
+    Ui.Internal.Dispatch.Config msg
 
 
 {-| Empty configuration

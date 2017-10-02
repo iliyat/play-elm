@@ -3,19 +3,19 @@ module Main exposing (..)
 import Html exposing (..)
 import Html.Attributes exposing (..)
 import Html.Events as Events
-import Slider
-import Textfield
-import SliderWithTextfield
-import RadioButton
-import Ripple
 import Dict exposing (Dict)
-import Utils exposing (..)
 import Date exposing (Date)
-import Elevation
-import Typography
-import Internal.Textfield
-import Options exposing (styled, cs, css, when)
-import DatePicker
+import Ui.Slider as Slider
+import Ui.Textfield as Textfield
+import Ui.SliderWithTextfield as SliderWithTextfield
+import Ui.RadioButton as RadioButton
+import Ui.Ripple as Ripple
+import Utils.General exposing (..)
+import Ui.Elevation as Elevation
+import Ui.Typography as Typography
+import Ui.Internal.Textfield as InternalTextfield
+import Ui.Options as Options exposing (styled, cs, css, when)
+import Ui.DatePicker as DatePicker
     exposing
         ( defaultSettings
         , DateEvent(..)
@@ -309,7 +309,7 @@ update action model =
                             ( newSumSliderModel, _ ) =
                                 SliderWithTextfield.update
                                     (SliderWithTextfield.TextfieldMsg
-                                        (Internal.Textfield.Input (newSumInputText |> Maybe.withDefault "0"))
+                                        (InternalTextfield.Input (newSumInputText |> Maybe.withDefault "0"))
                                     )
                                     model.sliderWithTextfield1
                                     sumSliderPrimaryConfig
@@ -318,7 +318,7 @@ update action model =
                             ( newPeriodSliderModel, _ ) =
                                 SliderWithTextfield.update
                                     (SliderWithTextfield.TextfieldMsg
-                                        (Internal.Textfield.Input (newPeriodInputText |> Maybe.withDefault "0"))
+                                        (InternalTextfield.Input (newPeriodInputText |> Maybe.withDefault "0"))
                                     )
                                     model.sliderWithTextfield1
                                     periodSliderConfig
@@ -344,7 +344,7 @@ update action model =
                             ( newPeriodSliderModel, _ ) =
                                 SliderWithTextfield.update
                                     (SliderWithTextfield.TextfieldMsg
-                                        (Internal.Textfield.Input (newPeriodInputText |> Maybe.withDefault "0"))
+                                        (InternalTextfield.Input (newPeriodInputText |> Maybe.withDefault "0"))
                                     )
                                     model.sliderWithTextfield2
                                     newPeriodSliderConfig

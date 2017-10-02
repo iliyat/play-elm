@@ -1,4 +1,4 @@
-module Internal.Textfield exposing (Msg(..))
+module Ui.Internal.Textfield exposing (Msg(..))
 
 
 type Msg

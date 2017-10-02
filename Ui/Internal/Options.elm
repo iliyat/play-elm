@@ -1,11 +1,11 @@
-module Internal.Options exposing (..)
+module Ui.Internal.Options exposing (..)
 
 import Char
 import Html.Attributes
 import Html.Events
 import Html exposing (Html, Attribute)
 import Json.Decode as Json exposing (Decoder)
-import Dispatch as Dispatch
+import Ui.Dispatch as Dispatch
 
 
 -- import Msg exposing (Msg(..))

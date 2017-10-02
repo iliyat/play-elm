@@ -1,7 +1,7 @@
 module DatepickerDemo exposing (main)
 
 import Date exposing (Date, Day(..), day, dayOfWeek, month, year)
-import DatePicker
+import Ui.DatePicker as DatePicker
     exposing
         ( defaultSettings
         , DateEvent(..)

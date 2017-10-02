@@ -1,4 +1,4 @@
-module Elevation
+module Ui.Elevation
     exposing
         ( z0
         , z1
@@ -46,7 +46,7 @@ movement. An object’s elevation determines the appearance of its shadow.
 
 -}
 
-import Options exposing (..)
+import Ui.Options exposing (..)
 
 
 z0 : Property a m

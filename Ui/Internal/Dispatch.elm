@@ -1,4 +1,4 @@
-module Internal.Dispatch exposing (Config(..))
+module Ui.Internal.Dispatch exposing (Config(..))
 
 import Html.Events
 import Json.Decode exposing (Decoder)

@@ -1,4 +1,4 @@
-module Options
+module Ui.Options
     exposing
         ( Property
         , cs
@@ -49,7 +49,7 @@ import Html exposing (Html, Attribute)
 import Html.Attributes
 import Html.Events
 import Json.Decode as Json
-import Internal.Options as Internal exposing (..)
+import Ui.Internal.Options as Internal exposing (..)
 
 
 -- PROPERTIES

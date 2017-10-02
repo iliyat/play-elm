@@ -1,4 +1,4 @@
-module Internal.Menu
+module Ui.Internal.Menu
     exposing
         ( Geometry
         , Element

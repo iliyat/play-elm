@@ -1,4 +1,4 @@
-module Internal.Ripple exposing (Msg(..), Geometry, defaultGeometry)
+module Ui.Internal.Ripple exposing (Msg(..), Geometry, defaultGeometry)
 
 import DOM exposing (Rectangle)
 

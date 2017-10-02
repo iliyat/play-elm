@@ -1,18 +1,22 @@
-module SliderWithTextfield exposing (..)
+module Ui.SliderWithTextfield exposing (..)
 
 import Html exposing (..)
 import Html.Attributes exposing (style, class)
-import Slider
-import Textfield
-import Internal.Textfield
-import Internal.Slider
-import SliderCss exposing (..)
+import Ui.Slider as Slider
+import Ui.Textfield as Textfield
+import Ui.Internal.Textfield as InternalTextfield
+import Ui.Internal.Slider as InternalSlider
+
+
+-- import SliderCss exposing (..)
+
 import FormatNumber exposing (format)
-import Utils exposing (rusLocale, Plural)
+import Utils.General exposing (rusLocale, Plural)
 
 
-({ class } as class_) =
-    sliderNamespace
+-- ({ class } as class_) =
+--     sliderNamespace
+--
 
 
 type alias Model =
@@ -124,7 +128,7 @@ onSliderMsg msg model { sliderConfig, textfieldConfig } previousInputText =
 
         ( newTextfieldModel, newText ) =
             Textfield.externalUpdate
-                (Internal.Textfield.Input
+                (InternalTextfield.Input
                     (toString
                         discretizedValue
                     )
@@ -134,10 +138,10 @@ onSliderMsg msg model { sliderConfig, textfieldConfig } previousInputText =
                 previousInputText
     in
         case msg of
-            Internal.Slider.MouseDrag pos ->
+            InternalSlider.MouseDrag pos ->
                 ( { model | textfield = newTextfieldModel, slider = newSliderModel }, newText )
 
-            Internal.Slider.MouseUp pos ->
+            InternalSlider.MouseUp pos ->
                 ( { model | textfield = newTextfieldModel, slider = newSliderModel }, newText )
 
             _ ->
@@ -170,11 +174,11 @@ onTextfieldMsg msg model { sliderConfig, textfieldConfig } previousInputText =
                 sliderConfig
     in
         case msg of
-            Internal.Textfield.Blur ->
+            InternalTextfield.Blur ->
                 let
                     ( newTextfieldModel1, newText ) =
                         Textfield.externalUpdate
-                            (Internal.Textfield.Input <| toString discretizedTextfieldValue)
+                            (InternalTextfield.Input <| toString discretizedTextfieldValue)
                             newTextfieldModel
                             textfieldConfig
                             previousInputText
@@ -185,18 +189,18 @@ onTextfieldMsg msg model { sliderConfig, textfieldConfig } previousInputText =
                     , newText
                     )
 
-            Internal.Textfield.Input str ->
+            InternalTextfield.Input str ->
                 let
                     ( newTextfieldModel1, newText ) =
                         Textfield.externalUpdate
-                            (Internal.Textfield.Input <| str)
+                            (InternalTextfield.Input <| str)
                             model.textfield
                             textfieldConfig
                             previousInputText
 
                     ( newSliderModel, _ ) =
                         Slider.update
-                            (Internal.Slider.SetValue
+                            (InternalSlider.SetValue
                                 discretizedTextfieldValue
                             )
                             model.slider
@@ -227,7 +231,7 @@ view inputText model { sliderConfig, textfieldConfig, extraPlural, extraStatic }
     let
         extra =
             (++) (extraStatic |> Maybe.withDefault "" |> (++) " ")
-                (Maybe.map (flip Utils.pluralize <| round sliderConfig.min) extraPlural |> Maybe.withDefault "")
+                (Maybe.map (flip Utils.General.pluralize <| round sliderConfig.min) extraPlural |> Maybe.withDefault "")
 
         labelMin =
             format rusLocale sliderConfig.min ++ extra
@@ -254,9 +258,9 @@ view inputText model { sliderConfig, textfieldConfig, extraPlural, extraStatic }
                             model.slider
                             sliderConfig
                             |> Html.map SliderMsg
-                        , div [ class [ LabelsContainer ] ]
-                            [ div [ class [ Label ] ] [ text labelMin ]
-                            , div [ class [ Label ] ] [ text labelMax ]
+                        , div [ class "ui-slider-with-textfield-labels-container" ]
+                            [ div [ class "ui-slider-with-textfield-label" ] [ text labelMin ]
+                            , div [ class "ui-slider-with-textfield-label" ] [ text labelMax ]
                             ]
                         ]
                     ]

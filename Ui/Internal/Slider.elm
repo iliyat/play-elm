@@ -1,4 +1,4 @@
-module Internal.Slider exposing (Msg(..), Geometry, defaultGeometry)
+module Ui.Internal.Slider exposing (Msg(..), Geometry, defaultGeometry)
 
 import Mouse
 

@@ -1,4 +1,4 @@
-module Textfield
+module Ui.Textfield
     exposing
         ( view
         , Model
@@ -15,11 +15,10 @@ module Textfield
 import Html exposing (Html, span, input, label, text, div, button, Attribute)
 import Html.Attributes as Attr exposing (class, classList, style)
 import Html.Events as Events
-import Internal.Textfield exposing (Msg(..))
-import Char
+import Ui.Internal.Textfield exposing (Msg(..))
 import Json.Decode as Json
 import Regex
-import Utils exposing (..)
+import Utils.General as Utils exposing (..)
 import FormatNumber exposing (format)
 
 
@@ -37,7 +36,7 @@ defaultModel =
 
 
 type alias Msg =
-    Internal.Textfield.Msg
+    Ui.Internal.Textfield.Msg
 
 
 type TextfieldEvent

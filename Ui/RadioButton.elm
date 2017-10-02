@@ -1,4 +1,4 @@
-module RadioButton
+module Ui.RadioButton
     exposing
         ( -- VIEWW
           view
@@ -51,15 +51,11 @@ component-level API for state modification.
 import Html.Attributes as Html
 import Html exposing (Html, text, div)
 import Json.Decode as Json
-import Internal.Helpers as Helpers exposing (map1st, map2nd, blurOn, filter, noAttr)
-import Internal.Options as Internal
-import Internal.RadioButton exposing (Msg(..))
-
-
--- import Msg exposing (Index)
-
-import Options as Options exposing (Style, cs, styled, many, when, maybe)
-import Ripple as Ripple
+import Ui.Internal.Helpers as Helpers exposing (map1st, map2nd, blurOn, filter, noAttr)
+import Ui.Internal.Options as Internal
+import Ui.Internal.RadioButton exposing (Msg(..))
+import Ui.Options as Options exposing (Style, cs, styled, many, when, maybe)
+import Ui.Ripple as Ripple
 
 
 -- MODEL
@@ -83,7 +79,7 @@ defaultModel =
 
 
 type alias Msg =
-    Internal.RadioButton.Msg
+    Ui.Internal.RadioButton.Msg
 
 
 update : (Msg -> m) -> Msg -> Model -> ( Maybe Model, Cmd m )

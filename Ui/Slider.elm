@@ -1,4 +1,4 @@
-module Slider
+module Ui.Slider
     exposing
         ( view
         , Model
@@ -19,7 +19,7 @@ import Html.Events as Events
 import Json.Decode as Json exposing (Decoder)
 import Svg
 import Svg.Attributes as Svg
-import Internal.Slider exposing (Msg(..), Geometry, defaultGeometry)
+import Ui.Internal.Slider as InternalSlider exposing (Msg(..), Geometry, defaultGeometry)
 import DOM
 import Mouse
 
@@ -80,7 +80,7 @@ defaultModel =
 
 
 type alias Msg =
-    Internal.Slider.Msg
+    InternalSlider.Msg
 
 
 update : Msg -> Model -> ( Model, Cmd Msg )

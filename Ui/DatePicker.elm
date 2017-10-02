@@ -1,4 +1,4 @@
-module DatePicker
+module Ui.DatePicker
     exposing
         ( Msg
         , Settings
@@ -6,8 +6,6 @@ module DatePicker
         , DatePicker
         , defaultSettings
         , init
-          -- , initFromDate
-          -- , initFromDates
         , update
         , view
         , pick
@@ -21,17 +19,17 @@ module DatePicker
         , withLabel
         )
 
-import Date exposing (Date, Day(..), Month, day, month, year)
-import DatePickerDate exposing (..)
-import Icons.Icon as Icon
 import Html exposing (..)
 import Html.Attributes as Attrs exposing (href, tabindex, type_, value, selected)
 import Html.Events exposing (on, onBlur, onClick, onInput, onFocus, onWithOptions, targetValue)
 import Html.Keyed
 import Json.Decode as Json
 import Task
-import Textfield
-import Internal.Textfield
+import Date exposing (Date, Day(..), Month, day, month, year)
+import Ui.DatePickerDate exposing (..)
+import Ui.Textfield as Textfield
+import Ui.Internal.Textfield as InternalTextfield
+import Icons.Icon as Icon
 
 
 type Msg
@@ -205,10 +203,10 @@ update settings msg (DatePicker model) =
 
                 open =
                     case tfMsg of
-                        Internal.Textfield.Focus ->
+                        InternalTextfield.Focus ->
                             True
 
-                        Internal.Textfield.Blur ->
+                        InternalTextfield.Blur ->
                             model.forceOpen
 
                         _ ->
@@ -216,14 +214,14 @@ update settings msg (DatePicker model) =
 
                 forceOpen =
                     case tfMsg of
-                        Internal.Textfield.Focus ->
+                        InternalTextfield.Focus ->
                             False
 
                         _ ->
                             model.forceOpen
             in
                 case tfMsg of
-                    Internal.Textfield.SubmitText ->
+                    InternalTextfield.SubmitText ->
                         let
                             isWhitespace =
                                 String.trim >> String.isEmpty
@@ -294,7 +292,7 @@ update settings msg (DatePicker model) =
 
                         Just d ->
                             Textfield.update
-                                (Internal.Textfield.SetValue <| formatDate d)
+                                (InternalTextfield.SetValue <| formatDate d)
                                 model.textfield
                                 settings.textfieldConfig
             in

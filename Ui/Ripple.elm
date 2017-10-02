@@ -1,4 +1,4 @@
-module Ripple
+module Ui.Ripple
     exposing
         ( Model
         , defaultModel
@@ -13,10 +13,10 @@ import DOM
 import Html.Attributes as Html
 import Html exposing (..)
 import Json.Decode as Json exposing (Decoder, field, at)
-import Internal.Helpers as Helpers
-import Internal.Options as Internal exposing (Property)
-import Internal.Ripple exposing (Msg(..), Geometry, defaultGeometry)
-import Options as Options exposing (styled, cs, css, when)
+import Ui.Internal.Helpers as Helpers
+import Ui.Internal.Options as Internal exposing (Property)
+import Ui.Internal.Ripple exposing (Msg(..), Geometry, defaultGeometry)
+import Ui.Options as Options exposing (styled, cs, css, when)
 import Platform.Cmd exposing (Cmd, none)
 import Task
 import Time exposing (Time)
@@ -52,7 +52,7 @@ defaultModel =
 
 
 type alias Msg =
-    Internal.Ripple.Msg
+    Ui.Internal.Ripple.Msg
 
 
 delay : Time -> msg -> Cmd msg
