@@ -456,7 +456,7 @@ datePicker pickedDate settings ({ focused, today } as model) =
                 [ classList
                     [ ( "year-button", True )
                     ]
-                , onClick (today |> ChangeFocus)
+                , onClick (newYear today (toString selectedYear) |> ChangeFocus)
                 ]
                 [ span
                     [ classList

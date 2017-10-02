@@ -268,9 +268,9 @@ $grey-78-color: #78909c;
   font-weight: 500;
   line-height: 16px;
   flex: 1 1 auto;
-  cursor: default;
   text-align: left;
   font-weight: 300;
+  cursor: pointer;
 }
 
 .#{$datepicker-ns}year-menu {
