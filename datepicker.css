@@ -49,22 +49,6 @@
   padding: 20px;
   box-sizing: border-box; }
 
-.elm-datepicker--year {
-  position: relative;
-  overflow: hidden;
-  height: 16px;
-  margin: 0px 0px 10px;
-  font-size: 16px;
-  font-weight: 500;
-  line-height: 16px;
-  opacity: 0.7;
-  font-weight: 500;
-  line-height: 16px;
-  flex: 1 1 auto;
-  cursor: default;
-  text-align: left;
-  font-weight: 300; }
-
 .elm-datepicker--current-date {
   overflow: hidden;
   height: 38px;
@@ -219,5 +203,80 @@
 
 .elm-datepicker--today .elm-datepicker--day-text {
   color: #3f51b4; }
+
+.elm-datepicker--hidden {
+  opacity: 0 !important;
+  z-index: -1 !important; }
+
+.elm-datepicker--year {
+  position: relative;
+  overflow: hidden;
+  height: 16px;
+  margin: 0px 0px 10px;
+  font-size: 16px;
+  font-weight: 500;
+  line-height: 16px;
+  opacity: 0.7;
+  font-weight: 500;
+  line-height: 16px;
+  flex: 1 1 auto;
+  cursor: default;
+  text-align: left;
+  font-weight: 300; }
+
+.elm-datepicker--year-menu {
+  display: flex;
+  justify-content: space-between;
+  flex-direction: column;
+  height: 272px;
+  margin-top: 10px;
+  overflow: hidden;
+  width: 310px;
+  position: absolute;
+  opacity: 1;
+  z-index: 5; }
+  .elm-datepicker--year-menu .elm-datepicker--year-menu0 {
+    background-color: white;
+    height: inherit;
+    line-height: 35px;
+    overflow-x: hidden;
+    overflow-y: scroll;
+    position: relative; }
+    .elm-datepicker--year-menu .elm-datepicker--year-menu0 .elm-datepicker--year-menu1 {
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      min-height: 100%; }
+
+.elm-datepicker--year-button {
+  border: 10px;
+  box-sizing: border-box;
+  display: block;
+  font-family: Roboto, sans-serif;
+  -webkit-tap-highlight-color: rgba(0, 0, 0, 0);
+  cursor: pointer;
+  text-decoration: none;
+  margin: 0px auto;
+  padding: 0px;
+  outline: none;
+  font-size: 14px;
+  font-weight: inherit;
+  position: relative;
+  text-align: center;
+  line-height: inherit;
+  background: none; }
+  .elm-datepicker--year-button :hover {
+    color: #00bcd4; }
+  .elm-datepicker--year-button span {
+    align-self: center;
+    color: rgba(0, 0, 0, 0.87);
+    font-size: 17px;
+    font-weight: 400;
+    position: relative;
+    top: -1px; }
+  .elm-datepicker--year-button span.elm-datepicker--current-year {
+    color: #00bcd4;
+    font-size: 26px;
+    font-weight: 500; }
 
 /*# sourceMappingURL=datepicker.css.map */

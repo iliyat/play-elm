@@ -20,7 +20,7 @@ module Ui.DatePicker
         )
 
 import Html exposing (..)
-import Html.Attributes as Attrs exposing (href, tabindex, type_, value, selected)
+import Html.Attributes as Attrs exposing (href, tabindex, type_, value)
 import Html.Events exposing (on, onBlur, onClick, onInput, onFocus, onWithOptions, targetValue)
 import Html.Keyed
 import Json.Decode as Json
@@ -40,6 +40,7 @@ type Msg
     | Text String
     | Focus
     | Blur
+    | ToggleYearList
     | MouseDown
     | MouseUp
     | TextfieldMsg Textfield.Msg
@@ -64,6 +65,7 @@ type alias Settings =
 type alias Model =
     { open : Bool
     , forceOpen : Bool
+    , yearListOpen : Bool
     , focused : Maybe Date
     , inputText : Maybe String
     , today : Date
@@ -89,7 +91,7 @@ defaultSettings =
     , yearFormatter = toString
     , cellFormatter = formatCell
     , firstDayOfWeek = Mon
-    , changeYear = off
+    , changeYear = between 2000 2030
     , textfieldConfig = Textfield.defaultConfig
     }
 
@@ -106,11 +108,6 @@ withLabel label =
         { defaultSettings
             | textfieldConfig = setLabel defaultSettings.textfieldConfig
         }
-
-
-yearRangeActive : YearRange -> Bool
-yearRangeActive yearRange =
-    yearRange /= Off
 
 
 between : Int -> Int -> YearRange
@@ -150,6 +147,7 @@ defaultModel : Model
 defaultModel =
     { open = False
     , forceOpen = False
+    , yearListOpen = False
     , focused = Just initDate
     , inputText = Nothing
     , today = initDate
@@ -278,7 +276,7 @@ update settings msg (DatePicker model) =
             { model | focused = Just date, today = date } ! []
 
         ChangeFocus date ->
-            { model | focused = Just date } ! []
+            { model | focused = Just date, yearListOpen = False } ! []
 
         Pick date ->
             let
@@ -312,6 +310,9 @@ update settings msg (DatePicker model) =
 
         Blur ->
             { model | open = model.forceOpen } ! []
+
+        ToggleYearList ->
+            { model | yearListOpen = not model.yearListOpen } ! []
 
         MouseDown ->
             { model | forceOpen = True } ! []
@@ -449,18 +450,27 @@ datePicker pickedDate settings ({ focused, today } as model) =
         isCurrentYear selectedYear =
             year currentMonth == selectedYear
 
-        yearOption index selectedYear =
+        yearButton index selectedYear =
             ( toString index
-            , option [ value (toString selectedYear), selected (isCurrentYear selectedYear) ]
-                [ text <| toString selectedYear ]
+            , button
+                [ classList
+                    [ ( "year-button", True )
+                    ]
+                , onClick (today |> ChangeFocus)
+                ]
+                [ span
+                    [ classList
+                        [ ( "current-year", isCurrentYear selectedYear )
+                        ]
+                    ]
+                    [ text <| toString selectedYear ]
+                ]
             )
 
-        dropdownYear =
-            Html.Keyed.node "select"
-                [ onChange (newYear currentDate >> ChangeFocus), class "year-menu" ]
-                (List.indexedMap yearOption
-                    (yearRange { focused = currentDate, currentMonth = currentMonth } settings.changeYear)
-                )
+        yearList =
+            Html.Keyed.node "div"
+                [ class "year-menu1" ]
+                (List.indexedMap yearButton (yearRange { focused = currentDate, currentMonth = currentMonth } settings.changeYear))
     in
         div
             [ classList
@@ -472,13 +482,25 @@ datePicker pickedDate settings ({ focused, today } as model) =
             , onPicker "mouseup" MouseUp
             ]
             [ div [ class "picker-header" ]
-                [ div [ class "year" ]
-                    [ text <| settings.yearFormatter <| year currentMonth ]
+                [ div [ class "year", onClick ToggleYearList ] [ text <| settings.yearFormatter <| year currentMonth ]
                 , div [ class "current-date" ]
                     [ text <| formatCalendarHeaderDate today ]
                 ]
             , div [ class "body" ]
-                [ div [ class "dates-and-month-container" ]
+                [ div
+                    [ classList
+                        [ (( "hidden"
+                           , if model.yearListOpen then
+                                False
+                             else
+                                True
+                           )
+                          )
+                        , ( "year-menu", True )
+                        ]
+                    ]
+                    [ Html.Keyed.node "div" [ class "year-menu0" ] [ ( toString (year currentMonth), yearList ) ] ]
+                , div [ class "dates-and-month-container" ]
                     [ div [ class "dates-and-month-container-0" ]
                         [ div [ class "month-container" ]
                             [ Icon.asButton "keyboard_arrow_left"

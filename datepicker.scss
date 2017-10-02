@@ -66,23 +66,6 @@ $grey-78-color: #78909c;
   box-sizing: border-box;
 }
 
-.#{$datepicker-ns}year {
-  position: relative;
-  overflow: hidden;
-  height: 16px;
-  margin: 0px 0px 10px;
-  font-size: 16px;
-  font-weight: 500;
-  line-height: 16px;
-  opacity: 0.7;
-  font-weight: 500;
-  line-height: 16px;
-  flex: 1 1 auto;
-  cursor: default;
-  text-align: left;
-  font-weight: 300;
-}
-
 .#{$datepicker-ns}current-date {
   overflow: hidden;
   height: 38px;
@@ -268,8 +251,93 @@ $grey-78-color: #78909c;
   }
 }
 
-.#{$datepicker-ns} {}
+.#{$datepicker-ns}hidden {
+  opacity: 0 !important;
+  z-index: -1 !important;
+}
 
-.#{$datepicker-ns} {}
+.#{$datepicker-ns}year {
+  position: relative;
+  overflow: hidden;
+  height: 16px;
+  margin: 0px 0px 10px;
+  font-size: 16px;
+  font-weight: 500;
+  line-height: 16px;
+  opacity: 0.7;
+  font-weight: 500;
+  line-height: 16px;
+  flex: 1 1 auto;
+  cursor: default;
+  text-align: left;
+  font-weight: 300;
+}
+
+.#{$datepicker-ns}year-menu {
+  display: flex;
+  justify-content: space-between;
+  flex-direction: column;
+  height: 272px;
+  margin-top: 10px;
+  overflow: hidden;
+  width: 310px;
+  position: absolute;
+  opacity: 1;
+  z-index: 5;
+
+  .#{$datepicker-ns}year-menu0 {
+    background-color: rgb(255, 255, 255);
+    height: inherit;
+    line-height: 35px;
+    overflow-x: hidden;
+    overflow-y: scroll;
+    position: relative;
+
+    .#{$datepicker-ns}year-menu1 {
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      min-height: 100%;
+    }
+  }
+}
+
+.#{$datepicker-ns}year-button {
+  border: 10px;
+  box-sizing: border-box;
+  display: block;
+  font-family: Roboto, sans-serif;
+  -webkit-tap-highlight-color: rgba(0, 0, 0, 0);
+  cursor: pointer;
+  text-decoration: none;
+  margin: 0px auto;
+  padding: 0px;
+  outline: none;
+  font-size: 14px;
+  font-weight: inherit;
+  position: relative;
+  text-align: center;
+  line-height: inherit;
+  background: none;
+
+  :hover {
+    color: rgb(0, 188, 212);
+  }
+
+  span {
+    align-self: center;
+    color: rgba(0, 0, 0, 0.87);
+    font-size: 17px;
+    font-weight: 400;
+    position: relative;
+    top: -1px;
+  }
+
+  span.#{$datepicker-ns}current-year {
+    color: rgb(0, 188, 212);
+    font-size: 26px;
+    font-weight: 500;
+  }
+}
 
 .#{$datepicker-ns} {}
