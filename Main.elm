@@ -4,7 +4,7 @@ import Html exposing (..)
 import Html.Attributes exposing (..)
 import Html.Events as Events
 import Dict exposing (Dict)
-import Date exposing (Date)
+import Date exposing (Date, Month(..))
 import Ui.Slider as Slider
 import Ui.Textfield as Textfield
 import Ui.SliderWithTextfield as SliderWithTextfield
@@ -14,6 +14,7 @@ import Utils.General exposing (..)
 import Ui.Elevation as Elevation
 import Ui.Typography as Typography
 import Ui.Internal.Textfield as InternalTextfield
+import Ui.Internal.Slider as InternalSlider
 import Ui.Options as Options exposing (styled, cs, css, when)
 import Ui.DatePicker as DatePicker
     exposing
@@ -21,6 +22,8 @@ import Ui.DatePicker as DatePicker
         , DateEvent(..)
         , moreOrLess
         )
+import Date.Extra as Date
+import Task
 
 
 type alias Model =
@@ -50,7 +53,7 @@ type alias Model =
 init : ( Model, Cmd Msg )
 init =
     let
-        ( dp, datePickerFx ) =
+        ( dp, _ ) =
             DatePicker.init
     in
         { textfield = Textfield.defaultModel
@@ -60,7 +63,8 @@ init =
         , sumInputText = Just "2000"
         , periodInputText = Just "7"
         , datePicker = dp
-        , date = Nothing
+        , date =
+            Just <| Date.fromParts 1992 Feb 21 0 0 0 0
         , radios = Dict.fromList []
         , radioModel1 = RadioButton.defaultModel
         , radioModel2 = RadioButton.defaultModel
@@ -74,7 +78,7 @@ init =
         , perDayPercentTextInput = Nothing
         , perDayAmountTextInput = Nothing
         }
-            ! [ Cmd.map DatePickerMsg datePickerFx ]
+            ! [ Task.perform CurrentDate Date.now ]
 
 
 type Msg
@@ -88,6 +92,7 @@ type Msg
     | RadioButtonMsg1 RadioButton.Msg
     | RadioButtonMsg2 RadioButton.Msg
     | RippleMsg Ripple.Msg
+    | CurrentDate Date
 
 
 swtConf1 : SliderWithTextfield.Config
@@ -232,6 +237,17 @@ calculatePeriodSliderConfig model =
 update : Msg -> Model -> ( Model, Cmd Msg )
 update action model =
     case action of
+        CurrentDate today ->
+            let
+                initDate =
+                    (Date.add Date.Day 6 today)
+            in
+                { model
+                    | datePicker = DatePicker.initFromDate initDate today
+                    , date = Just initDate
+                }
+                    ! []
+
         RippleMsg msg_ ->
             let
                 ( new, effects ) =
@@ -401,9 +417,57 @@ update action model =
                         model.sliderWithTextfield2
                         (calculatePeriodSliderConfig model)
                         model.periodInputText
+
+                newTextString =
+                    newText |> Maybe.withDefault ""
+
+                daysToAdd_ =
+                    String.toInt newTextString |> Result.withDefault 0
+
+                daysToAdd =
+                    if daysToAdd_ > 100 then
+                        100
+                    else
+                        daysToAdd_
+
+                dateForDatepicker =
+                    Date.add Date.Day daysToAdd <| DatePicker.today model.datePicker
+
+                ( newDatePicker, newDate ) =
+                    let
+                        ( newDatePicker_, _, dateEvent ) =
+                            DatePicker.update datePickerConfig
+                                (DatePicker.Pick (Just dateForDatepicker))
+                                model.datePicker
+
+                        newDate_ =
+                            case dateEvent of
+                                Changed newDate_ ->
+                                    newDate_
+
+                                _ ->
+                                    model.date
+                    in
+                        case msg_ of
+                            SliderWithTextfield.TextfieldMsg (InternalTextfield.Input _) ->
+                                ( newDatePicker_, newDate_ )
+
+                            SliderWithTextfield.TextfieldMsg (InternalTextfield.SetValue _) ->
+                                ( newDatePicker_, newDate_ )
+
+                            SliderWithTextfield.TextfieldMsg InternalTextfield.Blur ->
+                                ( newDatePicker_, newDate_ )
+
+                            SliderWithTextfield.SliderMsg (InternalSlider.MouseDrag _) ->
+                                ( newDatePicker_, newDate_ )
+
+                            _ ->
+                                ( model.datePicker, model.date )
             in
                 { model
                     | sliderWithTextfield2 = newModel
+                    , datePicker = newDatePicker
+                    , date = newDate
                     , periodInputText =
                         newText
                 }

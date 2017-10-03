@@ -1,6 +1,7 @@
 module Ui.DatePicker
     exposing
         ( Msg
+        , Msg(..)
         , Settings
         , DateEvent(..)
         , DatePicker
@@ -11,6 +12,7 @@ module Ui.DatePicker
         , view
         , pick
         , isOpen
+        , today
         , between
         , moreOrLess
         , off
@@ -203,6 +205,11 @@ prepareDates date firstDayOfWeek =
 isOpen : DatePicker -> Bool
 isOpen (DatePicker model) =
     model.open
+
+
+today : DatePicker -> Date
+today (DatePicker model) =
+    model.today
 
 
 focusedDate : DatePicker -> Maybe Date

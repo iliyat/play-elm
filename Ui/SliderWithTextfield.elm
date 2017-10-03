@@ -1,4 +1,16 @@
-module Ui.SliderWithTextfield exposing (..)
+module Ui.SliderWithTextfield
+    exposing
+        ( Model
+        , Config
+        , withLimits
+        , defaultModel
+        , defaultConfig
+        , discretize
+        , update
+        , view
+        , subscriptions
+        , Msg(..)
+        )
 
 import Html exposing (..)
 import Html.Attributes exposing (style, class)

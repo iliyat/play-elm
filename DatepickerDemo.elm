@@ -20,7 +20,6 @@ type Msg
 
 type alias Model =
     { date : Maybe Date
-    , initDate : Date
     , datePicker : DatePicker.DatePicker
     }
 
@@ -36,8 +35,7 @@ init =
         ( dp, _ ) =
             DatePicker.init
     in
-        { date = Nothing
-        , initDate = Date.fromParts 1992 Feb 21 0 0 0 0
+        { date = Just <| Date.fromParts 1992 Feb 21 0 0 0 0
         , datePicker = dp
         }
             ! [ Task.perform CurrentDate Date.now ]
@@ -52,8 +50,7 @@ update msg ({ date, datePicker } as model) =
                     (Date.add Date.Day 7 today)
             in
                 { model
-                    | initDate = initDate
-                    , datePicker = DatePicker.initFromDate initDate today
+                    | datePicker = DatePicker.initFromDate initDate today
                     , date = Just initDate
                 }
                     ! []
