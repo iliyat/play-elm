@@ -5,6 +5,7 @@ module Ui.DatePicker
         , DateEvent(..)
         , DatePicker
         , defaultSettings
+        , defaultModel
         , init
         , update
         , view
@@ -16,6 +17,7 @@ module Ui.DatePicker
         , from
         , to
         , focusedDate
+        , initFromDate
         , withLabel
         )
 
@@ -103,6 +105,7 @@ withLabel label =
             { tfConfig
                 | labelText = Just label
                 , mask = Just "##.##.####"
+                , asTitle = True
             }
     in
         { defaultSettings
@@ -153,6 +156,28 @@ defaultModel =
     , today = initDate
     , textfield = Textfield.defaultModel
     }
+
+
+initFromDate : Date -> Date -> DatePicker
+initFromDate date today =
+    let
+        tfModel =
+            Textfield.defaultModel
+
+        updated =
+            { tfModel
+                | isDirty = True
+            }
+    in
+        DatePicker <|
+            { open = False
+            , forceOpen = False
+            , focused = Just today
+            , inputText = Just <| formatDate date
+            , today = today
+            , yearListOpen = False
+            , textfield = updated
+            }
 
 
 init : ( DatePicker, Cmd Msg )

@@ -537,10 +537,6 @@ view model =
                         datePickerConfig
                         model.datePicker
                         |> Html.map DatePickerMsg
-                    , Textfield.view model.textInput
-                        model.textfield
-                        textfieldConfig
-                        |> Html.map TextfieldMsg
                     ]
                 ]
             , styled Html.div
@@ -584,7 +580,7 @@ view model =
             , Html.node "script" [ Html.Attributes.src "mdc.js" ] []
             , Html.node "link"
                 [ Html.Attributes.rel "stylesheet"
-                , Html.Attributes.href "https://unpkg.com/material-components-web@latest/dist/material-components-web.min.css"
+                , Html.Attributes.href "material-components-web.css"
                 ]
                 []
             , Html.node "link"

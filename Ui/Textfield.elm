@@ -183,30 +183,40 @@ view value_ model config =
         isDirty =
             model.isDirty || (config.defaultValue /= Nothing)
 
-        labelBottom =
-            if config.asTitle then
-                "24px"
-            else
-                "8px"
-
-        height =
-            if config.asTitle then
-                "56px"
-            else
-                "48px"
-
-        fontSize =
-            if config.asTitle then
-                "34px"
-            else
-                "18px"
-
         value =
             value_
                 |> Maybe.withDefault
                     (config.defaultValue
                         |> Maybe.withDefault ""
                     )
+
+        asTitleStyle =
+            { labelBottom =
+                if model.isFocused || value /= "" then
+                    "24px"
+                else
+                    "8px"
+            , labelFontSize =
+                if model.isFocused || value /= "" then
+                    "16px"
+                else
+                    "34px"
+            , height = "56px"
+            , fontSize = "34px"
+            }
+
+        simpleStyle =
+            { labelBottom = "8px"
+            , labelFontSize = "16px"
+            , height = "48px"
+            , fontSize = "18px"
+            }
+
+        st =
+            if config.asTitle then
+                asTitleStyle
+            else
+                simpleStyle
 
         extra =
             config.extra |> Maybe.withDefault ""
@@ -239,6 +249,7 @@ view value_ model config =
                 , Events.on "change" (Json.succeed SubmitText)
                 , Events.onFocus <| Focus
                 , Events.onBlur <| Blur
+                , style [ ( "font-size", st.fontSize ) ]
                 ]
                 model.maskedState
                 value
@@ -246,7 +257,7 @@ view value_ model config =
         inputHtml =
             input
                 [ Attr.type_ "text"
-                , style [ ( "font-size", fontSize ) ]
+                , style [ ( "font-size", st.fontSize ) ]
                 , classList [ ( "mdc-textfield__input", True ) ]
                 , Events.onFocus <| Focus
                 , Events.onBlur <| Blur
@@ -259,7 +270,7 @@ view value_ model config =
         divHtml =
             div
                 [ style
-                    [ ( "font-size", fontSize )
+                    [ ( "font-size", st.fontSize )
                     , ( "width", "168px" )
                     ]
                 , classList
@@ -288,7 +299,7 @@ view value_ model config =
             , Events.onFocus <| Focus
             , Events.onBlur <| Blur
             , style
-                [ ( "height", height )
+                [ ( "height", st.height )
                 , ( "width"
                   , if config.fullWidth then
                         "100%"
@@ -304,7 +315,8 @@ view value_ model config =
                     , ( "mdc-textfield__label--float-above", isFocused || isDirty )
                     ]
                 , style
-                    [ ( "bottom", labelBottom )
+                    [ ( "bottom", st.labelBottom )
+                    , ( "font-size", st.labelFontSize )
                     ]
                 ]
                 (case config.labelText of

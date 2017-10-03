@@ -1,6 +1,6 @@
 module DatepickerDemo exposing (main)
 
-import Date exposing (Date, Day(..), day, dayOfWeek, month, year)
+import Date exposing (Date, Day(..), Month(..), day, dayOfWeek, month, year)
 import Ui.DatePicker as DatePicker
     exposing
         ( defaultSettings
@@ -9,14 +9,18 @@ import Ui.DatePicker as DatePicker
         )
 import Html exposing (Html, div, h1, text)
 import Html.Attributes
+import Task
+import Date.Extra as Date
 
 
 type Msg
     = ToDatePicker DatePicker.Msg
+    | CurrentDate Date
 
 
 type alias Model =
     { date : Maybe Date
+    , initDate : Date
     , datePicker : DatePicker.DatePicker
     }
 
@@ -29,18 +33,31 @@ settings =
 init : ( Model, Cmd Msg )
 init =
     let
-        ( dp, datePickerFx ) =
+        ( dp, _ ) =
             DatePicker.init
     in
         { date = Nothing
+        , initDate = Date.fromParts 1992 Feb 21 0 0 0 0
         , datePicker = dp
         }
-            ! [ Cmd.map ToDatePicker datePickerFx ]
+            ! [ Task.perform CurrentDate Date.now ]
 
 
 update : Msg -> Model -> ( Model, Cmd Msg )
 update msg ({ date, datePicker } as model) =
     case msg of
+        CurrentDate today ->
+            let
+                initDate =
+                    (Date.add Date.Day 7 today)
+            in
+                { model
+                    | initDate = initDate
+                    , datePicker = DatePicker.initFromDate initDate today
+                    , date = Just initDate
+                }
+                    ! []
+
         ToDatePicker msg ->
             let
                 ( newDatePicker, datePickerFx, dateEvent ) =
@@ -71,7 +88,7 @@ view ({ date, datePicker } as model) =
             []
         , Html.node "link"
             [ Html.Attributes.rel "stylesheet"
-            , Html.Attributes.href "https://unpkg.com/material-components-web@latest/dist/material-components-web.min.css"
+            , Html.Attributes.href "material-components-web.css"
             ]
             []
         , Html.node "link"
