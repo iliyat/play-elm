@@ -234,6 +234,68 @@ calculatePeriodSliderConfig model =
         SliderWithTextfield.withLimits swtConf2 min max 1
 
 
+updatePeriodSliderAndDatepicker :
+    Model
+    -> SliderWithTextfield.Msg
+    -> ( SliderWithTextfield.Model, DatePicker.DatePicker, Maybe Date, Maybe String )
+updatePeriodSliderAndDatepicker model msg_ =
+    let
+        ( newModel, newText ) =
+            SliderWithTextfield.update
+                msg_
+                model.sliderWithTextfield2
+                (calculatePeriodSliderConfig model)
+                model.periodInputText
+
+        newTextString =
+            newText |> Maybe.withDefault ""
+
+        daysToAdd_ =
+            String.toInt newTextString |> Result.withDefault 0
+
+        daysToAdd =
+            if daysToAdd_ > 100 then
+                100
+            else
+                daysToAdd_
+
+        dateForDatepicker =
+            Date.add Date.Day daysToAdd <| DatePicker.today model.datePicker
+
+        ( newDatePicker, newDate ) =
+            let
+                ( newDatePicker_, _, dateEvent ) =
+                    DatePicker.update datePickerConfig
+                        (DatePicker.Pick (Just dateForDatepicker))
+                        model.datePicker
+
+                newDate_ =
+                    case dateEvent of
+                        Changed newDate_ ->
+                            newDate_
+
+                        _ ->
+                            model.date
+            in
+                case msg_ of
+                    SliderWithTextfield.TextfieldMsg (InternalTextfield.Input _) ->
+                        ( newDatePicker_, newDate_ )
+
+                    SliderWithTextfield.TextfieldMsg (InternalTextfield.SetValue _) ->
+                        ( newDatePicker_, newDate_ )
+
+                    SliderWithTextfield.TextfieldMsg InternalTextfield.Blur ->
+                        ( newDatePicker_, newDate_ )
+
+                    SliderWithTextfield.SliderMsg (InternalSlider.MouseDrag _) ->
+                        ( newDatePicker_, newDate_ )
+
+                    _ ->
+                        ( model.datePicker, model.date )
+    in
+        ( newModel, newDatePicker, newDate, newText )
+
+
 update : Msg -> Model -> ( Model, Cmd Msg )
 update action model =
     case action of
@@ -330,20 +392,19 @@ update action model =
                                     sumSliderPrimaryConfig
                                     model.sumInputText
 
-                            ( newPeriodSliderModel, _ ) =
-                                SliderWithTextfield.update
+                            ( newPeriodSliderModel, newDatePicker, newDate, newText ) =
+                                updatePeriodSliderAndDatepicker model
                                     (SliderWithTextfield.TextfieldMsg
                                         (InternalTextfield.Input (newPeriodInputText |> Maybe.withDefault "0"))
                                     )
-                                    model.sliderWithTextfield1
-                                    periodSliderConfig
-                                    model.periodInputText
                         in
                             { model
                                 | radios = radios
                                 , sliderWithTextfield1 = newSumSliderModel
                                 , sliderWithTextfield2 = newPeriodSliderModel
                                 , sumInputText = newSumInputText
+                                , datePicker = newDatePicker
+                                , date = newDate
                             }
                                 ! []
 
@@ -411,58 +472,8 @@ update action model =
 
         SliderWithTextfieldMsg2 msg_ ->
             let
-                ( newModel, newText ) =
-                    SliderWithTextfield.update
-                        msg_
-                        model.sliderWithTextfield2
-                        (calculatePeriodSliderConfig model)
-                        model.periodInputText
-
-                newTextString =
-                    newText |> Maybe.withDefault ""
-
-                daysToAdd_ =
-                    String.toInt newTextString |> Result.withDefault 0
-
-                daysToAdd =
-                    if daysToAdd_ > 100 then
-                        100
-                    else
-                        daysToAdd_
-
-                dateForDatepicker =
-                    Date.add Date.Day daysToAdd <| DatePicker.today model.datePicker
-
-                ( newDatePicker, newDate ) =
-                    let
-                        ( newDatePicker_, _, dateEvent ) =
-                            DatePicker.update datePickerConfig
-                                (DatePicker.Pick (Just dateForDatepicker))
-                                model.datePicker
-
-                        newDate_ =
-                            case dateEvent of
-                                Changed newDate_ ->
-                                    newDate_
-
-                                _ ->
-                                    model.date
-                    in
-                        case msg_ of
-                            SliderWithTextfield.TextfieldMsg (InternalTextfield.Input _) ->
-                                ( newDatePicker_, newDate_ )
-
-                            SliderWithTextfield.TextfieldMsg (InternalTextfield.SetValue _) ->
-                                ( newDatePicker_, newDate_ )
-
-                            SliderWithTextfield.TextfieldMsg InternalTextfield.Blur ->
-                                ( newDatePicker_, newDate_ )
-
-                            SliderWithTextfield.SliderMsg (InternalSlider.MouseDrag _) ->
-                                ( newDatePicker_, newDate_ )
-
-                            _ ->
-                                ( model.datePicker, model.date )
+                ( newModel, newDatePicker, newDate, newText ) =
+                    updatePeriodSliderAndDatepicker model msg_
             in
                 { model
                     | sliderWithTextfield2 = newModel
