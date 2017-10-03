@@ -104,7 +104,6 @@ withLabel label =
         setLabel tfConfig =
             { tfConfig
                 | labelText = Just label
-                , mask = Just "##.##.####"
                 , asTitle = True
             }
     in
@@ -357,25 +356,50 @@ view pickedDate settings (DatePicker ({ open } as model)) =
         class =
             mkClass settings
 
+        isFocused =
+            model.textfield.isFocused
+
         inputClasses =
             [ ( settings.classNamespace ++ "input", True ) ]
 
         replaceDots =
             Regex.replace Regex.All (Regex.regex "\\.") (\_ -> "")
 
+        textfieldConfigDefault =
+            settings.textfieldConfig
+
+        textfieldConfigFocused =
+            { textfieldConfigDefault
+                | mask = Just "##.##.####"
+            }
+
+        textfieldConfig =
+            if isFocused then
+                textfieldConfigFocused
+            else
+                textfieldConfigDefault
+
+        valueForMaskedInput =
+            Just <|
+                (model.inputText
+                    |> Maybe.withDefault
+                        (Maybe.map formatDate pickedDate |> Maybe.withDefault "")
+                    |> replaceDots
+                )
+
+        valueFullMonth =
+            Just <|
+                (Maybe.map formatDateMonthFullName pickedDate |> Maybe.withDefault "")
+
         dateInput =
             Textfield.view
-                (Just <|
-                    (model.inputText
-                        |> Maybe.withDefault
-                            (Maybe.map settings.dateFormatter pickedDate
-                                |> Maybe.withDefault ""
-                            )
-                        |> replaceDots
-                    )
+                (if isFocused then
+                    valueForMaskedInput
+                 else
+                    valueFullMonth
                 )
                 model.textfield
-                settings.textfieldConfig
+                textfieldConfig
                 |> Html.map TextfieldMsg
     in
         div [ class "container" ]

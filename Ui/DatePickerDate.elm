@@ -3,6 +3,7 @@ module Ui.DatePickerDate
         ( YearRange(..)
         , initDate
         , formatDate
+        , formatDateMonthFullName
         , formatDay
         , formatMonth
         , addDays
@@ -85,6 +86,11 @@ formatDate date =
     dayToString (day date) ++ "." ++ monthToString (month date) ++ "." ++ toString (year date)
 
 
+formatDateMonthFullName : Date -> String
+formatDateMonthFullName date =
+    dayToString (day date) ++ " " ++ formatMonth2 (month date) ++ " " ++ toString (year date)
+
+
 formatCalendarHeaderDate : Date -> String
 formatCalendarHeaderDate date =
     formatDay (Date.dayOfWeek date)
@@ -118,6 +124,46 @@ formatDay day =
 
         Sun ->
             "Вск"
+
+
+formatMonth2 : Month -> String
+formatMonth2 month =
+    case month of
+        Jan ->
+            "января"
+
+        Feb ->
+            "февраля"
+
+        Mar ->
+            "марта"
+
+        Apr ->
+            "апреля"
+
+        May ->
+            "мая"
+
+        Jun ->
+            "июня"
+
+        Jul ->
+            "июля"
+
+        Aug ->
+            "августа"
+
+        Sep ->
+            "сентября"
+
+        Oct ->
+            "октября"
+
+        Nov ->
+            "ноября"
+
+        Dec ->
+            "декабря"
 
 
 formatMonth1 : Month -> String
