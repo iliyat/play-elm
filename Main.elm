@@ -251,7 +251,7 @@ updatePeriodSliderAndDatepicker model msg_ =
             newText |> Maybe.withDefault ""
 
         daysToAdd_ =
-            String.toInt newTextString |> Result.withDefault 0
+            String.toInt newTextString |> Result.map (flip (-) 1) |> Result.withDefault 0
 
         daysToAdd =
             if daysToAdd_ > 100 then
