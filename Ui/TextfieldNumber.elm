@@ -55,6 +55,7 @@ externalUpdate msg model textfieldConfig previousText =
                 msg
                 model
                 textfieldConfig
+                previousText
 
         newText =
             case textfieldEvent of
@@ -67,8 +68,8 @@ externalUpdate msg model textfieldConfig previousText =
         ( newTextfieldModel, newText )
 
 
-update : Msg -> Model -> Config -> ( Model, Cmd m, TextfieldEvent )
-update msg model config =
+update : Msg -> Model -> Config -> Maybe Int -> ( Model, Cmd m, TextfieldEvent )
+update msg model config previousText =
     let
         numerize =
             Regex.replace Regex.All (Regex.regex "[^0-9]") (\_ -> "")
@@ -111,8 +112,20 @@ update msg model config =
                 let
                     _ =
                         Debug.log "InputStateChanged" state
+
+                    val =
+                        MaskedNumber.getter state previousText
+
+                    dirty =
+                        case val of
+                            Nothing ->
+                                config.defaultValue == Nothing
+
+                            Just int ->
+                                int /= (config.defaultValue |> Maybe.withDefault 0)
                 in
-                    { model | maskedState = state } ! []
+                    -- ( { model | isDirty = dirty }, Cmd.none, Changed val )
+                    ({ model | maskedState = state }) ! []
 
             FocusChanged bool ->
                 model ! []
@@ -175,7 +188,7 @@ maskedInputOptions config =
             MaskedNumber.defaultOptions Input InputStateChanged
     in
         { defaultOptions
-            | pattern = "(###)###"
+            | pattern = "(###) ###"
             , hasFocus = Just FocusChanged
         }
 
@@ -235,8 +248,6 @@ view value_ model config =
         displayValue =
             format rusLocale (toFloat intValue)
 
-        -- _ =
-        --     Debug.log "displayValue" displayValue
         pl =
             Maybe.map (flip Utils.pluralize intValue) config.plural
                 |> Maybe.withDefault ""

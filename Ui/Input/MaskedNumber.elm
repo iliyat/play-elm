@@ -5,6 +5,7 @@ module Ui.Input.MaskedNumber
         , defaultOptions
         , State
         , initialState
+        , getter
         )
 
 {-| Masked Number input, similar to Masked Text input, but only accepting numeric input
@@ -63,19 +64,40 @@ initialState =
     State Nothing
 
 
-{-| Default value for `Options`.
+getter : State -> Maybe Int -> Maybe Int
+getter (State st) previousText =
+    case st of
+        Nothing ->
+            previousText
 
-  - `onInput` (type: `Maybe Int -> msg`) : The onInput Msg tagger
-  - `toMsg` (type: `String -> msg`) : The Msg for updating internal `State` of the element.
-    Value:
-    { pattern = ""
-    , inputCharacter = '#'
-    , onInput = onInput
-    , toMsg = toMsg
-    , hasFocus = Nothing
-    }
+        Just key ->
+            let
+                char =
+                    Char.fromCode key
 
--}
+                isDigit =
+                    Char.isDigit char
+
+                prevStr =
+                    case previousText of
+                        Nothing ->
+                            ""
+
+                        Just s ->
+                            toString s
+
+                concatenated =
+                    String.fromChar char |> (++) prevStr
+
+                makeInt =
+                    String.toInt >> Result.withDefault 0
+            in
+                if isDigit then
+                    (Just <| makeInt concatenated)
+                else
+                    previousText
+
+
 defaultOptions : (Maybe Int -> msg) -> (State -> msg) -> Options msg
 defaultOptions onInput toMsg =
     { pattern = ""
@@ -128,13 +150,11 @@ input options attributes state currentValue =
                 |> Maybe.withDefault ""
                 |> Pattern.format tokens
 
-        _ =
-            Debug.log "currentFormattedValue" currentFormattedValue
-
         inputAttributes =
             (List.append attributes
                 [ value currentFormattedValue
-                , onInput (processInput options tokens state currentFormattedValue)
+
+                -- , onInput (processInput options tokens state currentFormattedValue)
                 , onKeyDown currentFormattedValue tokens options.toMsg
                 , onKeyPress currentFormattedValue tokens options.toMsg
                 , type_ "text"
@@ -193,15 +213,52 @@ onKeyDown : String -> List Pattern.Token -> (State -> msg) -> Attribute msg
 onKeyDown currentFormattedValue tokens toMsg =
     let
         eventOptions =
-            { stopPropagation = False
+            { stopPropagation = True
             , preventDefault = True
             }
 
+        isDigit =
+            Char.isDigit << Char.fromCode
+
         filterKey =
             (\event ->
-                Json.succeed event.keyCode
+                -- let
+                --     _ =
+                --         Debug.log "isDigit" (isDigit event.keyCode)
+                -- in
+                if event.ctrlKey || event.altKey then
+                    Json.fail "modifier key is pressed"
+                else if not (isDigit event.keyCode) then
+                    Json.fail "not digit"
+                else
+                    Json.succeed event.keyCode
             )
 
+        isNumPad keyCode =
+            keyCode
+                >= 96
+                && keyCode
+                <= 105
+
+        isNumber keyCode =
+            keyCode
+                >= 48
+                && keyCode
+                <= 57
+
+        -- filterKey =
+        --     (\event ->
+        --         if event.ctrlKey || event.altKey then
+        --             Json.fail "modifier key is pressed"
+        --         else if List.any ((==) event.keyCode) allowedKeyCodes then
+        --             Json.fail "not arrow"
+        --         else if not (isNumber event.keyCode) then
+        --             Json.fail "numeric"
+        --             -- else if String.length currentFormattedValue < List.length tokens then
+        --             --     Json.fail "accepting more input"
+        --         else
+        --             Json.succeed event.keyCode
+        -- )
         decoder =
             eventDecoder
                 |> Json.andThen filterKey
