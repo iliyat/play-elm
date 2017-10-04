@@ -1,4 +1,4 @@
-module Main exposing (..)
+module Consultation exposing (..)
 
 import Html exposing (..)
 import Html.Attributes exposing (..)
@@ -7,6 +7,7 @@ import Dict exposing (Dict)
 import Date exposing (Date, Month(..))
 import Ui.Slider as Slider
 import Ui.Textfield as Textfield
+import Ui.TextfieldNumber as TextfieldNumber
 import Ui.SliderWithTextfield as SliderWithTextfield
 import Ui.RadioButton as RadioButton
 import Ui.Ripple as Ripple
@@ -39,8 +40,8 @@ type alias Model =
     , radioModel2 : RadioButton.Model
     , ripple : Ripple.Model
     , textInput : Maybe String
-    , forPay : Textfield.Model
-    , forPayTextInput : Maybe String
+    , forPay : TextfieldNumber.Model
+    , forPayTextInput : Maybe Int
     , percent : Textfield.Model
     , percentTextInput : Maybe String
     , perDayPercent : Textfield.Model
@@ -69,7 +70,7 @@ init =
         , radioModel1 = RadioButton.defaultModel
         , radioModel2 = RadioButton.defaultModel
         , ripple = Ripple.defaultModel
-        , forPay = Textfield.defaultModel
+        , forPay = TextfieldNumber.defaultModel
         , percent = Textfield.defaultModel
         , perDayPercent = Textfield.defaultModel
         , perDayAmount = Textfield.defaultModel
@@ -86,6 +87,7 @@ type Msg
     | SliderWithTextfieldMsg1 SliderWithTextfield.Msg
     | SliderWithTextfieldMsg2 SliderWithTextfield.Msg
     | TextfieldMsg Textfield.Msg
+    | ForPayMsg TextfieldNumber.Msg
     | DatePickerMsg DatePicker.Msg
     | Select Int
     | OnRadioClick String String
@@ -495,11 +497,36 @@ update action model =
             in
                 { model | textfield = newTextfieldModel, textInput = newText } ! []
 
+        ForPayMsg msg_ ->
+            let
+                ( newTextfieldModel, newText ) =
+                    TextfieldNumber.externalUpdate
+                        msg_
+                        model.forPay
+                        forPayConfig
+                        model.forPayTextInput
+            in
+                { model | forPay = newTextfieldModel, forPayTextInput = newText } ! []
+
         Select n ->
             model ! []
 
         Open ->
             model ! []
+
+
+forPayConfig : TextfieldNumber.Config
+forPayConfig =
+    let
+        defaultTextfieldNumber =
+            TextfieldNumber.defaultConfig
+    in
+        { defaultTextfieldNumber
+            | extraInside = Just "₽"
+            , defaultValue = Just 40000
+            , labelText = Just "К выплате"
+            , asTitle = True
+        }
 
 
 view : Model -> Html Msg
@@ -510,16 +537,6 @@ view model =
 
         defaultTextfield =
             Textfield.defaultConfig
-
-        forPayConfig =
-            { defaultTextfield
-                | readonly = True
-                , numbered = True
-                , extraInside = Just "₽"
-                , defaultValue = Just "40000"
-                , labelText = Just "К выплате"
-                , asTitle = True
-            }
 
         percentConfig =
             { defaultTextfield
@@ -622,11 +639,11 @@ view model =
                 , styled div
                     [ cs "loan-wrapper" ]
                     [ div []
-                        [ Textfield.view
+                        [ TextfieldNumber.view
                             model.forPayTextInput
                             model.forPay
                             forPayConfig
-                            |> Html.map TextfieldMsg
+                            |> Html.map ForPayMsg
                         ]
                     , div []
                         [ Textfield.view
