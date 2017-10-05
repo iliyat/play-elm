@@ -447,10 +447,54 @@ update action model =
 
                         _ ->
                             model.date
+
+                newPeriodInputText =
+                    case dateEvent of
+                        Changed newDate ->
+                            let
+                                today =
+                                    DatePicker.today model.datePicker
+
+                                diff =
+                                    Date.diff Date.Day
+                                        today
+                                        (newDate |> Maybe.withDefault today)
+                                        |> (+) 2
+                                        |> toFloat
+
+                                min =
+                                    periodSliderConfig.sliderConfig.min
+
+                                max =
+                                    periodSliderConfig.sliderConfig.max
+
+                                newValue =
+                                    if diff < min then
+                                        min
+                                    else if diff > max then
+                                        max
+                                    else
+                                        diff
+                            in
+                                Just <| toString newValue
+
+                        _ ->
+                            model.periodInputText
+
+                ( newPeriodSliderModel, _ ) =
+                    SliderWithTextfield.update
+                        (SliderWithTextfield.TextfieldMsg
+                            (InternalTextfield.Input (newPeriodInputText |> Maybe.withDefault "0"))
+                        )
+                        model.sliderWithTextfield2
+                        periodSliderConfig
+                        model.periodInputText
             in
                 { model
                     | date = newDate
                     , datePicker = newDatePicker
+                    , periodInputText = newPeriodInputText
+                    , sliderWithTextfield2 = newPeriodSliderModel
                 }
                     ! [ Cmd.map DatePickerMsg datePickerFx ]
 
@@ -472,12 +516,12 @@ update action model =
 
         SliderWithTextfieldMsg2 msg_ ->
             let
-                ( newModel, newDatePicker, newDate, newText ) =
+                ( newPeriodSliderModel, newDatePickerModel, newDate, newText ) =
                     updatePeriodSliderAndDatepicker model msg_
             in
                 { model
-                    | sliderWithTextfield2 = newModel
-                    , datePicker = newDatePicker
+                    | sliderWithTextfield2 = newPeriodSliderModel
+                    , datePicker = newDatePickerModel
                     , date = newDate
                     , periodInputText =
                         newText
