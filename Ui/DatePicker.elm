@@ -25,7 +25,7 @@ module Ui.DatePicker
 
 import Html exposing (..)
 import Html.Attributes as Attrs exposing (href, tabindex, type_, value)
-import Html.Events exposing (on, onBlur, onClick, onInput, onFocus, onWithOptions, targetValue)
+import Html.Events exposing (on, onBlur, onInput, onFocus, onWithOptions, targetValue)
 import Html.Keyed
 import Json.Decode as Json
 import Task
@@ -41,6 +41,7 @@ type Msg
     = CurrentDate Date
     | ChangeFocus Date
     | Pick (Maybe Date)
+    | SetDate Date
     | Text String
     | Focus
     | Blur
@@ -333,6 +334,25 @@ update settings msg (DatePicker model) =
                 , Changed date
                 )
 
+        SetDate date ->
+            let
+                ( newTextfieldModel, _, textfieldEvent ) =
+                    Textfield.update
+                        (InternalTextfield.SetValue <| formatDate date)
+                        model.textfield
+                        settings.textfieldConfig
+            in
+                ( DatePicker <|
+                    { model
+                        | textfield = newTextfieldModel
+                        , inputText = Nothing
+                        , focused = Nothing
+                    }
+                , Cmd.none
+                , Changed
+                    (Just date)
+                )
+
         Text text ->
             { model | inputText = Just text } ! []
 
@@ -413,6 +433,13 @@ view pickedDate settings (DatePicker ({ open } as model)) =
             [ dateInput
             , datePicker pickedDate settings model
             ]
+
+
+onClick : msg -> Attribute msg
+onClick msg =
+    onWithOptions "click"
+        { stopPropagation = True, preventDefault = True }
+        (Json.succeed msg)
 
 
 datePicker : Maybe Date -> Settings -> Model -> Html Msg

@@ -28,8 +28,8 @@ import Task
 
 type alias Model =
     { textfield : Textfield.Model
-    , sliderWithTextfield1 : SliderWithTextfield.Model
-    , sliderWithTextfield2 : SliderWithTextfield.Model
+    , sumSliderModel : SliderWithTextfield.Model
+    , periodSliderModel : SliderWithTextfield.Model
     , sumInputText : Maybe String
     , periodInputText : Maybe String
     , datePicker : DatePicker.DatePicker
@@ -58,8 +58,8 @@ init =
     in
         { textfield = Textfield.defaultModel
         , textInput = Nothing
-        , sliderWithTextfield1 = SliderWithTextfield.defaultModel
-        , sliderWithTextfield2 = SliderWithTextfield.defaultModel
+        , sumSliderModel = SliderWithTextfield.defaultModel
+        , periodSliderModel = SliderWithTextfield.defaultModel
         , sumInputText = Just "2000"
         , periodInputText = Just "7"
         , datePicker = dp
@@ -83,8 +83,8 @@ init =
 
 type Msg
     = Open
-    | SliderWithTextfieldMsg1 SliderWithTextfield.Msg
-    | SliderWithTextfieldMsg2 SliderWithTextfield.Msg
+    | SumSliderWithTextfieldMsg SliderWithTextfield.Msg
+    | PeriodSliderWithTextfieldMsg SliderWithTextfield.Msg
     | TextfieldMsg Textfield.Msg
     | DatePickerMsg DatePicker.Msg
     | Select Int
@@ -243,7 +243,7 @@ updatePeriodSliderAndDatepicker model msg_ =
         ( newModel, newText ) =
             SliderWithTextfield.update
                 msg_
-                model.sliderWithTextfield2
+                model.periodSliderModel
                 (calculatePeriodSliderConfig model)
                 model.periodInputText
 
@@ -266,7 +266,7 @@ updatePeriodSliderAndDatepicker model msg_ =
             let
                 ( newDatePicker_, _, dateEvent ) =
                     DatePicker.update datePickerConfig
-                        (DatePicker.Pick (Just dateForDatepicker))
+                        (DatePicker.SetDate dateForDatepicker)
                         model.datePicker
 
                 newDate_ =
@@ -288,6 +288,9 @@ updatePeriodSliderAndDatepicker model msg_ =
                         ( newDatePicker_, newDate_ )
 
                     SliderWithTextfield.SliderMsg (InternalSlider.MouseDrag _) ->
+                        ( newDatePicker_, newDate_ )
+
+                    SliderWithTextfield.SliderMsg (InternalSlider.MouseUp _) ->
                         ( newDatePicker_, newDate_ )
 
                     _ ->
@@ -388,7 +391,7 @@ update action model =
                                     (SliderWithTextfield.TextfieldMsg
                                         (InternalTextfield.Input (newSumInputText |> Maybe.withDefault "0"))
                                     )
-                                    model.sliderWithTextfield1
+                                    model.sumSliderModel
                                     sumSliderPrimaryConfig
                                     model.sumInputText
 
@@ -400,8 +403,8 @@ update action model =
                         in
                             { model
                                 | radios = radios
-                                , sliderWithTextfield1 = newSumSliderModel
-                                , sliderWithTextfield2 = newPeriodSliderModel
+                                , sumSliderModel = newSumSliderModel
+                                , periodSliderModel = newPeriodSliderModel
                                 , sumInputText = newSumInputText
                                 , datePicker = newDatePicker
                                 , date = newDate
@@ -422,13 +425,13 @@ update action model =
                                     (SliderWithTextfield.TextfieldMsg
                                         (InternalTextfield.Input (newPeriodInputText |> Maybe.withDefault "0"))
                                     )
-                                    model.sliderWithTextfield2
+                                    model.periodSliderModel
                                     newPeriodSliderConfig
                                     model.periodInputText
                         in
                             { model
                                 | radios = radios
-                                , sliderWithTextfield2 = newPeriodSliderModel
+                                , periodSliderModel = newPeriodSliderModel
                                 , periodInputText = newPeriodInputText
                             }
                                 ! []
@@ -486,7 +489,7 @@ update action model =
                         (SliderWithTextfield.TextfieldMsg
                             (InternalTextfield.Input (newPeriodInputText |> Maybe.withDefault "0"))
                         )
-                        model.sliderWithTextfield2
+                        model.periodSliderModel
                         periodSliderConfig
                         model.periodInputText
             in
@@ -494,33 +497,33 @@ update action model =
                     | date = newDate
                     , datePicker = newDatePicker
                     , periodInputText = newPeriodInputText
-                    , sliderWithTextfield2 = newPeriodSliderModel
+                    , periodSliderModel = newPeriodSliderModel
                 }
                     ! [ Cmd.map DatePickerMsg datePickerFx ]
 
-        SliderWithTextfieldMsg1 msg_ ->
+        SumSliderWithTextfieldMsg msg_ ->
             let
                 ( newSumSliderModel, newText ) =
                     SliderWithTextfield.update
                         msg_
-                        model.sliderWithTextfield1
+                        model.sumSliderModel
                         (currentSliderConfig model)
                         model.sumInputText
             in
                 { model
-                    | sliderWithTextfield1 = newSumSliderModel
+                    | sumSliderModel = newSumSliderModel
                     , sumInputText =
                         newText
                 }
                     ! []
 
-        SliderWithTextfieldMsg2 msg_ ->
+        PeriodSliderWithTextfieldMsg msg_ ->
             let
                 ( newPeriodSliderModel, newDatePickerModel, newDate, newText ) =
                     updatePeriodSliderAndDatepicker model msg_
             in
                 { model
-                    | sliderWithTextfield2 = newPeriodSliderModel
+                    | periodSliderModel = newPeriodSliderModel
                     , datePicker = newDatePickerModel
                     , date = newDate
                     , periodInputText =
@@ -643,14 +646,14 @@ view model =
                     [ cs "fields" ]
                     [ SliderWithTextfield.view
                         model.sumInputText
-                        model.sliderWithTextfield1
+                        model.sumSliderModel
                         (currentSliderConfig model)
-                        |> Html.map SliderWithTextfieldMsg1
+                        |> Html.map SumSliderWithTextfieldMsg
                     , SliderWithTextfield.view
                         model.periodInputText
-                        model.sliderWithTextfield2
+                        model.periodSliderModel
                         (calculatePeriodSliderConfig model)
-                        |> Html.map SliderWithTextfieldMsg2
+                        |> Html.map PeriodSliderWithTextfieldMsg
                     , DatePicker.view
                         model.date
                         datePickerConfig
@@ -744,12 +747,12 @@ main =
 subscriptions : Model -> Sub Msg
 subscriptions model =
     Sub.batch
-        [ Sub.map SliderWithTextfieldMsg1
+        [ Sub.map SumSliderWithTextfieldMsg
             (SliderWithTextfield.subscriptions
-                model.sliderWithTextfield1
+                model.sumSliderModel
             )
-        , Sub.map SliderWithTextfieldMsg2
+        , Sub.map PeriodSliderWithTextfieldMsg
             (SliderWithTextfield.subscriptions
-                model.sliderWithTextfield2
+                model.periodSliderModel
             )
         ]
