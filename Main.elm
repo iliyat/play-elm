@@ -325,7 +325,7 @@ update action model =
                         False
 
                 newSumSliderText =
-                    (currentSumSliderConfig (isPrimary) model.sumInputText)
+                    (currentSumSliderConfig isPrimary model.sumInputText)
                         |> .sliderConfig
                         |> .value
                         |> toString
