@@ -43,13 +43,6 @@ defaultConfig =
 subscriptions : Model -> Sub Msg
 subscriptions model =
     let
-        -- list =
-        --     [ Mouse.ups MouseUp ]
-        --         ++ (if model.active == True then
-        --                 [ Mouse.moves MouseDrag ]
-        --             else
-        --                 []
-        --            )
         list =
             (if model.active == True then
                 [ Mouse.moves MouseDrag, Mouse.ups MouseUp ]

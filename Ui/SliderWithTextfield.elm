@@ -2,7 +2,6 @@ module Ui.SliderWithTextfield
     exposing
         ( Model
         , Config
-        , withLimits
         , withLimits1
         , defaultModel
         , defaultConfig
@@ -46,34 +45,6 @@ type alias Config =
     }
 
 
-withLimits : Config -> Float -> Float -> Int -> Config
-withLimits config min max steps =
-    let
-        sliderConfig =
-            config.sliderConfig
-
-        textfieldConfig =
-            config.textfieldConfig
-
-        value =
-            if sliderConfig.value > max then
-                max
-            else if sliderConfig.value < min then
-                min
-            else
-                sliderConfig.value
-
-        updatedSlider =
-            { sliderConfig
-                | min = min
-                , max = max
-                , steps = steps
-                , value = value
-            }
-    in
-        { config | sliderConfig = updatedSlider }
-
-
 withLimits1 : Config -> Float -> Float -> Float -> Int -> Config
 withLimits1 config value min max steps =
     let
@@ -84,9 +55,9 @@ withLimits1 config value min max steps =
             config.textfieldConfig
 
         resultValue =
-            if sliderConfig.value > max then
+            if value > max then
                 max
-            else if sliderConfig.value < min then
+            else if value < min then
                 min
             else
                 value
