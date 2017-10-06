@@ -43,13 +43,19 @@ defaultConfig =
 subscriptions : Model -> Sub Msg
 subscriptions model =
     let
+        -- list =
+        --     [ Mouse.ups MouseUp ]
+        --         ++ (if model.active == True then
+        --                 [ Mouse.moves MouseDrag ]
+        --             else
+        --                 []
+        --            )
         list =
-            [ Mouse.ups MouseUp ]
-                ++ (if model.active == True then
-                        [ Mouse.moves MouseDrag ]
-                    else
-                        []
-                   )
+            (if model.active == True then
+                [ Mouse.moves MouseDrag, Mouse.ups MouseUp ]
+             else
+                []
+            )
     in
         Sub.batch list
 
@@ -288,8 +294,11 @@ view : Model -> Config -> Html Msg
 view model config =
     let
         continuousValue =
-            model.value
-                |> Maybe.withDefault config.value
+            if model.active then
+                model.value
+                    |> Maybe.withDefault config.value
+            else
+                config.value
 
         value =
             discretize config.steps continuousValue

@@ -3,6 +3,7 @@ module Ui.SliderWithTextfield
         ( Model
         , Config
         , withLimits
+        , withLimits1
         , defaultModel
         , defaultConfig
         , discretize
@@ -68,6 +69,34 @@ withLimits config min max steps =
                 , max = max
                 , steps = steps
                 , value = value
+            }
+    in
+        { config | sliderConfig = updatedSlider }
+
+
+withLimits1 : Config -> Float -> Float -> Float -> Int -> Config
+withLimits1 config value min max steps =
+    let
+        sliderConfig =
+            config.sliderConfig
+
+        textfieldConfig =
+            config.textfieldConfig
+
+        resultValue =
+            if sliderConfig.value > max then
+                max
+            else if sliderConfig.value < min then
+                min
+            else
+                value
+
+        updatedSlider =
+            { sliderConfig
+                | min = min
+                , max = max
+                , steps = steps
+                , value = resultValue
             }
     in
         { config | sliderConfig = updatedSlider }

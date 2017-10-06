@@ -380,6 +380,16 @@ pick =
 view : Maybe Date -> Settings -> DatePicker -> Html Msg
 view pickedDate settings (DatePicker ({ open } as model)) =
     let
+        pickedDateInputText =
+            Just <|
+                (Maybe.map formatDate pickedDate |> Maybe.withDefault "")
+
+        inputText =
+            if model.open then
+                model.inputText
+            else
+                pickedDateInputText
+
         class =
             mkClass settings
 
@@ -408,7 +418,7 @@ view pickedDate settings (DatePicker ({ open } as model)) =
 
         valueForMaskedInput =
             Just <|
-                (model.inputText
+                (inputText
                     |> Maybe.withDefault
                         (Maybe.map formatDate pickedDate |> Maybe.withDefault "")
                     |> replaceDots
