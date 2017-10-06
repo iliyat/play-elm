@@ -72,7 +72,6 @@ type alias Model =
     , forceOpen : Bool
     , yearListOpen : Bool
     , focused : Maybe Date
-    , inputText : Maybe String
     , today : Date
     , textfield : Textfield.Model
     }
@@ -154,7 +153,6 @@ defaultModel =
     , forceOpen = False
     , yearListOpen = False
     , focused = Just initDate
-    , inputText = Nothing
     , today = initDate
     , textfield = Textfield.defaultModel
     }
@@ -175,7 +173,6 @@ initFromDate date today =
             { open = False
             , forceOpen = False
             , focused = Just today
-            , inputText = Just <| formatDate date
             , today = today
             , yearListOpen = False
             , textfield = updated
@@ -223,153 +220,148 @@ type DateEvent
     | Changed (Maybe Date)
 
 
-update : Settings -> Msg -> DatePicker -> ( DatePicker, Cmd Msg, DateEvent )
-update settings msg (DatePicker model) =
-    case msg of
-        TextfieldMsg tfMsg ->
-            let
-                ( newTextfieldModel, newText ) =
-                    Textfield.externalUpdate
-                        tfMsg
-                        model.textfield
-                        settings.textfieldConfig
-                        model.inputText
+update : Maybe Date -> Settings -> Msg -> DatePicker -> ( DatePicker, Cmd Msg, DateEvent )
+update date settings msg (DatePicker model) =
+    let
+        inputText =
+            Just <|
+                (Maybe.map formatDate date |> Maybe.withDefault "")
+    in
+        case msg of
+            TextfieldMsg tfMsg ->
+                let
+                    ( newTextfieldModel, newText ) =
+                        Textfield.externalUpdate
+                            tfMsg
+                            model.textfield
+                            settings.textfieldConfig
+                            inputText
 
-                open =
+                    open =
+                        case tfMsg of
+                            InternalTextfield.Focus ->
+                                True
+
+                            InternalTextfield.Blur ->
+                                model.forceOpen
+
+                            _ ->
+                                model.open
+
+                    forceOpen =
+                        case tfMsg of
+                            InternalTextfield.Focus ->
+                                False
+
+                            _ ->
+                                model.forceOpen
+                in
                     case tfMsg of
-                        InternalTextfield.Focus ->
-                            True
+                        InternalTextfield.SubmitText ->
+                            let
+                                isWhitespace =
+                                    String.trim >> String.isEmpty
 
-                        InternalTextfield.Blur ->
-                            model.forceOpen
+                                dateEvent =
+                                    let
+                                        text =
+                                            inputText ?> ""
+
+                                        inputDate =
+                                            Result.withDefault model.today
+                                                (fromString <| text)
+                                    in
+                                        if isWhitespace text then
+                                            Changed Nothing
+                                        else
+                                            Changed (Just inputDate)
+                            in
+                                ( DatePicker <|
+                                    { model
+                                        | focused =
+                                            case dateEvent of
+                                                Changed _ ->
+                                                    Nothing
+
+                                                NoChange ->
+                                                    model.focused
+                                    }
+                                , Cmd.none
+                                , dateEvent
+                                )
 
                         _ ->
-                            model.open
+                            { model
+                                | textfield = newTextfieldModel
+                                , open = open
+                                , forceOpen = forceOpen
+                            }
+                                ! []
 
-                forceOpen =
-                    case tfMsg of
-                        InternalTextfield.Focus ->
-                            False
+            CurrentDate date ->
+                { model | focused = Just date, today = date } ! []
 
-                        _ ->
-                            model.forceOpen
-            in
-                case tfMsg of
-                    InternalTextfield.SubmitText ->
-                        let
-                            isWhitespace =
-                                String.trim >> String.isEmpty
+            ChangeFocus date ->
+                { model | focused = Just date, yearListOpen = False } ! []
 
-                            dateEvent =
-                                let
-                                    text =
-                                        model.inputText ?> ""
+            Pick date ->
+                let
+                    ( newTextfieldModel, _, textfieldEvent ) =
+                        case date of
+                            Nothing ->
+                                ( model.textfield, Cmd.none, Textfield.NoChange )
 
-                                    inputDate =
-                                        Result.withDefault model.today
-                                            (fromString <| text)
-                                in
-                                    if isWhitespace text then
-                                        Changed Nothing
-                                    else
-                                        Changed (Just inputDate)
-                        in
-                            ( DatePicker <|
-                                { model
-                                    | inputText =
-                                        case dateEvent of
-                                            Changed _ ->
-                                                Nothing
-
-                                            NoChange ->
-                                                model.inputText
-                                    , focused =
-                                        case dateEvent of
-                                            Changed _ ->
-                                                Nothing
-
-                                            NoChange ->
-                                                model.focused
-                                }
-                            , Cmd.none
-                            , dateEvent
-                            )
-
-                    _ ->
+                            Just d ->
+                                Textfield.update
+                                    (InternalTextfield.SetValue <| formatDate d)
+                                    model.textfield
+                                    settings.textfieldConfig
+                in
+                    ( DatePicker <|
                         { model
                             | textfield = newTextfieldModel
-                            , inputText = newText
-                            , open = open
-                            , forceOpen = forceOpen
+                            , open = False
+                            , focused = Nothing
                         }
-                            ! []
+                    , Cmd.none
+                    , Changed date
+                    )
 
-        CurrentDate date ->
-            { model | focused = Just date, today = date } ! []
+            SetDate date ->
+                let
+                    ( newTextfieldModel, _, textfieldEvent ) =
+                        Textfield.update
+                            (InternalTextfield.SetValue <| formatDate date)
+                            model.textfield
+                            settings.textfieldConfig
+                in
+                    ( DatePicker <|
+                        { model
+                            | textfield = newTextfieldModel
+                            , focused = Nothing
+                        }
+                    , Cmd.none
+                    , Changed
+                        (Just date)
+                    )
 
-        ChangeFocus date ->
-            { model | focused = Just date, yearListOpen = False } ! []
+            Text text ->
+                model ! []
 
-        Pick date ->
-            let
-                ( newTextfieldModel, _, textfieldEvent ) =
-                    case date of
-                        Nothing ->
-                            ( model.textfield, Cmd.none, Textfield.NoChange )
+            Focus ->
+                { model | open = True, forceOpen = False } ! []
 
-                        Just d ->
-                            Textfield.update
-                                (InternalTextfield.SetValue <| formatDate d)
-                                model.textfield
-                                settings.textfieldConfig
-            in
-                ( DatePicker <|
-                    { model
-                        | textfield = newTextfieldModel
-                        , open = False
-                        , inputText = Nothing
-                        , focused = Nothing
-                    }
-                , Cmd.none
-                , Changed date
-                )
+            Blur ->
+                { model | open = model.forceOpen } ! []
 
-        SetDate date ->
-            let
-                ( newTextfieldModel, _, textfieldEvent ) =
-                    Textfield.update
-                        (InternalTextfield.SetValue <| formatDate date)
-                        model.textfield
-                        settings.textfieldConfig
-            in
-                ( DatePicker <|
-                    { model
-                        | textfield = newTextfieldModel
-                        , inputText = Nothing
-                        , focused = Nothing
-                    }
-                , Cmd.none
-                , Changed
-                    (Just date)
-                )
+            ToggleYearList ->
+                { model | yearListOpen = not model.yearListOpen } ! []
 
-        Text text ->
-            { model | inputText = Just text } ! []
+            MouseDown ->
+                { model | forceOpen = True } ! []
 
-        Focus ->
-            { model | open = True, forceOpen = False } ! []
-
-        Blur ->
-            { model | open = model.forceOpen } ! []
-
-        ToggleYearList ->
-            { model | yearListOpen = not model.yearListOpen } ! []
-
-        MouseDown ->
-            { model | forceOpen = True } ! []
-
-        MouseUp ->
-            { model | forceOpen = False } ! []
+            MouseUp ->
+                { model | forceOpen = False } ! []
 
 
 pick : Maybe Date -> Msg
@@ -385,10 +377,7 @@ view pickedDate settings (DatePicker ({ open } as model)) =
                 (Maybe.map formatDate pickedDate |> Maybe.withDefault "")
 
         inputText =
-            if model.open then
-                model.inputText
-            else
-                pickedDateInputText
+            pickedDateInputText
 
         class =
             mkClass settings

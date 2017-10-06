@@ -155,7 +155,7 @@ update msg ({ date, datePicker } as model) =
         DatePickerMsg msg ->
             let
                 ( newDatePicker, datePickerFx, dateEvent ) =
-                    DatePicker.update settings msg datePicker
+                    DatePicker.update model.date settings msg datePicker
 
                 newDate =
                     case dateEvent of
