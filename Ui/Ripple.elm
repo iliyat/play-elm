@@ -180,7 +180,7 @@ view isUnbounded lift model _ _ =
         -- maxRadius =
         --     surfaceDiameter + 10
         maxRadius =
-            surfaceDiameter - 10
+            surfaceDiameter + 10
 
         fgScale =
             toString (maxRadius / initialSize)

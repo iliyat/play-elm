@@ -3,11 +3,13 @@ body {
   font-family: Roboto;
 }
 
-.main-container {
-  background: white;
+.content-view {
   width: 1216px;
   margin: 50px auto;
-  margin-bottom: 50px;
+}
+
+.block {
+  background: white;
   padding: 20px 32px;
 }
 
@@ -60,6 +62,10 @@ body {
 .ui-slider-with-textfield-label {
   color: #afbec5;
   font-size: 14px;
+}
+
+.ui-flex {
+  display: flex;
 }
 
 .mdc-dialog__surface {

@@ -181,7 +181,10 @@ view value_ model config =
             model.isFocused && not config.disabled
 
         isDirty =
-            model.isDirty || (config.defaultValue /= Nothing)
+            model.isDirty
+                || (config.defaultValue /= Nothing)
+                || value_
+                /= Nothing
 
         value =
             value_
@@ -217,6 +220,12 @@ view value_ model config =
                 asTitleStyle
             else
                 simpleStyle
+
+        width =
+            if config.fullWidth then
+                "100%"
+            else
+                "168px"
 
         extra =
             config.extra |> Maybe.withDefault ""
@@ -271,7 +280,7 @@ view value_ model config =
             div
                 [ style
                     [ ( "font-size", st.fontSize )
-                    , ( "width", "168px" )
+                    , ( "width", width )
                     ]
                 , classList
                     [ ( "mdc-textfield__input", True )
