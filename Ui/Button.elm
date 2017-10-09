@@ -11,6 +11,7 @@ module Ui.Button
         , dense
         , primary
         , secondary
+        , danger
         , link
         , darkTheme
           -- TEA
@@ -26,7 +27,7 @@ import Json.Decode as Json
 import Ui.Internal.Helpers as Helpers exposing (map1st, map2nd, blurOn, filter, noAttr)
 import Ui.Internal.Options as Internal
 import Ui.Internal.Button exposing (Msg(..))
-import Ui.Options as Options exposing (Style, cs, styled, many, when, maybe)
+import Ui.Options as Options exposing (Style, cs, styled, many, when, maybe, css)
 import Ui.Ripple as Ripple
 
 
@@ -129,6 +130,11 @@ unelevated =
 stroked : Property m
 stroked =
     cs "mdc-button--stroked"
+
+
+danger : Property m
+danger =
+    css "color" "#d50000"
 
 
 darkTheme : Property m

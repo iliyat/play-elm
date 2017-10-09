@@ -1,7 +1,7 @@
 .issue-loan--base-info {
   position: relative;
   background: white;
-  padding: 32px;
+  padding: 32px 32px 18px 32px;
   margin-bottom: 32px; }
 
 .issue-loan--avatar {
@@ -75,7 +75,7 @@
 
 .stepper--actions {
   display: flex;
-  flex-direction: row-reverse;
-  padding-top: 24px; }
+  padding-top: 24px;
+  justify-content: space-between; }
 
 /*# sourceMappingURL=issue-loan.css.map */

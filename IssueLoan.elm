@@ -26,9 +26,10 @@ type Step
 
 type Msg
     = CurrentDate Date
-    | ChangeStep Step
     | OnNextClick
     | OnPrevClick
+    | OnClientDecline
+    | ClientDeclineRipple Button.Msg
     | PrevRipple Button.Msg
     | NextRipple Button.Msg
     | NoOp
@@ -75,6 +76,7 @@ prevStep current =
 type alias Model =
     { date : Maybe Date
     , currentStep : Step
+    , clientDeclineButtonModel : Button.Model
     , prevButtonModel : Button.Model
     , nextButtonModel : Button.Model
     }
@@ -84,6 +86,7 @@ init : ( Model, Cmd Msg )
 init =
     { date = Just <| Date.fromParts 1992 Feb 21 0 0 0 0
     , currentStep = PassportCheck
+    , clientDeclineButtonModel = Button.defaultModel
     , prevButtonModel = Button.defaultModel
     , nextButtonModel = Button.defaultModel
     }
@@ -93,6 +96,9 @@ init =
 update : Msg -> Model -> ( Model, Cmd Msg )
 update msg model =
     case msg of
+        OnClientDecline ->
+            model ! []
+
         OnPrevClick ->
             let
                 current =
@@ -125,13 +131,14 @@ update msg model =
                 , effects |> Cmd.map NextRipple
                 )
 
-        ChangeStep step ->
-            case step of
-                PassportCheck ->
-                    model ! []
-
-                _ ->
-                    model ! []
+        ClientDeclineRipple msg_ ->
+            let
+                ( new, effects ) =
+                    Button.update msg_ model.clientDeclineButtonModel
+            in
+                ( { model | clientDeclineButtonModel = new }
+                , effects |> Cmd.map ClientDeclineRipple
+                )
 
         NoOp ->
             model ! []
@@ -194,19 +201,30 @@ stepper model =
                 ]
             , div
                 [ class "actions" ]
-                [ Button.view NextRipple
-                    model.nextButtonModel
-                    [ Button.ripple
-                    , Button.raised
-                    , Button.primary
-                    , css "margin-left" "8px"
-                    , Options.onClick OnNextClick
+                [ div []
+                    [ Button.view ClientDeclineRipple
+                        model.clientDeclineButtonModel
+                        [ Button.ripple
+                        , Button.danger
+                        , Options.onClick OnClientDecline
+                        ]
+                        [ text "Отказ клиента" ]
                     ]
-                    [ text "Дальше" ]
-                , Button.view PrevRipple
-                    model.prevButtonModel
-                    [ Button.ripple, Options.onClick OnPrevClick ]
-                    [ text "Назад" ]
+                , div []
+                    [ Button.view PrevRipple
+                        model.prevButtonModel
+                        [ Button.ripple, Options.onClick OnPrevClick ]
+                        [ text "Назад" ]
+                    , Button.view NextRipple
+                        model.nextButtonModel
+                        [ Button.ripple
+                        , Button.raised
+                        , Button.primary
+                        , css "margin-left" "8px"
+                        , Options.onClick OnNextClick
+                        ]
+                        [ text "Дальше" ]
+                    ]
                 ]
             ]
 
