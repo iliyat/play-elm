@@ -1,4 +1,4 @@
-module Step.PrintDocuments exposing (view)
+module Step.ReceiveType exposing (view)
 
 import Html exposing (Html, div, h1, text, p, span)
 import Html.Attributes as Attrs
@@ -10,5 +10,5 @@ view : Html Never
 view =
     styled Html.div
         [ cs "block" ]
-        [ styled div [ Typography.headline ] [ text "Печать документов" ]
+        [ styled div [ Typography.headline ] [ text "Способ получения" ]
         ]

@@ -14,6 +14,9 @@ import Views.Stepper exposing (step, stepLine)
 import Ui.Button as Button
 import Step.PassportCheck
 import Step.Conditions
+import Step.ReceiveType
+import Step.PrintDocuments
+import Step.IssueLoan
 
 
 type Step
@@ -163,8 +166,14 @@ getCurrentView step =
         Conditions ->
             Step.Conditions.view |> Html.map never
 
-        _ ->
-            div [] [ text "no view" ]
+        ReceiveType ->
+            Step.ReceiveType.view |> Html.map never
+
+        PrintDocuments ->
+            Step.PrintDocuments.view |> Html.map never
+
+        IssueLoan ->
+            Step.IssueLoan.view |> Html.map never
 
 
 stepper : Model -> Html Msg
