@@ -61,3 +61,22 @@ body {
   color: #afbec5;
   font-size: 14px;
 }
+
+.mdc-dialog__surface {
+  width: 448px;
+  max-width: 448px;
+  min-width: 448px;
+}
+.mdc-dialog__header {
+  padding-right: 32px;
+  padding-left: 32px;
+}
+.mdc-dialog__body {
+  padding-right: 32px;
+  padding-left: 32px;
+}
+.mdc-dialog__footer {
+  padding-right: 32px;
+  padding-left: 32px;
+  padding-bottom: 24px;
+}

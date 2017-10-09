@@ -15,6 +15,7 @@ module Ui.Options
         , stylesheet
         , Style
         , div
+        , header
         , span
         , img
         , attribute
@@ -118,6 +119,11 @@ styled_ ctor props attrs =
 div : List (Property c m) -> List (Html m) -> Html m
 div =
     styled Html.div
+
+
+header : List (Property c m) -> List (Html m) -> Html m
+header =
+    styled Html.header
 
 
 
