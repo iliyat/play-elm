@@ -35,6 +35,7 @@ import Ui.Textfield as Textfield
 import Ui.Internal.Textfield as InternalTextfield
 import Icons.Icon as Icon
 import Regex
+import Date.Extra as Date
 
 
 type Msg
@@ -152,7 +153,7 @@ defaultModel =
     { open = False
     , forceOpen = False
     , yearListOpen = False
-    , focused = Just initDate
+    , focused = Nothing
     , today = initDate
     , textfield = Textfield.defaultModel
     }
@@ -299,7 +300,11 @@ update date settings msg (DatePicker model) =
                                 ! []
 
             CurrentDate date ->
-                { model | focused = Just date, today = date } ! []
+                let
+                    cleanDate =
+                        model.today |> Date.floor Date.Day
+                in
+                    { model | focused = Just cleanDate, today = cleanDate } ! []
 
             ChangeFocus date ->
                 { model | focused = Just date, yearListOpen = False } ! []
