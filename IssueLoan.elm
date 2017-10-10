@@ -14,7 +14,7 @@ import Select
 import Views.Stepper exposing (step, stepLine)
 import Ui.Button as Button
 import Step.PassportCheck
-import Step.Conditions
+import Step.Conditions as Conditions
 import Step.ReceiveType
 import Step.PrintDocuments
 import Step.IssueLoan
@@ -22,7 +22,7 @@ import Step.IssueLoan
 
 type Step
     = PassportCheck
-    | Conditions
+    | Conditions Conditions.Model
     | ReceiveType
     | PrintDocuments
     | IssueLoan
@@ -40,15 +40,16 @@ type Msg
     | ClientDeclineRipple Button.Msg
     | ClientDeclineDialogRipple Button.Msg
     | ClientDeclineAccept
+    | ConditionsMsg Conditions.Msg
 
 
 nextStep : Step -> Step
 nextStep current =
     case current of
         PassportCheck ->
-            Conditions
+            Conditions Conditions.init
 
-        Conditions ->
+        Conditions _ ->
             ReceiveType
 
         ReceiveType ->
@@ -67,11 +68,11 @@ prevStep current =
         PassportCheck ->
             PassportCheck
 
-        Conditions ->
+        Conditions _ ->
             PassportCheck
 
         ReceiveType ->
-            Conditions
+            Conditions Conditions.init
 
         PrintDocuments ->
             ReceiveType
@@ -96,7 +97,7 @@ type alias Model =
 init : ( Model, Cmd Msg )
 init =
     { date = Just <| Date.fromParts 1992 Feb 21 0 0 0 0
-    , currentStep = PassportCheck
+    , currentStep = Conditions Conditions.init
     , clientDeclineButtonModel = Button.defaultModel
     , prevButtonModel = Button.defaultModel
     , nextButtonModel = Button.defaultModel
@@ -189,15 +190,32 @@ update msg model =
                 }
                     ! []
 
+        ConditionsMsg msg_ ->
+            let
+                getModel =
+                    case model.currentStep of
+                        Conditions a ->
+                            a
 
-getCurrentView : Step -> Html Msg
-getCurrentView step =
-    case step of
+                        _ ->
+                            Conditions.init
+
+                ( new, effects ) =
+                    Conditions.update msg_ getModel
+            in
+                ( { model | currentStep = Conditions new }
+                , effects |> Cmd.map ConditionsMsg
+                )
+
+
+getCurrentView : Model -> Html Msg
+getCurrentView model =
+    case model.currentStep of
         PassportCheck ->
             Step.PassportCheck.view |> Html.map never
 
-        Conditions ->
-            Step.Conditions.view |> Html.map never
+        Conditions model ->
+            Conditions.view model |> Html.map (ConditionsMsg)
 
         ReceiveType ->
             Step.ReceiveType.view |> Html.map never
@@ -237,7 +255,9 @@ stepper model =
                 [ div [ class "header" ]
                     [ step "Проверка паспорта" 1 (ifCurrent PassportCheck)
                     , stepLine
-                    , step "Условия займа" 2 (ifCurrent Conditions)
+                    , step "Условия займа"
+                        2
+                        (ifCurrent <| Conditions Conditions.init)
                     , stepLine
                     , step "Способ получения" 3 (ifCurrent ReceiveType)
                     , stepLine
@@ -245,8 +265,8 @@ stepper model =
                     , stepLine
                     , step "Выдача денежных средств" 5 (ifCurrent IssueLoan)
                     ]
-                , getCurrentView model.currentStep
                 ]
+            , getCurrentView model
             , div
                 [ class "actions" ]
                 [ div []

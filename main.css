@@ -10,7 +10,7 @@ body {
 
 .block {
   background: white;
-  padding: 20px 32px;
+  padding: 24px 32px;
 }
 
 .header {
@@ -85,4 +85,10 @@ body {
   padding-right: 32px;
   padding-left: 32px;
   padding-bottom: 24px;
+}
+.mdc-textfield__input {
+  letter-spacing: 0 !important;
+}
+.mdc-textfield__label {
+  white-space: nowrap;
 }
