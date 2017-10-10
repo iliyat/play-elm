@@ -19,7 +19,6 @@ type Msg
     = Open
     | Close
     | Toggle Geometry
-    | ToggleString String
     | Click Mouse.Position
     | Init Geometry
 

@@ -2,8 +2,7 @@ module Select exposing (..)
 
 import Html exposing (..)
 import Html.Attributes exposing (style, class)
-import Textfield
-import Internal.Menu
+import Ui.Textfield as Textfield
 import Icons.Icon as Icon
 import Html.Events as Events
 import Menu
@@ -12,6 +11,7 @@ import Menu
 type alias Model =
     { textfield : Textfield.Model
     , menu : Menu.Model
+    , selected : Maybe String
     }
 
 
@@ -19,6 +19,7 @@ defaultModel : Model
 defaultModel =
     { textfield = Textfield.defaultModel
     , menu = Menu.defaultModel
+    , selected = Nothing
     }
 
 
@@ -27,13 +28,17 @@ type Msg
     | MenuMsg Menu.Msg
 
 
-update : (Msg -> m) -> Msg -> Model -> ( Model, Cmd m )
-update lift msg model =
+update : Msg -> Model -> ( Model, Cmd m )
+update msg model =
     case msg of
         TextfieldMsg msg_ ->
             let
-                ( newTextfieldModel, _ ) =
-                    Textfield.update TextfieldMsg msg_ model.textfield textfieldConfig
+                ( newTextfieldModel, newText ) =
+                    Textfield.externalUpdate
+                        msg_
+                        model.textfield
+                        textfieldConfig
+                        model.selected
             in
                 ( { model | textfield = newTextfieldModel }, Cmd.none )
 
@@ -43,11 +48,6 @@ update lift msg model =
                     Menu.update MenuMsg msg_ model.menu
             in
                 ( { model | menu = m }, Cmd.none )
-
-
-
--- _ ->
---     ( model, Cmd.none )
 
 
 type alias Config =
@@ -68,47 +68,43 @@ textfieldConfig =
     in
         { dc
             | fullWidth = False
-            , readonly = True
             , defaultValue = Just "ololo"
         }
 
 
-view : (Msg -> m) -> Model -> Config -> Html m
-view lift model config =
-    let
-        labelMin =
-            2
-    in
-        div
-            [ Events.onClick (lift <| MenuMsg Internal.Menu.Open)
-            , style
+view : Model -> Config -> Html Msg
+view model config =
+    div
+        [ Menu.attach MenuMsg
+        , style
+            [ ( "position", "relative" )
+            , ( "width", "198px" )
+            , ( "height", "48px" )
+            , ( "max-height", "48px" )
+            , ( "display", "inline-flex" )
+            , ( "align-items", "center" )
+            , ( "cursor", "pointer" )
+            ]
+        ]
+        [ Textfield.viewReadonly model.selected
+            model.textfield
+            textfieldConfig
+            |> Html.map never
+        , Menu.view MenuMsg
+            model.menu
+            ([ li [ class "mdc-list-item" ] [ text "Редактировать" ]
+             , li [ class "mdc-list-item" ] [ text "Отправить в архив" ]
+             ]
+            )
+        , Icon.view "arrow_drop_down"
+            [ style
                 [ ( "position", "relative" )
-                , ( "width", "198px" )
-                , ( "height", "100%" )
-                , ( "display", "flex" )
-                , ( "align-items", "center" )
+                , ( "right", "22px" )
+                , ( "top", "7px" )
                 , ( "cursor", "pointer" )
                 ]
             ]
-            [ Menu.view (lift << MenuMsg)
-                model.menu
-                ([ li [ class "mdc-list-item" ] [ text "Редактировать" ]
-                 , li [ class "mdc-list-item" ] [ text "Отправить в архив" ]
-                 ]
-                )
-            , Textfield.view
-                (lift << TextfieldMsg)
-                model.textfield
-                textfieldConfig
-            , Icon.view "arrow_drop_down"
-                [ style
-                    [ ( "position", "relative" )
-                    , ( "right", "22px" )
-                    , ( "top", "7px" )
-                    , ( "cursor", "pointer" )
-                    ]
-                ]
-            ]
+        ]
 
 
 subscriptions : Model -> Sub Msg

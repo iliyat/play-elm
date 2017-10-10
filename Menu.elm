@@ -16,7 +16,7 @@ import Html exposing (Html, text, div, button, Attribute, ul, li)
 import Html.Events as Events
 import Html.Attributes exposing (class, classList, style)
 import Json.Decode as Json
-import Internal.Menu
+import Ui.Internal.Menu as InternalMenu
     exposing
         ( Msg(..)
         , Geometry
@@ -77,7 +77,7 @@ defaultModel =
 
 
 type alias Msg =
-    Internal.Menu.Msg
+    InternalMenu.Msg
 
 
 
@@ -118,9 +118,6 @@ update fwd msg model =
               }
             , Cmd.none
             )
-
-        ToggleString st ->
-            ( model, Cmd.none )
 
         Init geometry ->
             ( { model
@@ -179,32 +176,22 @@ view lift { open, left, top } menuItems =
             , style
                 [ ( "opacity", opacity )
                 , ( "transform-origin", "right top 0px" )
-                , ( "transform", transform )
-                , ( "transition", "transform 250ms cubic-bezier(0.23, 1, 0.32, 1) 0ms, opacity 250ms cubic-bezier(0.23, 1, 0.32, 1) 0ms" )
+                , ( "top", "12px" )
 
-                -- , ( "position", "fixed" )
-                -- , ( "left", toString left ++ "px" )
-                -- , ( "top", toString top ++ "px" )
+                -- , ( "transform-origin", "right top 0px" )
+                -- , ( "transform", transform )
+                , ( "transform", transform2 )
+
+                -- , ( "transition", "transform 250ms cubic-bezier(0.23, 1, 0.32, 1) 0ms, opacity 250ms cubic-bezier(0.23, 1, 0.32, 1) 0ms" )
+                , ( "transition", "transform 450ms cubic-bezier(0.23, 1, 0.32, 1) 0ms, opacity 450ms cubic-bezier(0.23, 1, 0.32, 1) 0ms" )
                 , ( "z-index", zIndex )
                 ]
             ]
             [ div
-                [ style
-                    [ ( "opacity", opacity )
-                    , ( "max-height", "100%" )
-                    , ( "overflow-y", "auto" )
-                    , ( "transform-origin", "right top 0px" )
-                    , ( "transform", transform1 )
-                    , ( "transition", "transform 250ms cubic-bezier(0.23, 1, 0.32, 1) 0ms, opacity 250ms cubic-bezier(0.23, 1, 0.32, 1) 0ms" )
-                    ]
-                ]
+                []
                 [ div
                     [ style
-                        [ ( "opacity", opacity )
-                        , ( "transform-origin", "right top 0px" )
-                        , ( "transform", transform2 )
-                        , ( "transition", "transform 500ms cubic-bezier(0.23, 1, 0.32, 1) 0ms, opacity 500ms cubic-bezier(0.23, 1, 0.32, 1) 0ms" )
-                        ]
+                        []
                     ]
                     [ ul [ class "mdc-simple-menu__items mdc-list" ]
                         (menuItems)
