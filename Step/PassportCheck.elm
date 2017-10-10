@@ -16,22 +16,30 @@ view =
         dateOfBirthConfig =
             { tfConfig | labelText = Just "Дата рождения", readonly = True }
 
-        passportConfig =
-            { tfConfig | labelText = Just "Паспорт", readonly = True }
+        passportSeriesConfig =
+            { tfConfig | labelText = Just "Серия" }
 
-        phoneConfig =
-            { tfConfig | labelText = Just "Моб. телефон", readonly = True }
+        passportNumberConfig =
+            { tfConfig | labelText = Just "Номер" }
 
-        loanNumberConfig =
-            { tfConfig | labelText = Just "Номер займа", readonly = True }
+        issuedAtConfig =
+            { tfConfig | labelText = Just "Дата выдачи" }
     in
         styled Html.div
             [ cs "block" ]
             [ styled div [ Typography.headline ] [ text "Проверка паспорта" ]
-
-            -- , div []
-            --     [ Textfield.view (Just "24.05.1990")
-            --         Textfield.defaultModel
-            --         dateOfBirthConfig |> Html.map (mapper)
-            --     ]
+            , div []
+                [ Textfield.viewReadonly (Just "4212")
+                    Textfield.defaultModel
+                    passportSeriesConfig
+                , Textfield.viewReadonly (Just "122312")
+                    Textfield.defaultModel
+                    passportNumberConfig
+                , Textfield.viewReadonly (Just "12.12.2012")
+                    Textfield.defaultModel
+                    issuedAtConfig
+                , Textfield.viewReadonly (Just "12.12.2012")
+                    Textfield.defaultModel
+                    dateOfBirthConfig
+                ]
             ]

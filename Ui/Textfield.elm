@@ -1,6 +1,7 @@
 module Ui.Textfield
     exposing
         ( view
+        , viewReadonly
         , Model
         , defaultModel
         , Msg
@@ -172,6 +173,134 @@ maskedInputOptions config =
             | pattern = mask
             , hasFocus = Just FocusChanged
         }
+
+
+viewReadonly : Maybe String -> Model -> Config -> Html Never
+viewReadonly value_ model config =
+    let
+        isFocused =
+            model.isFocused && not config.disabled
+
+        value =
+            value_
+                |> Maybe.withDefault
+                    (config.defaultValue
+                        |> Maybe.withDefault ""
+                    )
+
+        asTitleStyle =
+            { labelBottom = "24px"
+            , labelFontSize = "16px"
+            , height = "56px"
+            , fontSize = "34px"
+            }
+
+        simpleStyle =
+            { labelBottom = "8px"
+            , labelFontSize = "16px"
+            , height = "48px"
+            , fontSize = "18px"
+            }
+
+        st =
+            if config.asTitle then
+                asTitleStyle
+            else
+                simpleStyle
+
+        width =
+            if config.fullWidth then
+                "100%"
+            else
+                "168px"
+
+        extra =
+            config.extra |> Maybe.withDefault ""
+
+        extraInside =
+            Maybe.map (\e -> " " ++ e) config.extraInside |> Maybe.withDefault ""
+
+        intValue =
+            String.toInt value |> Result.withDefault 0
+
+        floatValue =
+            intValue |> toFloat
+
+        displayValue =
+            value
+
+        pl =
+            Maybe.map (flip Utils.pluralize intValue) config.plural
+                |> Maybe.withDefault ""
+
+        divHtml =
+            div
+                [ style
+                    [ ( "font-size", st.fontSize )
+                    , ( "width", width )
+                    ]
+                , classList
+                    [ ( "mdc-textfield__input", True )
+                    ]
+                ]
+                [ text <| displayValue ++ extraInside ]
+
+        contentHtml =
+            divHtml
+    in
+        div
+            [ classList
+                [ ( "mdc-textfield mdc-textfield--upgraded", True )
+                , ( "mdc-textfield--focused", isFocused )
+                , ( "mdc-textfield--disabled", config.disabled )
+                , ( "ui-textfield--readonly", True )
+                , ( "mdc-textfield--fullwidth", False )
+                , ( "mdc-textfield--invalid", False )
+                ]
+            , style
+                [ ( "height", st.height )
+                , ( "width"
+                  , if config.fullWidth then
+                        "100%"
+                    else
+                        "initial"
+                  )
+                ]
+            ]
+            [ contentHtml
+            , label
+                [ classList
+                    [ ( "mdc-textfield__label mdc-typography", True )
+                    , ( "mdc-textfield__label--float-above", True )
+                    ]
+                , style
+                    [ ( "bottom", st.labelBottom )
+                    , ( "font-size", st.labelFontSize )
+                    ]
+                ]
+                (case config.labelText of
+                    Just str ->
+                        [ text str ]
+
+                    Nothing ->
+                        []
+                )
+            , span
+                [ style
+                    [ ( "float", "right" )
+                    , ( "position", "absolute" )
+                    , ( "right", "0" )
+                    , ( "bottom", "10px" )
+                    , ( "height", "24px" )
+                    , ( "font-family", "Roboto" )
+                    , ( "font-size", "34px" )
+                    , ( "line-height", "15px" )
+                    , ( "color", "rgba(0, 0, 0, 0.38)" )
+                    ]
+                ]
+                [ text <| extra ++ pl ]
+            , div [ class "mdc-textfield__bottom-line" ] []
+            ]
 
 
 view : Maybe String -> Model -> Config -> Html Msg
