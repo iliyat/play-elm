@@ -10,6 +10,7 @@ import Ui.Textfield as Textfield
 import Ui.Options as Options exposing (styled, cs, css)
 import Ui.Elevation as Elevation
 import Ui.Button as Button
+import Select
 import Views.Stepper exposing (step, stepLine)
 import Ui.Button as Button
 import Step.PassportCheck
@@ -31,11 +32,14 @@ type Msg
     = CurrentDate Date
     | OnNextClick
     | OnPrevClick
-    | OnClientDecline
-    | ClientDeclineRipple Button.Msg
+    | OnClientDeclineClick
     | PrevRipple Button.Msg
     | NextRipple Button.Msg
+    | SelectMsg Select.Msg
     | NoOp
+    | ClientDeclineRipple Button.Msg
+    | ClientDeclineDialogRipple Button.Msg
+    | ClientDeclineAccept
 
 
 nextStep : Step -> Step
@@ -79,8 +83,12 @@ prevStep current =
 type alias Model =
     { date : Maybe Date
     , currentStep : Step
+    , clientDeclineDialogOpen : Bool
     , clientDeclineButtonModel : Button.Model
+    , clientDeclineButtonDialogModel : Button.Model
+    , clientDeclineSelected : Maybe String
     , prevButtonModel : Button.Model
+    , selectModel : Select.Model
     , nextButtonModel : Button.Model
     }
 
@@ -92,6 +100,10 @@ init =
     , clientDeclineButtonModel = Button.defaultModel
     , prevButtonModel = Button.defaultModel
     , nextButtonModel = Button.defaultModel
+    , clientDeclineButtonDialogModel = Button.defaultModel
+    , clientDeclineDialogOpen = False
+    , clientDeclineSelected = Just "something"
+    , selectModel = Select.defaultModel
     }
         ! [ Task.perform CurrentDate Date.now ]
 
@@ -99,8 +111,20 @@ init =
 update : Msg -> Model -> ( Model, Cmd Msg )
 update msg model =
     case msg of
-        OnClientDecline ->
-            model ! []
+        SelectMsg msg_ ->
+            let
+                ( newModel, _ ) =
+                    Select.update
+                        msg_
+                        model.selectModel
+            in
+                ( { model | selectModel = newModel }, Cmd.none )
+
+        OnClientDeclineClick ->
+            ({ model | clientDeclineDialogOpen = True }) ! []
+
+        ClientDeclineAccept ->
+            ({ model | clientDeclineDialogOpen = False }) ! []
 
         OnPrevClick ->
             let
@@ -141,6 +165,15 @@ update msg model =
             in
                 ( { model | clientDeclineButtonModel = new }
                 , effects |> Cmd.map ClientDeclineRipple
+                )
+
+        ClientDeclineDialogRipple msg_ ->
+            let
+                ( new, effects ) =
+                    Button.update msg_ model.clientDeclineButtonDialogModel
+            in
+                ( { model | clientDeclineButtonDialogModel = new }
+                , effects |> Cmd.map ClientDeclineDialogRipple
                 )
 
         NoOp ->
@@ -190,6 +223,12 @@ stepper model =
                 True
             else
                 False
+
+        tfConfig =
+            Textfield.defaultConfig
+
+        selectOptions =
+            [ "Передумал", "Не ответил", "Заснул" ]
     in
         div
             []
@@ -215,7 +254,7 @@ stepper model =
                         model.clientDeclineButtonModel
                         [ Button.ripple
                         , Button.danger
-                        , Options.onClick OnClientDecline
+                        , Options.onClick OnClientDeclineClick
                         ]
                         [ text "Отказ клиента" ]
                     ]
@@ -233,6 +272,36 @@ stepper model =
                         , Options.onClick OnNextClick
                         ]
                         [ text "Дальше" ]
+                    ]
+                ]
+            , Dialog.view
+                [ Dialog.open
+                    |> Options.when model.clientDeclineDialogOpen
+                ]
+                [ Dialog.header []
+                    [ Html.h2
+                        [ Attrs.class "mdc-dialog__header__title"
+                        ]
+                        [ text "Отказ клиента"
+                        ]
+                    ]
+                , Dialog.body []
+                    [ Select.view
+                        model.selectModel
+                        (Select.config "Причина отказа" model.clientDeclineSelected selectOptions)
+                        |> Html.map SelectMsg
+                    ]
+                , Dialog.footer []
+                    [ Dialog.acceptButton
+                        (Button.view ClientDeclineDialogRipple
+                            model.clientDeclineButtonDialogModel
+                        )
+                        [ Button.ripple
+                        , Button.raised
+                        , Button.primary
+                        , Options.onClick ClientDeclineAccept
+                        ]
+                        [ text "Отправить" ]
                     ]
                 ]
             ]
@@ -353,11 +422,18 @@ mkClassList classNamespace cs =
         |> Attrs.classList
 
 
+subscriptions : Model -> Sub Msg
+subscriptions model =
+    Sub.batch
+        [ Sub.map SelectMsg (Select.subscriptions model.selectModel)
+        ]
+
+
 main : Program Never Model Msg
 main =
     Html.program
         { init = init
         , update = update
         , view = view
-        , subscriptions = always Sub.none
+        , subscriptions = subscriptions
         }

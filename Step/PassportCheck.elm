@@ -17,13 +17,13 @@ view =
             { tfConfig | labelText = Just "Дата рождения", readonly = True }
 
         passportSeriesConfig =
-            { tfConfig | labelText = Just "Серия" }
+            { tfConfig | labelText = Just "Серия", readonly = True }
 
         passportNumberConfig =
-            { tfConfig | labelText = Just "Номер" }
+            { tfConfig | labelText = Just "Номер", readonly = True }
 
         issuedAtConfig =
-            { tfConfig | labelText = Just "Дата выдачи" }
+            { tfConfig | labelText = Just "Дата выдачи", readonly = True }
     in
         styled Html.div
             [ cs "block" ]

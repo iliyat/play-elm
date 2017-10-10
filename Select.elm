@@ -37,7 +37,7 @@ update msg model =
                     Textfield.externalUpdate
                         msg_
                         model.textfield
-                        textfieldConfig
+                        Textfield.defaultConfig
                         model.selected
             in
                 ( { model | textfield = newTextfieldModel }, Cmd.none )
@@ -52,59 +52,78 @@ update msg model =
 
 type alias Config =
     { items : List String
+    , textfieldConfig : Textfield.Config
+    , selected : Maybe String
     }
 
 
 defaultConfig : Config
 defaultConfig =
-    { items = [] }
+    { items = [], textfieldConfig = Textfield.defaultConfig, selected = Nothing }
 
 
-textfieldConfig : Textfield.Config
-textfieldConfig =
+config : String -> Maybe String -> List String -> Config
+config label selected items =
     let
-        dc =
+        tfConfig =
             Textfield.defaultConfig
+
+        setLabel =
+            { tfConfig | labelText = Just label }
     in
-        { dc
-            | fullWidth = False
-            , defaultValue = Just "ololo"
+        { textfieldConfig = setLabel
+        , items = items
+        , selected = selected
+        }
+
+
+withLabel : String -> Config
+withLabel label =
+    let
+        tfConfig =
+            Textfield.defaultConfig
+
+        setLabel =
+            { tfConfig | labelText = Just label }
+    in
+        { textfieldConfig = setLabel
+        , items = []
+        , selected = Nothing
         }
 
 
 view : Model -> Config -> Html Msg
 view model config =
-    div
-        [ Menu.attach MenuMsg
-        , style
-            [ ( "position", "relative" )
-            , ( "width", "198px" )
-            , ( "height", "48px" )
-            , ( "max-height", "48px" )
-            , ( "display", "inline-flex" )
-            , ( "align-items", "center" )
-            , ( "cursor", "pointer" )
-            ]
-        ]
-        [ Textfield.viewReadonly model.selected
-            model.textfield
-            textfieldConfig
-            |> Html.map never
-        , Menu.view MenuMsg
-            model.menu
-            ([ li [ class "mdc-list-item" ] [ text "Редактировать" ]
-             , li [ class "mdc-list-item" ] [ text "Отправить в архив" ]
-             ]
-            )
-        , Icon.view "arrow_drop_down"
-            [ style
+    let
+        items =
+            List.map (\e -> li [ class "mdc-list-item" ] [ text e ]) config.items
+    in
+        div
+            [ Menu.attach MenuMsg
+            , style
                 [ ( "position", "relative" )
-                , ( "right", "22px" )
-                , ( "top", "7px" )
+                , ( "width", "198px" )
+                , ( "height", "48px" )
+                , ( "max-height", "48px" )
+                , ( "display", "inline-flex" )
+                , ( "align-items", "center" )
                 , ( "cursor", "pointer" )
                 ]
             ]
-        ]
+            [ Textfield.viewReadonly config.selected
+                model.textfield
+                config.textfieldConfig
+                |> Html.map never
+            , Menu.view MenuMsg model.menu items
+            , Icon.view "arrow_drop_down"
+                [ style
+                    [ ( "position", "relative" )
+                    , ( "right", "22px" )
+                    , ( "top", "7px" )
+                    , ( "cursor", "pointer" )
+                    ]
+                ]
+            ]
 
 
 subscriptions : Model -> Sub Msg

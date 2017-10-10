@@ -176,7 +176,7 @@ view lift { open, left, top } menuItems =
             , style
                 [ ( "opacity", opacity )
                 , ( "transform-origin", "right top 0px" )
-                , ( "top", "12px" )
+                , ( "top", "6px" )
 
                 -- , ( "transform-origin", "right top 0px" )
                 -- , ( "transform", transform )
