@@ -22,6 +22,8 @@ import Regex
 import Utils.General as Utils exposing (..)
 import FormatNumber exposing (format)
 import MaskedInput.Text as MaskedText
+import Form
+import Form.Field as Field exposing (Field, FieldValue(..))
 
 
 type alias Model =
@@ -391,6 +393,19 @@ view value_ model config =
                 ]
                 model.maskedState
                 value
+
+        inputForm =
+            input
+                [ Attr.type_ "text"
+                , style [ ( "font-size", st.fontSize ) ]
+                , classList [ ( "mdc-textfield__input", True ) ]
+                , Events.onFocus <| Focus
+                , Events.onBlur <| Blur
+                , Events.onInput Input
+                , Events.on "change" (Json.succeed SubmitText)
+                , Attr.value displayValue
+                ]
+                []
 
         inputHtml =
             input

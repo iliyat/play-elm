@@ -1,5 +1,6 @@
 module Ui.Internal.Textfield exposing (Msg(..))
 
+import Form
 import MaskedInput.Text as MaskedText
 
 

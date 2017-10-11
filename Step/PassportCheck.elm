@@ -51,8 +51,8 @@ update msg model =
                 ( { model | buttonModel = new }, effects |> Cmd.map Ripple )
 
 
-passportValid : Bool -> Html Msg
-passportValid isValid =
+passportValid : Bool -> Bool -> Html Msg
+passportValid isHidden isValid =
     let
         class =
             mkClass "passport-check--validation-"
@@ -78,31 +78,34 @@ passportValid isValid =
             else
                 "Сообщите клиенту об отказе по заявке"
     in
-        div [ classList [ ( "wrapper", True ), ( "wrapper--invalid", not isValid ) ] ]
-            [ div [ classList [ ( "square", True ), ( "square--invalid", not isValid ) ] ]
-                [ div [ class "icon-container" ]
-                    [ Icon.view iconName
-                        [ Attrs.style
-                            [ ( "font-size", "36px" )
-                            , ( "color", "white" )
+        if isHidden then
+            div [] []
+        else
+            div [ classList [ ( "wrapper", True ), ( "wrapper--invalid", not isValid ) ] ]
+                [ div [ classList [ ( "square", True ), ( "square--invalid", not isValid ) ] ]
+                    [ div [ class "icon-container" ]
+                        [ Icon.view iconName
+                            [ Attrs.style
+                                [ ( "font-size", "36px" )
+                                , ( "color", "white" )
+                                ]
                             ]
                         ]
                     ]
-                ]
-            , div [ class "info" ]
-                [ div
-                    [ classList
-                        [ ( "title", True )
-                        , ( "title--invalid"
-                          , not
-                                isValid
-                          )
+                , div [ class "info" ]
+                    [ div
+                        [ classList
+                            [ ( "title", True )
+                            , ( "title--invalid"
+                              , not
+                                    isValid
+                              )
+                            ]
                         ]
+                        [ text titleText ]
+                    , span [ class "helper-text" ] [ text titleHelpText ]
                     ]
-                    [ text titleText ]
-                , span [ class "helper-text" ] [ text titleHelpText ]
                 ]
-            ]
 
 
 view : Model -> Html Msg
@@ -153,18 +156,30 @@ view model =
                         dateOfBirthConfig
                         |> Html.map never
                     ]
-                , passportValid True
+                , passportValid model.formVisible True
                 ]
             , Button.view Ripple
                 model.buttonModel
                 [ Button.ripple
                 , Button.primary
                 , Options.onClick AddNewPassport
+                , css "display" "none" |> when model.formVisible
                 ]
                 [ text "Добавить новый паспорт" ]
             , styled div
                 [ css "display" "none" |> when (not model.formVisible)
+                , css "margin-top" "48px"
                 ]
                 [ styled div [ Typography.headline ] [ text "Новый паспорт" ]
+                , div []
+                    [ Textfield.viewReadonly (Just "4212")
+                        Textfield.defaultModel
+                        passportSeriesConfig
+                        |> Html.map never
+                    , Textfield.viewReadonly (Just "122312")
+                        Textfield.defaultModel
+                        passportNumberConfig
+                        |> Html.map never
+                    ]
                 ]
             ]
