@@ -2,7 +2,7 @@ module Step.Conditions exposing (view, Model, Msg, init, update)
 
 import Html exposing (Html, div, h1, text, p, span)
 import Html.Attributes as Attrs exposing (style)
-import Ui.Options as Options exposing (styled, cs, css)
+import Ui.Options as Options exposing (styled, cs, css, when)
 import Ui.Typography as Typography
 import Ui.Textfield as Textfield
 import Ui.Button as Button
@@ -17,6 +17,7 @@ import Ui.DatePicker as DatePicker
 import Date exposing (Date, Month(..))
 import Date.Extra as Date
 import Task
+import LoanDetails
 
 
 -- ID                              string `gorm:"type:uuid;primary_key;"`
@@ -59,6 +60,7 @@ type alias Model =
     , periodInputText : Maybe String
     , datePicker : DatePicker.DatePicker
     , date : Maybe Date
+    , loanDetailsModel : LoanDetails.Model
     }
 
 
@@ -78,6 +80,7 @@ init =
         , datePicker = dp
         , date =
             Just <| Date.fromParts 1992 Feb 21 0 0 0 0
+        , loanDetailsModel = LoanDetails.defaultModel
         }
             ! [ Task.perform CurrentDate Date.now ]
 
@@ -89,6 +92,7 @@ type Msg
     | PeriodSliderWithTextfieldMsg SliderWithTextfield.Msg
     | DatePickerMsg DatePicker.Msg
     | CurrentDate Date
+    | LoanDetailsMsg LoanDetails.Msg
 
 
 sumSliderConfig : Maybe String -> SliderWithTextfield.Config
@@ -199,6 +203,13 @@ update msg model =
                 }
                     ! [ Cmd.map DatePickerMsg datePickerFx ]
 
+        LoanDetailsMsg msg_ ->
+            let
+                ( newModel, _ ) =
+                    LoanDetails.update msg_ model.loanDetailsModel
+            in
+                { model | loanDetailsModel = newModel } ! []
+
 
 view : Model -> Html Msg
 view model =
@@ -266,6 +277,14 @@ view model =
 
         textfield value config =
             Textfield.viewReadonly (Just value) tfModel config |> Html.map never
+
+        hiddenBlockAttributes =
+            [ Elevation.z1
+            , cs "block"
+            , css "margin-top" "24px"
+            , css "display" "none"
+                |> when (not model.showConditionsBlock)
+            ]
     in
         div []
             [ styled div
@@ -287,8 +306,7 @@ view model =
                         , Button.primary
                         , Options.onClick ChangeConditionsClick
                         , css "display" "none"
-                            |> Options.when
-                                (model.showConditionsBlock)
+                            |> when (model.showConditionsBlock)
                         ]
                         [ text "Изменить условия" ]
                     ]
@@ -306,15 +324,7 @@ view model =
                     ]
                 ]
             , styled div
-                [ Elevation.z1
-                , cs "block"
-                , css "margin-top" "24px"
-                , css "display" "none"
-                    |> Options.when
-                        (not
-                            model.showConditionsBlock
-                        )
-                ]
+                hiddenBlockAttributes
                 [ styled div
                     [ Typography.headline
                     ]
@@ -343,5 +353,9 @@ view model =
                         , textfield "12" promoConfig
                         ]
                     ]
+                ]
+            , styled div
+                hiddenBlockAttributes
+                [ LoanDetails.render model.loanDetailsModel |> Html.map LoanDetailsMsg
                 ]
             ]
