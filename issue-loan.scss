@@ -1,6 +1,8 @@
 $ns: issue-loan-- !default;
 $stepper: stepper--;
 $loan-details: loan-details-- !default;
+$passport-check: passport-check-- !default;
+$passport-check-validation: passport-check--validation- !default;
 
 .#{$ns}base-info {
   position: relative;
@@ -151,4 +153,53 @@ $loan-details: loan-details-- !default;
 
   font-size: 13px;
   font-weight: bold;
+}
+
+.#{$passport-check-validation}wrapper {
+  height: 80px;
+  width: 500px;
+  border-radius: 2px;
+  display: flex;
+  background-color: rgba(119, 179, 76, 0.16);
+}
+
+.#{$passport-check-validation}wrapper--invalid {
+  background-color: rgba(213, 0, 0, 0.16);
+}
+
+.#{$passport-check-validation}square {
+  height: 80px;
+  width: 80px;
+  background-color: #77b34c;
+}
+
+.#{$passport-check-validation}square--invalid {
+  background-color: #d50000;
+}
+
+.#{$passport-check-validation}title {
+  font-size: 18px;
+  font-weight: 500;
+  text-align: left;
+  color: #77b34c;
+  padding-top: 16px;
+  padding-left: 16px;
+  padding-bottom: 6px;
+}
+
+.#{$passport-check-validation}title--invalid {
+  color: #d50000;
+}
+
+.#{$passport-check-validation}helper-text {
+  font-size: 13px;
+  text-align: left;
+  color: rgba(0, 0, 0, 0.87);
+  padding-left: 16px;
+}
+
+.#{$passport-check-validation}icon-container {
+  width: 50%;
+  margin: 0 auto;
+  margin-top: 20px;
 }
