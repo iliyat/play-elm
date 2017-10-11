@@ -5,12 +5,10 @@ import Html.Attributes exposing (..)
 import Html.Events as Events
 import Dict exposing (Dict)
 import Date exposing (Date, Month(..))
-import Ui.Slider as Slider
 import Ui.Textfield as Textfield
 import Ui.SliderWithTextfield as SliderWithTextfield
 import Ui.RadioButton as RadioButton
 import Ui.Ripple as Ripple
-import Utils.General exposing (..)
 import Ui.Elevation as Elevation
 import Ui.Typography as Typography
 import Ui.Options as Options exposing (styled, cs, css, when)
@@ -93,63 +91,6 @@ type Msg
     | CurrentDate Date
 
 
-swtConf1 : SliderWithTextfield.Config
-swtConf1 =
-    let
-        slider =
-            Slider.defaultConfig
-
-        textfield =
-            Textfield.defaultConfig
-    in
-        { sliderConfig =
-            { slider
-                | value = 2000
-                , min = 2000
-                , max = 10000
-                , steps = 1000
-            }
-        , textfieldConfig =
-            { textfield
-                | defaultValue = Just "2000"
-                , asTitle = True
-                , numbered = True
-                , extra = Just "₽"
-                , fullWidth = True
-                , labelText = Just "Сумма"
-            }
-        , extraStatic = Just "₽"
-        , extraPlural = Nothing
-        }
-
-
-swtConf2 : SliderWithTextfield.Config
-swtConf2 =
-    let
-        slider =
-            Slider.defaultConfig
-
-        textfield =
-            Textfield.defaultConfig
-    in
-        { sliderConfig =
-            { slider
-                | steps = 1
-            }
-        , textfieldConfig =
-            { textfield
-                | defaultValue = Just "7"
-                , asTitle = True
-                , numbered = True
-                , plural = Just (Plural "день" "дня" "дней")
-                , fullWidth = True
-                , labelText = Just "Срок"
-            }
-        , extraPlural = Just (Plural "день" "дня" "дней")
-        , extraStatic = Nothing
-        }
-
-
 textfieldConfig : Textfield.Config
 textfieldConfig =
     let
@@ -189,10 +130,10 @@ currentSumSliderConfig isPrimary inputText =
             toFloat inputOriginalText
 
         primaryConfig =
-            SliderWithTextfield.withLimits1 swtConf1 floatValue 2000 10000 1000
+            SliderWithTextfield.withLimits1 SliderWithTextfield.sumConfig floatValue 2000 10000 1000
 
         secondaryConfig =
-            SliderWithTextfield.withLimits1 swtConf1 floatValue 2000 30000 1000
+            SliderWithTextfield.withLimits1 SliderWithTextfield.sumConfig floatValue 2000 30000 1000
     in
         if isPrimary then
             primaryConfig
@@ -241,7 +182,7 @@ currentPeriodSliderConfig sumInputText_ periodInputText_ =
             (between periodInputText)
 
         config =
-            SliderWithTextfield.withLimits1 swtConf2 (toFloat periodValue) min max 1
+            SliderWithTextfield.withLimits1 SliderWithTextfield.periodConfig (toFloat periodValue) min max 1
     in
         config
 
@@ -520,8 +461,8 @@ view model =
                 , asTitle = True
             }
     in
-        Html.div []
-            [ styled Html.div
+        div []
+            [ styled div
                 [ cs "main-container"
                 , Elevation.z1
                 ]
@@ -587,10 +528,8 @@ view model =
                         |> Html.map DatePickerMsg
                     ]
                 ]
-            , styled Html.div
-                [ cs "main-container"
-                , Elevation.z1
-                ]
+            , styled div
+                [ cs "main-container", Elevation.z1 ]
                 [ styled div [ Typography.headline ] [ text "Расчет займа" ]
                 , styled div
                     [ cs "loan-wrapper" ]

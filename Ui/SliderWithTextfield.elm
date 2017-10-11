@@ -10,6 +10,8 @@ module Ui.SliderWithTextfield
         , view
         , subscriptions
         , Msg(..)
+        , periodConfig
+        , sumConfig
         )
 
 import Html exposing (..)
@@ -23,7 +25,7 @@ import Ui.Internal.Slider as InternalSlider
 -- import SliderCss exposing (..)
 
 import FormatNumber exposing (format)
-import Utils.General exposing (rusLocale, Plural)
+import Utils.General exposing (rusLocale, Plural, Plural(..))
 
 
 -- ({ class } as class_) =
@@ -285,3 +287,60 @@ subscriptions model =
     Sub.batch
         [ Sub.map SliderMsg (Slider.subscriptions model.slider)
         ]
+
+
+periodConfig : Config
+periodConfig =
+    let
+        slider =
+            Slider.defaultConfig
+
+        textfield =
+            Textfield.defaultConfig
+    in
+        { sliderConfig =
+            { slider
+                | steps = 1
+            }
+        , textfieldConfig =
+            { textfield
+                | defaultValue = Just "7"
+                , asTitle = True
+                , numbered = True
+                , plural = Just (Plural "день" "дня" "дней")
+                , fullWidth = True
+                , labelText = Just "Срок"
+            }
+        , extraPlural = Just (Plural "день" "дня" "дней")
+        , extraStatic = Nothing
+        }
+
+
+sumConfig : Config
+sumConfig =
+    let
+        slider =
+            Slider.defaultConfig
+
+        textfield =
+            Textfield.defaultConfig
+    in
+        { sliderConfig =
+            { slider
+                | value = 2000
+                , min = 2000
+                , max = 10000
+                , steps = 1000
+            }
+        , textfieldConfig =
+            { textfield
+                | defaultValue = Just "2000"
+                , asTitle = True
+                , numbered = True
+                , extra = Just "₽"
+                , fullWidth = True
+                , labelText = Just "Сумма"
+            }
+        , extraStatic = Just "₽"
+        , extraPlural = Nothing
+        }

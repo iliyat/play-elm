@@ -8,6 +8,15 @@ import Ui.Textfield as Textfield
 import Ui.Button as Button
 import Ui.Elevation as Elevation
 import Ui.SliderWithTextfield as SliderWithTextfield
+import Ui.DatePicker as DatePicker
+    exposing
+        ( defaultSettings
+        , DateEvent(..)
+        , moreOrLess
+        )
+import Date exposing (Date, Month(..))
+import Date.Extra as Date
+import Task
 
 
 -- ID                              string `gorm:"type:uuid;primary_key;"`
@@ -46,27 +55,86 @@ type alias Model =
     , showConditionsBlock : Bool
     , sumSliderModel : SliderWithTextfield.Model
     , periodSliderModel : SliderWithTextfield.Model
+    , sumInputText : Maybe String
+    , periodInputText : Maybe String
+    , datePicker : DatePicker.DatePicker
+    , date : Maybe Date
     }
 
 
-init : Model
+init : ( Model, Cmd Msg )
 init =
-    { errors = []
-    , buttonModel = Button.defaultModel
-    , showConditionsBlock = False
-    , sumSliderModel = SliderWithTextfield.defaultModel
-    , periodSliderModel = SliderWithTextfield.defaultModel
-    }
+    let
+        ( dp, _ ) =
+            DatePicker.init
+    in
+        { errors = []
+        , buttonModel = Button.defaultModel
+        , showConditionsBlock = False
+        , sumSliderModel = SliderWithTextfield.defaultModel
+        , periodSliderModel = SliderWithTextfield.defaultModel
+        , sumInputText = Just "2000"
+        , periodInputText = Just "7"
+        , datePicker = dp
+        , date =
+            Just <| Date.fromParts 1992 Feb 21 0 0 0 0
+        }
+            ! [ Task.perform CurrentDate Date.now ]
 
 
 type Msg
     = ChangeConditionsClick
     | Ripple Button.Msg
+    | SumSliderWithTextfieldMsg SliderWithTextfield.Msg
+    | PeriodSliderWithTextfieldMsg SliderWithTextfield.Msg
+    | DatePickerMsg DatePicker.Msg
+    | CurrentDate Date
+
+
+sumSliderConfig : Maybe String -> SliderWithTextfield.Config
+sumSliderConfig inputText =
+    let
+        inputOriginalText =
+            String.toInt (inputText |> Maybe.withDefault "0")
+                |> Result.withDefault 0
+
+        floatValue =
+            toFloat inputOriginalText
+    in
+        SliderWithTextfield.withLimits1 SliderWithTextfield.sumConfig floatValue 2000 30000 1000
+
+
+periodSliderConfig : Maybe String -> SliderWithTextfield.Config
+periodSliderConfig inputText =
+    let
+        inputOriginalText =
+            String.toInt (inputText |> Maybe.withDefault "0")
+                |> Result.withDefault 0
+
+        floatValue =
+            toFloat inputOriginalText
+    in
+        SliderWithTextfield.withLimits1 SliderWithTextfield.periodConfig
+            floatValue
+            10
+            30
+            1
 
 
 update : Msg -> Model -> ( Model, Cmd Msg )
 update msg model =
     case msg of
+        CurrentDate today ->
+            let
+                initDate =
+                    (Date.add Date.Day 6 today)
+            in
+                { model
+                    | datePicker = DatePicker.initFromDate initDate today
+                    , date = Just initDate
+                }
+                    ! []
+
         ChangeConditionsClick ->
             ({ model | showConditionsBlock = True }) ! []
 
@@ -76,6 +144,60 @@ update msg model =
                     Button.update msg_ model.buttonModel
             in
                 ( { model | buttonModel = new }, effects |> Cmd.map Ripple )
+
+        SumSliderWithTextfieldMsg msg_ ->
+            let
+                ( newSumSliderModel, newSumText ) =
+                    SliderWithTextfield.update
+                        msg_
+                        model.sumSliderModel
+                        (sumSliderConfig model.sumInputText)
+                        model.sumInputText
+            in
+                { model
+                    | sumSliderModel = newSumSliderModel
+                    , sumInputText = newSumText
+                }
+                    ! []
+
+        PeriodSliderWithTextfieldMsg msg_ ->
+            let
+                ( newPeriodSliderModel, newText ) =
+                    SliderWithTextfield.update
+                        msg_
+                        model.periodSliderModel
+                        (periodSliderConfig model.periodInputText)
+                        model.periodInputText
+            in
+                { model
+                    | periodSliderModel = newPeriodSliderModel
+                    , periodInputText =
+                        newText
+                }
+                    ! []
+
+        DatePickerMsg msg_ ->
+            let
+                ( newDatePicker, datePickerFx, dateEvent ) =
+                    DatePicker.update
+                        model.date
+                        (DatePicker.withLabel "Дата погашения")
+                        msg_
+                        model.datePicker
+
+                newDate =
+                    case dateEvent of
+                        Changed newDate ->
+                            newDate
+
+                        _ ->
+                            model.date
+            in
+                { model
+                    | date = newDate
+                    , datePicker = newDatePicker
+                }
+                    ! [ Cmd.map DatePickerMsg datePickerFx ]
 
 
 view : Model -> Html Msg
@@ -133,7 +255,16 @@ view model =
                 , readonly = True
             }
 
-        field value config =
+        loanNumber =
+            "435-43313"
+
+        headlineText =
+            if model.showConditionsBlock then
+                "Старые условия займа"
+            else
+                "Заявка № " ++ loanNumber
+
+        textfield value config =
             Textfield.viewReadonly (Just value) tfModel config |> Html.map never
     in
         div []
@@ -144,24 +275,32 @@ view model =
                     , css "justify-content"
                         "space-between"
                     ]
-                    [ styled div [ Typography.headline, css "padding-bottom" "24px" ] [ text "Заявка №435-84313" ]
+                    [ styled div
+                        [ Typography.headline
+                        , css "padding-bottom"
+                            "24px"
+                        ]
+                        [ text <| headlineText ]
                     , Button.view Ripple
                         model.buttonModel
                         [ Button.ripple
                         , Button.primary
                         , Options.onClick ChangeConditionsClick
+                        , css "display" "none"
+                            |> Options.when
+                                (model.showConditionsBlock)
                         ]
                         [ text "Изменить условия" ]
                     ]
                 , div [ Attrs.class "ui-flex" ]
-                    [ field "10000" amountConfig
-                    , field "14 дней" daysConfig
+                    [ textfield "10000" amountConfig
+                    , textfield "14 дней" daysConfig
                     , styled div
                         [ css "width" "300px" ]
-                        [ field "12 сентября 2017" payAt
+                        [ textfield "12 сентября 2017" payAt
                         ]
-                    , field "13 212" returnConfig
-                    , field "13 212" percentConfig
+                    , textfield "13 212" returnConfig
+                    , textfield "13 212" percentConfig
                     , Textfield.viewReadonly (Just "lastchance") tfModel promoConfig
                         |> Html.map never
                     ]
@@ -179,6 +318,30 @@ view model =
                 [ styled div
                     [ Typography.headline
                     ]
-                    [ text "Изменение условий по заявке" ]
+                    [ text <| "Изменение условий по заявке № " ++ loanNumber
+                    , styled div
+                        [ cs "fields" ]
+                        [ SliderWithTextfield.view
+                            model.sumInputText
+                            model.sumSliderModel
+                            (sumSliderConfig model.sumInputText)
+                            |> Html.map SumSliderWithTextfieldMsg
+                        , SliderWithTextfield.view
+                            model.periodInputText
+                            model.periodSliderModel
+                            (periodSliderConfig model.periodInputText)
+                            |> Html.map PeriodSliderWithTextfieldMsg
+                        , DatePicker.view
+                            model.date
+                            (DatePicker.withLabel "Дата погашения")
+                            model.datePicker
+                            |> Html.map DatePickerMsg
+                        ]
+                    , div []
+                        [ textfield "1000" returnConfig
+                        , textfield "12" percentConfig
+                        , textfield "12" promoConfig
+                        ]
+                    ]
                 ]
             ]

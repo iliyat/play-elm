@@ -47,7 +47,11 @@ nextStep : Step -> Step
 nextStep current =
     case current of
         PassportCheck ->
-            Conditions Conditions.init
+            let
+                ( model, effects ) =
+                    Conditions.init
+            in
+                Conditions model
 
         Conditions _ ->
             ReceiveType
@@ -72,7 +76,11 @@ prevStep current =
             PassportCheck
 
         ReceiveType ->
-            Conditions Conditions.init
+            let
+                ( model, effects ) =
+                    Conditions.init
+            in
+                Conditions model
 
         PrintDocuments ->
             ReceiveType
@@ -96,17 +104,21 @@ type alias Model =
 
 init : ( Model, Cmd Msg )
 init =
-    { date = Just <| Date.fromParts 1992 Feb 21 0 0 0 0
-    , currentStep = Conditions Conditions.init
-    , clientDeclineButtonModel = Button.defaultModel
-    , prevButtonModel = Button.defaultModel
-    , nextButtonModel = Button.defaultModel
-    , clientDeclineButtonDialogModel = Button.defaultModel
-    , clientDeclineDialogOpen = False
-    , clientDeclineSelected = Just "something"
-    , selectModel = Select.defaultModel
-    }
-        ! [ Task.perform CurrentDate Date.now ]
+    let
+        ( condInitModel, _ ) =
+            Conditions.init
+    in
+        { date = Just <| Date.fromParts 1992 Feb 21 0 0 0 0
+        , currentStep = Conditions condInitModel
+        , clientDeclineButtonModel = Button.defaultModel
+        , prevButtonModel = Button.defaultModel
+        , nextButtonModel = Button.defaultModel
+        , clientDeclineButtonDialogModel = Button.defaultModel
+        , clientDeclineDialogOpen = False
+        , clientDeclineSelected = Just "something"
+        , selectModel = Select.defaultModel
+        }
+            ! [ Task.perform CurrentDate Date.now ]
 
 
 update : Msg -> Model -> ( Model, Cmd Msg )
@@ -192,13 +204,16 @@ update msg model =
 
         ConditionsMsg msg_ ->
             let
+                ( condInitModel, _ ) =
+                    Conditions.init
+
                 getModel =
                     case model.currentStep of
                         Conditions a ->
                             a
 
                         _ ->
-                            Conditions.init
+                            condInitModel
 
                 ( new, effects ) =
                     Conditions.update msg_ getModel
@@ -247,6 +262,9 @@ stepper model =
 
         selectOptions =
             [ "Передумал", "Не ответил", "Заснул" ]
+
+        ( condInitModel, _ ) =
+            Conditions.init
     in
         div
             []
@@ -257,7 +275,7 @@ stepper model =
                     , stepLine
                     , step "Условия займа"
                         2
-                        (ifCurrent <| Conditions Conditions.init)
+                        (ifCurrent <| Conditions condInitModel)
                     , stepLine
                     , step "Способ получения" 3 (ifCurrent ReceiveType)
                     , stepLine
@@ -427,6 +445,12 @@ view model =
                 []
             , Html.node "link"
                 [ Attrs.rel "stylesheet", Attrs.href "https://fonts.googleapis.com/css?family=Roboto:300,400,500" ]
+                []
+            , Html.node "link"
+                [ Attrs.rel "stylesheet"
+                , Attrs.href
+                    "datepicker.css"
+                ]
                 []
             ]
 
