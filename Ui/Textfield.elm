@@ -13,7 +13,7 @@ module Ui.Textfield
         , externalUpdate
         )
 
-import Html exposing (Html, span, input, label, text, div, button, Attribute)
+import Html exposing (Html, span, input, label, text, div, button, Attribute, p)
 import Html.Attributes as Attr exposing (class, classList, style)
 import Html.Events as Events
 import Ui.Internal.Textfield as InternalTextfield exposing (..)
@@ -138,6 +138,7 @@ type alias Config =
     , readonly : Bool
     , plural : Maybe Plural
     , mask : Maybe String
+    , errorText : String
     }
 
 
@@ -159,6 +160,7 @@ defaultConfig =
     , plural = Nothing
     , extraInside = Nothing
     , mask = Nothing
+    , errorText = ""
     }
 
 
@@ -257,7 +259,7 @@ viewReadonly value_ model config =
                 , ( "mdc-textfield--disabled", config.disabled )
                 , ( "ui-textfield--readonly", config.readonly )
                 , ( "mdc-textfield--fullwidth", False )
-                , ( "mdc-textfield--invalid", False )
+                , ( "mdc-textfield--invalid", config.invalid )
                 ]
             , style
                 [ ( "height", st.height )
@@ -380,14 +382,18 @@ view value_ model config =
             Maybe.map (flip Utils.pluralize intValue) config.plural
                 |> Maybe.withDefault ""
 
-        formAttrs state =
-            [ Attr.type_ "text"
-            , Attr.defaultValue (state.value |> Maybe.withDefault "")
-            , Events.onInput (Field.String >> Form.Input state.path Form.Text)
-            , Events.onFocus (Form.Focus state.path)
-            , Events.onBlur (Form.Blur state.path)
+        errorClasses =
+            [ ( "mdc-textfield-helptext mdc-textfield-helptext--validation-msg", True )
+            , ( "mdc-textfield-helptext--persistent", True )
             ]
 
+        -- formAttrs state =
+        --     [ Attr.type_ "text"
+        --     , Attr.defaultValue (state.value |> Maybe.withDefault "")
+        --     , Events.onInput (Field.String >> Form.Input state.path Form.Text)
+        --     , Events.onFocus (Form.Focus state.path)
+        --     , Events.onBlur (Form.Blur state.path)
+        --     ]
         maskedInputHtml =
             MaskedText.input
                 (maskedInputOptions config)
@@ -448,60 +454,73 @@ view value_ model config =
             else
                 inputHtml
     in
-        div
-            [ classList
-                [ ( "mdc-textfield mdc-textfield--upgraded", True )
-                , ( "mdc-textfield--focused", isFocused )
-                , ( "mdc-textfield--disabled", config.disabled )
-                , ( "ui-textfield--readonly", config.readonly )
-                , ( "mdc-textfield--fullwidth", False )
-                , ( "mdc-textfield--invalid", False )
-                ]
-            , Events.onFocus <| Focus
-            , Events.onBlur <| Blur
-            , style
-                [ ( "height", st.height )
-                , ( "width"
-                  , if config.fullWidth then
-                        "100%"
-                    else
-                        "initial"
-                  )
-                ]
-            ]
-            [ contentHtml
-            , label
+        div []
+            [ div
                 [ classList
-                    [ ( "mdc-textfield__label mdc-typography", True )
-                    , ( "mdc-textfield__label--float-above", isFocused || isDirty )
+                    [ ( "mdc-textfield mdc-textfield--upgraded", True )
+                    , ( "mdc-textfield--focused", isFocused )
+                    , ( "mdc-textfield--disabled", config.disabled )
+                    , ( "ui-textfield--readonly", config.readonly )
+                    , ( "mdc-textfield--fullwidth", False )
+                    , ( "mdc-textfield--invalid", config.invalid )
                     ]
+                , Events.onFocus <| Focus
+                , Events.onBlur <| Blur
                 , style
-                    [ ( "bottom", st.labelBottom )
-                    , ( "font-size", st.labelFontSize )
+                    [ ( "height", st.height )
+                    , ( "width"
+                      , if config.fullWidth then
+                            "100%"
+                        else
+                            "initial"
+                      )
                     ]
                 ]
-                (case config.labelText of
-                    Just str ->
-                        [ text str ]
+                [ contentHtml
+                , label
+                    [ classList
+                        [ ( "mdc-textfield__label mdc-typography", True )
+                        , ( "mdc-textfield__label--float-above"
+                          , isFocused
+                                || (String.length value > 0)
+                          )
+                        ]
+                    , style
+                        [ ( "bottom", st.labelBottom )
+                        , ( "font-size", st.labelFontSize )
+                        ]
+                    ]
+                    (case config.labelText of
+                        Just label ->
+                            [ text <|
+                                label
+                                    ++ (if config.required then
+                                            " *"
+                                        else
+                                            ""
+                                       )
+                            ]
 
-                    Nothing ->
-                        []
-                )
-            , span
-                [ style
-                    [ ( "float", "right" )
-                    , ( "position", "absolute" )
-                    , ( "right", "0" )
-                    , ( "bottom", "10px" )
-                    , ( "height", "24px" )
-                    , ( "font-family", "Roboto" )
-                    , ( "font-size", "34px" )
-                    , ( "line-height", "15px" )
-                    , ( "color", "rgba(0, 0, 0, 0.38)" )
+                        Nothing ->
+                            []
+                    )
+                , span
+                    [ style
+                        [ ( "float", "right" )
+                        , ( "position", "absolute" )
+                        , ( "right", "0" )
+                        , ( "bottom", "10px" )
+                        , ( "height", "24px" )
+                        , ( "font-family", "Roboto" )
+                        , ( "font-size", "34px" )
+                        , ( "line-height", "15px" )
+                        , ( "color", "rgba(0, 0, 0, 0.38)" )
+                        ]
                     ]
+                    [ text <| extra ++ pl ]
+                , div [ class "mdc-textfield__bottom-line" ] []
                 ]
-                [ text <| extra ++ pl ]
-            , div [ class "mdc-textfield__bottom-line" ] []
+            , p [ classList errorClasses ] [ text (config.errorText) ]
             ]
 
 

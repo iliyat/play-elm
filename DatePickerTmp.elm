@@ -36,6 +36,9 @@ import Ui.Internal.Textfield as InternalTextfield
 import Icons.Icon as Icon
 import Regex
 import Date.Extra as Date
+import Form exposing (Form)
+import Form.Input as Form
+import Form.Validate as Validate exposing (..)
 
 
 type Msg
@@ -50,6 +53,7 @@ type Msg
     | MouseDown
     | MouseUp
     | TextfieldMsg Textfield.Msg
+    | FormMsg Form.Msg
 
 
 type alias Settings =
@@ -101,14 +105,13 @@ defaultSettings =
     }
 
 
-withLabel : String -> Bool -> Settings
-withLabel label invalid =
+withLabel : String -> Settings
+withLabel label =
     let
         setLabel tfConfig =
             { tfConfig
                 | labelText = Just label
                 , asTitle = True
-                , invalid = invalid
             }
     in
         { defaultSettings
@@ -222,8 +225,8 @@ type DateEvent
     | Changed (Maybe Date)
 
 
-update : Maybe Date -> Settings -> Msg -> DatePicker -> ( DatePicker, Cmd Msg, DateEvent )
-update date settings msg (DatePicker model) =
+update : Form () a -> Validation () a -> Maybe Date -> Settings -> Msg -> DatePicker -> ( DatePicker, Cmd Msg, DateEvent, Form () a )
+update form validation date settings msg (DatePicker model) =
     let
         inputText =
             Just <|
@@ -290,25 +293,118 @@ update date settings msg (DatePicker model) =
                                     }
                                 , Cmd.none
                                 , dateEvent
+                                , form
                                 )
 
                         _ ->
-                            { model
-                                | textfield = newTextfieldModel
-                                , open = open
-                                , forceOpen = forceOpen
-                            }
-                                ! []
+                            ( DatePicker
+                                { model
+                                    | open = open
+                                    , forceOpen = forceOpen
+                                    , textfield = newTextfieldModel
+                                }
+                            , Cmd.none
+                            , NoChange
+                            , form
+                            )
+
+            FormMsg formMsg ->
+                let
+                    _ =
+                        Debug.log "formMsg" formMsg
+
+                    newFormModel =
+                        Form.update validation formMsg form
+
+                    open =
+                        case formMsg of
+                            Form.Focus _ ->
+                                True
+
+                            Form.Blur _ ->
+                                model.forceOpen
+
+                            _ ->
+                                model.open
+
+                    forceOpen =
+                        case formMsg of
+                            Form.Focus _ ->
+                                False
+
+                            _ ->
+                                model.forceOpen
+                in
+                    --     case formMsg of
+                    --         InternalTextfield.SubmitText ->
+                    --             let
+                    --                 isWhitespace =
+                    --                     String.trim >> String.isEmpty
+                    --
+                    --                 dateEvent =
+                    --                     let
+                    --                         text =
+                    --                             inputText ?> ""
+                    --
+                    --                         inputDate =
+                    --                             Result.withDefault model.today
+                    --                                 (fromString <| text)
+                    --                     in
+                    --                         if isWhitespace text then
+                    --                             Changed Nothing
+                    --                         else
+                    --                             Changed (Just inputDate)
+                    --             in
+                    --                 ( DatePicker <|
+                    --                     { model
+                    --                         | focused =
+                    --                             case dateEvent of
+                    --                                 Changed _ ->
+                    --                                     Nothing
+                    --
+                    --                                 NoChange ->
+                    --                                     model.focused
+                    --                     }
+                    --                 , Cmd.none
+                    --                 , dateEvent
+                    --                 )
+                    --
+                    --         _ ->
+                    ( DatePicker
+                        { model
+                            | open = open
+                            , forceOpen = forceOpen
+                        }
+                    , Cmd.none
+                    , NoChange
+                    , form
+                    )
 
             CurrentDate date ->
                 let
                     cleanDate =
                         model.today |> Date.floor Date.Day
                 in
-                    { model | focused = Just cleanDate, today = cleanDate } ! []
+                    ( DatePicker
+                        { model
+                            | focused = Just cleanDate
+                            , today = cleanDate
+                        }
+                    , Cmd.none
+                    , NoChange
+                    , form
+                    )
 
             ChangeFocus date ->
-                { model | focused = Just date, yearListOpen = False } ! []
+                ( DatePicker
+                    { model
+                        | focused = Just date
+                        , yearListOpen = False
+                    }
+                , Cmd.none
+                , NoChange
+                , form
+                )
 
             Pick date ->
                 let
@@ -331,6 +427,7 @@ update date settings msg (DatePicker model) =
                         }
                     , Cmd.none
                     , Changed date
+                    , form
                     )
 
             SetDate date ->
@@ -349,25 +446,56 @@ update date settings msg (DatePicker model) =
                     , Cmd.none
                     , Changed
                         (Just date)
+                    , form
                     )
 
             Text text ->
-                model ! []
+                ( DatePicker
+                    model
+                , Cmd.none
+                , NoChange
+                , form
+                )
 
             Focus ->
-                { model | open = True, forceOpen = False } ! []
+                ( DatePicker
+                    { model | open = True, forceOpen = False }
+                , Cmd.none
+                , NoChange
+                , form
+                )
 
             Blur ->
-                { model | open = model.forceOpen } ! []
+                ( DatePicker
+                    { model | open = model.forceOpen }
+                , Cmd.none
+                , NoChange
+                , form
+                )
 
             ToggleYearList ->
-                { model | yearListOpen = not model.yearListOpen } ! []
+                ( DatePicker
+                    { model | yearListOpen = not model.yearListOpen }
+                , Cmd.none
+                , NoChange
+                , form
+                )
 
             MouseDown ->
-                { model | forceOpen = True } ! []
+                ( DatePicker
+                    { model | forceOpen = True }
+                , Cmd.none
+                , NoChange
+                , form
+                )
 
             MouseUp ->
-                { model | forceOpen = False } ! []
+                ( DatePicker
+                    { model | forceOpen = False }
+                , Cmd.none
+                , NoChange
+                , form
+                )
 
 
 pick : Maybe Date -> Msg
@@ -375,8 +503,8 @@ pick =
     Pick
 
 
-view : Maybe Date -> Settings -> DatePicker -> Html Msg
-view pickedDate settings (DatePicker ({ open } as model)) =
+view : Form.FieldState e String -> Maybe Date -> Settings -> DatePicker -> Html Msg
+view field pickedDate settings (DatePicker ({ open } as model)) =
     let
         pickedDateInputText =
             Just <|
@@ -423,6 +551,9 @@ view pickedDate settings (DatePicker ({ open } as model)) =
             Just <|
                 (Maybe.map formatDateMonthFullName pickedDate |> Maybe.withDefault "")
 
+        -- dateInput =
+        --     Form.textInput field [] |> Html.map FormMsg
+        --
         dateInput =
             Textfield.view
                 (if isFocused then
