@@ -166,90 +166,28 @@ update msg ({ form } as model) =
                     ! [ Cmd.map DatePickerMsg datePickerFx ]
 
 
-errorText : Form.FieldState e String -> Html Never
-errorText field =
-    let
-        classList_ =
-            [ ( "mdc-textfield-helptext mdc-textfield-helptext--validation-msg", True )
-            , ( "mdc-textfield-helptext--persistent", True )
-            ]
-    in
-        case field.liveError of
-            Just error ->
-                p [ Attr.classList classList_ ] [ text (toString error) ]
-
-            Nothing ->
-                text ""
-
-
-textfieldView : Form.FieldState e String -> String -> Bool -> Html Form.Msg
-textfieldView state labelText required =
-    let
-        isInvalid field =
-            case field.liveError of
-                Just error ->
-                    True
-
-                Nothing ->
-                    False
-
-        classList_ state =
-            [ ( "mdc-textfield mdc-textfield--upgraded", True )
-            , ( "mdc-textfield--focused", state.hasFocus )
-            , ( "mdc-textfield--fullwidth", False )
-            , ( "mdc-textfield--invalid", isInvalid state )
-            ]
-
-        inputAttrs =
-            [ Attr.class "mdc-textfield__input" ]
-
-        simpleStyle =
-            { labelBottom = "8px"
-            , labelFontSize = "16px"
-            , height = "48px"
-            , fontSize = "18px"
-            }
-
-        labelText_ =
-            labelText
-                ++ (if required then
-                        " *"
-                    else
-                        ""
-                   )
-    in
-        div []
-            [ div [ Attr.classList <| classList_ state ]
-                [ Form.textInput state inputAttrs
-                , label
-                    [ Attr.classList
-                        [ ( "mdc-textfield__label mdc-typography", True )
-                        , ( "mdc-textfield__label--float-above"
-                          , state.hasFocus || state.isChanged
-                          )
-                        ]
-                    , Attr.style
-                        [ ( "bottom", simpleStyle.labelBottom )
-                        , ( "font-size", simpleStyle.labelFontSize )
-                        ]
-                    ]
-                    [ text labelText_ ]
-                ]
-            , errorText state |> Html.map never
-            ]
-
-
 formView : Model -> Form () Output -> Html Msg
 formView model form =
     let
         tfConf =
             Textfield.defaultConfig
 
-        passportSeries =
-            Form.getFieldAsString "passportSeries" form
-
         passportNumber =
-            Form.getFieldAsString "passportNumber" form
+            let
+                field =
+                    Form.getFieldAsString "passportNumber" form
+            in
+                { tfConf
+                    | labelText = Just "Номер"
+                    , mask = Just "##"
+                    , invalid = hasError field
+                    , value = field.value
+                    , required = True
+                    , errorText =
+                        field.liveError
+                            |> Maybe.map toString
+                            |> Maybe.withDefault ""
+                }
 
         issuedAt =
             Form.getFieldAsString "issuedAt" form
@@ -260,26 +198,26 @@ formView model form =
             else
                 False
 
-        conf label formField =
-            { tfConf
-                | labelText = Just "Серия"
-                , mask = Just "####"
-                , invalid = hasError formField
-                , required = True
-                , errorText =
-                    formField.liveError
-                        |> Maybe.map toString
-                        |> Maybe.withDefault ""
-            }
+        passportSeries =
+            let
+                field =
+                    Form.getFieldAsString "passportSeries" form
+            in
+                { tfConf
+                    | labelText = Just "Серия"
+                    , mask = Just "####"
+                    , invalid = hasError field
+                    , value = field.value
+                    , required = True
+                    , errorText =
+                        field.liveError
+                            |> Maybe.map toString
+                            |> Maybe.withDefault ""
+                }
     in
         div []
             [ div [ style [ ( "display", "flex" ) ] ]
-                [ textfieldView passportNumber "Номер" True |> Html.map FormMsg
-                , Textfield.view
-                    passportSeries.value
-                    model.textfield
-                    (conf "Серия" passportSeries)
-                    |> Html.map (TextfieldMsg "passportSeries")
+                [ Textfield.render model.textfield passportSeries |> Html.map (TextfieldMsg "passportSeries")
                 , DatePicker.view
                     model.date
                     (DatePicker.withLabel "Дата погашения" (hasError issuedAt))
@@ -294,37 +232,33 @@ formView model form =
 
 view : Model -> Html Msg
 view ({ form } as model) =
-    let
-        issuedAt =
-            Form.getFieldAsString "issuedAt" form
-    in
-        div []
-            [ Button.view ButtonMsg model.buttonModel [] [ text "Test" ]
-            , (formView model form)
-            , Html.node "link"
-                [ Attr.rel "stylesheet"
-                , Attr.href "material-components-web.css"
-                ]
-                []
-            , Html.node "link"
-                [ Attr.rel "stylesheet"
-                , Attr.href "main.css"
-                ]
-                []
-            , Html.node "link"
-                [ Attr.rel "stylesheet"
-                , Attr.href "datePicker.css"
-                ]
-                []
-            , Html.node "link"
-                [ Attr.rel "stylesheet"
-                , Attr.href "https://fonts.googleapis.com/icon?family=Material+Icons"
-                ]
-                []
-            , Html.node "link"
-                [ Attr.rel "stylesheet", Attr.href "https://fonts.googleapis.com/css?family=Roboto:300,400,500" ]
-                []
+    div []
+        [ Button.view ButtonMsg model.buttonModel [] [ text "Test" ]
+        , (formView model form)
+        , Html.node "link"
+            [ Attr.rel "stylesheet"
+            , Attr.href "material-components-web.css"
             ]
+            []
+        , Html.node "link"
+            [ Attr.rel "stylesheet"
+            , Attr.href "main.css"
+            ]
+            []
+        , Html.node "link"
+            [ Attr.rel "stylesheet"
+            , Attr.href "datePicker.css"
+            ]
+            []
+        , Html.node "link"
+            [ Attr.rel "stylesheet"
+            , Attr.href "https://fonts.googleapis.com/icon?family=Material+Icons"
+            ]
+            []
+        , Html.node "link"
+            [ Attr.rel "stylesheet", Attr.href "https://fonts.googleapis.com/css?family=Roboto:300,400,500" ]
+            []
+        ]
 
 
 main : Program Never Model Msg

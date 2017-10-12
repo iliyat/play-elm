@@ -11,6 +11,7 @@ module Ui.Textfield
         , TextfieldEvent
         , TextfieldEvent(..)
         , externalUpdate
+        , render
         )
 
 import Html exposing (Html, span, input, label, text, div, button, Attribute, p)
@@ -307,6 +308,11 @@ viewReadonly value_ model config =
             ]
 
 
+render : Model -> Config -> Html Msg
+render model config =
+    view config.value model config
+
+
 view : Maybe String -> Model -> Config -> Html Msg
 view value_ model config =
     let
@@ -322,8 +328,11 @@ view value_ model config =
         value =
             value_
                 |> Maybe.withDefault
-                    (config.defaultValue
-                        |> Maybe.withDefault ""
+                    (config.value
+                        |> Maybe.withDefault
+                            (config.defaultValue
+                                |> Maybe.withDefault ""
+                            )
                     )
 
         asTitleStyle =
