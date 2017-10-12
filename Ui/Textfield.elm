@@ -22,8 +22,8 @@ import Regex
 import Utils.General as Utils exposing (..)
 import FormatNumber exposing (format)
 import MaskedInput.Text as MaskedText
-import Form
-import Form.Field as Field exposing (Field, FieldValue(..))
+import Form exposing (Form)
+import Form.Field as Field
 
 
 type alias Model =
@@ -379,6 +379,14 @@ view value_ model config =
         pl =
             Maybe.map (flip Utils.pluralize intValue) config.plural
                 |> Maybe.withDefault ""
+
+        formAttrs state =
+            [ Attr.type_ "text"
+            , Attr.defaultValue (state.value |> Maybe.withDefault "")
+            , Events.onInput (Field.String >> Form.Input state.path Form.Text)
+            , Events.onFocus (Form.Focus state.path)
+            , Events.onBlur (Form.Blur state.path)
+            ]
 
         maskedInputHtml =
             MaskedText.input

@@ -1,17 +1,19 @@
 module FormDemo exposing (main)
 
 import Html exposing (Html, div, h1, text, p, label, button)
-import Html.Attributes as Attr exposing (class)
-import Html.Events exposing (..)
+import Html.Attributes as Attr exposing (class, style)
+import Html.Events as Events exposing (..)
 import Form exposing (Form)
 import Form.Validate as Validate exposing (..)
-import Form.Input as Input
+import Form.Input as Form
+import Ui.Datepicker as DatePicker
 import Ui.Button as Button
-import Ui.Textfield as Textfield
 
 
 type alias Output =
-    { name : String
+    { passportSeries : String
+    , passportNumber : String
+    , issuedAt : String
     }
 
 
@@ -23,8 +25,10 @@ type alias Model =
 
 validation : Validation () Output
 validation =
-    map Output
-        (field "name" email)
+    map3 Output
+        (field "passportSeries" (string |> andThen (minLength 4)))
+        (field "passportNumber" string)
+        (field "issuedAt" string)
 
 
 init : ( Model, Cmd Msg )
@@ -38,10 +42,7 @@ init =
 type Msg
     = ButtonMsg Button.Msg
     | FormMsg Form.Msg
-
-
-
--- | TextfieldMsg Textfield.Msg
+    | DatepickerMsg DatePicker.Msg
 
 
 update : Msg -> Model -> ( Model, Cmd Msg )
@@ -50,17 +51,6 @@ update msg ({ form } as model) =
         FormMsg formMsg ->
             ( { model | form = Form.update validation formMsg form }, Cmd.none )
 
-        -- TextfieldMsg msg_ ->
-        --     let
-        --         ( newTextfieldModel, newText ) =
-        --             Textfield.externalUpdate
-        --                 msg_
-        --                 model.textfield
-        --                 Textfield.defaultConfig
-        --                 Nothing
-        --     in
-        --         ( { model | textfield = newTextfieldModel }, Cmd.none )
-        --
         ButtonMsg msg_ ->
             let
                 ( new, effects ) =
@@ -69,41 +59,98 @@ update msg ({ form } as model) =
                 ( { model | buttonModel = new }, effects |> Cmd.map ButtonMsg )
 
 
+textfieldView : Form.FieldState e String -> String -> Bool -> Html Form.Msg
+textfieldView state labelText required =
+    let
+        errorText field =
+            let
+                classList_ =
+                    [ ( "mdc-textfield-helptext mdc-textfield-helptext--validation-msg", True )
+                    , ( "mdc-textfield-helptext--persistent", True )
+                    ]
+            in
+                case field.liveError of
+                    Just error ->
+                        p [ Attr.classList classList_ ] [ text (toString error) ]
+
+                    Nothing ->
+                        text ""
+
+        isInvalid field =
+            case field.liveError of
+                Just error ->
+                    True
+
+                Nothing ->
+                    False
+
+        classList_ state =
+            [ ( "mdc-textfield mdc-textfield--upgraded", True )
+            , ( "mdc-textfield--focused", state.hasFocus )
+            , ( "mdc-textfield--fullwidth", False )
+            , ( "mdc-textfield--invalid", isInvalid state )
+            ]
+
+        inputAttrs =
+            [ Attr.class "mdc-textfield__input" ]
+
+        simpleStyle =
+            { labelBottom = "8px"
+            , labelFontSize = "16px"
+            , height = "48px"
+            , fontSize = "18px"
+            }
+
+        labelText_ =
+            labelText
+                ++ (if required then
+                        " *"
+                    else
+                        ""
+                   )
+    in
+        div []
+            [ div [ Attr.classList <| classList_ state ]
+                [ Form.textInput state inputAttrs
+                , label
+                    [ Attr.classList
+                        [ ( "mdc-textfield__label mdc-typography", True )
+                        , ( "mdc-textfield__label--float-above"
+                          , state.hasFocus || state.isChanged
+                          )
+                        ]
+                    , Attr.style
+                        [ ( "bottom", simpleStyle.labelBottom )
+                        , ( "font-size", simpleStyle.labelFontSize )
+                        ]
+                    ]
+                    [ text labelText_ ]
+                ]
+            , errorText state
+            ]
+
+
 formView : Form () Output -> Html Form.Msg
 formView form =
     let
-        tfConfig =
-            Textfield.defaultConfig
+        passportSeries =
+            Form.getFieldAsString "passportSeries" form
 
-        dateOfBirthConfig =
-            { tfConfig | labelText = Just "Дата рождения" }
+        passportNumber =
+            Form.getFieldAsString "passportNumber" form
 
-        errorFor field =
-            case field.liveError of
-                Just error ->
-                    div [ class "error" ] [ text (toString error) ]
-
-                Nothing ->
-                    text ""
-
-        name =
-            Form.getFieldAsString "name" form
-
-        _ =
-            Debug.log "name" name
+        issuedAt =
+            Form.getFieldAsString "issuedAt" form
     in
         div []
-            [ label [] [ text "Name" ]
-            , Input.textInput name []
-            , errorFor name
+            [ div [ style [ ( "display", "flex" ) ] ]
+                [ textfieldView passportSeries "Серия" True
+                , textfieldView passportNumber "Номер" True
+                , textfieldView issuedAt "Дата выдачи" True
+                ]
             , button
                 [ onClick Form.Submit ]
                 [ text "Submit" ]
-
-            -- , Textfield.view (Just "122312")
-            --     Textfield.defaultModel
-            --     dateOfBirthConfig
-            --     |> Html.map TextfieldMsg
             ]
 
 

@@ -1,7 +1,7 @@
 module DemoTemplate exposing (main)
 
 import Html exposing (Html, div, h1, text, p)
-import Html.Attributes as Attr
+import Html.Attributes as Attrs
 import Ui.Button as Button
 
 
@@ -37,22 +37,22 @@ view model =
     div []
         [ Button.view ButtonMsg model.buttonModel [] [ text "Test" ]
         , Html.node "link"
-            [ Attr.rel "stylesheet"
-            , Attr.href "material-components-web.css"
+            [ Attrs.rel "stylesheet"
+            , Attrs.href "material-components-web.css"
             ]
             []
         , Html.node "link"
-            [ Attr.rel "stylesheet"
-            , Attr.href "main.css"
+            [ Attrs.rel "stylesheet"
+            , Attrs.href "main.css"
             ]
             []
         , Html.node "link"
-            [ Attr.rel "stylesheet"
-            , Attr.href "https://fonts.googleapis.com/icon?family=Material+Icons"
+            [ Attrs.rel "stylesheet"
+            , Attrs.href "https://fonts.googleapis.com/icon?family=Material+Icons"
             ]
             []
         , Html.node "link"
-            [ Attr.rel "stylesheet", Attr.href "https://fonts.googleapis.com/css?family=Roboto:300,400,500" ]
+            [ Attrs.rel "stylesheet", Attrs.href "https://fonts.googleapis.com/css?family=Roboto:300,400,500" ]
             []
         ]
 
