@@ -17,7 +17,6 @@ import Form.Field as Field exposing (Field, FieldValue(..))
 import Form.Validate as Validate exposing (Validation)
 import Ui.Textfield as Textfield
 import Ui.DatePicker as DatePicker exposing (DateEvent)
-import Ui.DatePickerDate exposing (formatDate)
 import Date exposing (Date, Day(..), Month(..), day)
 import Date.Extra as Date
 import Task

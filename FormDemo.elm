@@ -14,6 +14,7 @@ import Ui.DatePicker as DatePicker
 import Ui.Button as Button
 import Ui.Textfield as Textfield
 import FormBinder
+import Regex exposing (Regex)
 
 
 type alias Output =
@@ -24,6 +25,7 @@ type alias Output =
     , lastName : String
     , firstName : String
     , middleName : String
+    , code : String
     }
 
 
@@ -33,9 +35,13 @@ type alias Model =
     }
 
 
+type LocalError
+    = InvalidCode
+
+
 validation : Validation () Output
 validation =
-    map7 Output
+    map8 Output
         (field "passportSeries" (string |> andThen (minLength 4)))
         (field "passportNumber" string)
         (field "issuedAt" (string))
@@ -43,6 +49,7 @@ validation =
         (field "lastName" string)
         (field "firstName" string)
         (field "middleName" string)
+        (field "code" string)
 
 
 init : ( Model, Cmd Msg )
@@ -143,6 +150,13 @@ formView ({ formBinder } as model) form =
                 | labelText = Just "Отчество"
                 , formName = Just "middleName"
             }
+
+        code =
+            { tfConf
+                | labelText = Just "Код подразделения"
+                , formName = Just "code"
+                , mask = Just "###-###"
+            }
     in
         div []
             [ div [ style [ ( "display", "flex" ) ] ]
@@ -155,6 +169,9 @@ formView ({ formBinder } as model) form =
                 [ FormBinder.textfield FormBinderMsg formBinder lastName
                 , FormBinder.textfield FormBinderMsg formBinder firstName
                 , FormBinder.textfield FormBinderMsg formBinder middleName
+                ]
+            , div [ style [ ( "display", "flex" ) ] ]
+                [ FormBinder.textfield FormBinderMsg formBinder code
                 ]
             , Button.view ButtonMsg
                 model.buttonModel
