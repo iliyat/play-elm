@@ -77,6 +77,7 @@ type alias Model =
     , focused : Maybe Date
     , today : Date
     , textfield : Textfield.Model
+    , inputText : Maybe String
     }
 
 
@@ -164,6 +165,7 @@ defaultModel =
     , focused = Nothing
     , today = initDate
     , textfield = Textfield.defaultModel
+    , inputText = Nothing
     }
 
 
@@ -185,6 +187,7 @@ initFromDate date today =
             , today = today
             , yearListOpen = False
             , textfield = updated
+            , inputText = Just (formatDate date)
             }
 
 
@@ -233,8 +236,10 @@ update : Maybe Date -> Settings -> Msg -> DatePicker -> ( DatePicker, Cmd Msg, D
 update date settings msg (DatePicker model) =
     let
         inputText =
-            Just <|
-                (Maybe.map formatDate date |> Maybe.withDefault "")
+            model.inputText
+
+        -- Just <|
+        --     (Maybe.map formatDate date |> Maybe.withDefault "")
     in
         case msg of
             TextfieldMsg tfMsg ->
@@ -268,6 +273,9 @@ update date settings msg (DatePicker model) =
                     case tfMsg of
                         InternalTextfield.SubmitText ->
                             let
+                                _ =
+                                    Debug.log "SubmitText" "SubmitText"
+
                                 isWhitespace =
                                     String.trim >> String.isEmpty
 
@@ -304,6 +312,7 @@ update date settings msg (DatePicker model) =
                                 | textfield = newTextfieldModel
                                 , open = open
                                 , forceOpen = forceOpen
+                                , inputText = newText
                             }
                                 ! []
 
@@ -390,7 +399,10 @@ view pickedDate settings (DatePicker ({ open } as model)) =
                 (Maybe.map formatDate pickedDate |> Maybe.withDefault "")
 
         inputText =
-            pickedDateInputText
+            if model.open then
+                model.inputText
+            else
+                pickedDateInputText
 
         class =
             mkClass settings
@@ -410,6 +422,7 @@ view pickedDate settings (DatePicker ({ open } as model)) =
         textfieldConfigFocused =
             { textfieldConfigDefault
                 | mask = Just "##.##.####"
+                , numbered = True
             }
 
         textfieldConfig =
