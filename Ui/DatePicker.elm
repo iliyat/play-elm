@@ -5,6 +5,7 @@ module Ui.DatePicker
         , Settings
         , DateEvent(..)
         , DatePicker
+        , DatePicker(..)
         , defaultSettings
         , defaultModel
         , init
@@ -21,6 +22,7 @@ module Ui.DatePicker
         , focusedDate
         , initFromDate
         , withLabel
+        , withTextfield
         )
 
 import Html exposing (..)
@@ -82,6 +84,13 @@ type DatePicker
     = DatePicker Model
 
 
+withTextfield : Textfield.Config -> Settings
+withTextfield config =
+    { defaultSettings
+        | textfieldConfig = config
+    }
+
+
 defaultSettings : Settings
 defaultSettings =
     { classNamespace = "elm-datepicker--"
@@ -101,13 +110,12 @@ defaultSettings =
     }
 
 
-withLabel : String -> Bool -> Settings
-withLabel label invalid =
+withLabel : String -> Settings
+withLabel label =
     let
         setLabel tfConfig =
             { tfConfig
                 | labelText = Just label
-                , invalid = invalid
             }
     in
         { defaultSettings

@@ -140,6 +140,7 @@ type alias Config =
     , plural : Maybe Plural
     , mask : Maybe String
     , errorText : String
+    , formName : Maybe String
     }
 
 
@@ -162,6 +163,7 @@ defaultConfig =
     , extraInside = Nothing
     , mask = Nothing
     , errorText = ""
+    , formName = Nothing
     }
 
 

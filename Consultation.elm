@@ -461,7 +461,8 @@ view model =
                 , asTitle = True
             }
     in
-        div []
+        styled div
+            [ cs "content-view", cs "block" ]
             [ styled div
                 [ cs "main-container"
                 , Elevation.z1
