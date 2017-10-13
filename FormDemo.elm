@@ -96,9 +96,12 @@ update msg ({ formBinder } as model) =
                     ( { model | buttonModel = new }, effects |> Cmd.map ButtonMsg )
 
 
-formView : Model -> Form () Output -> Html Msg
-formView ({ formBinder } as model) form =
+formView : Model -> Html Msg
+formView ({ formBinder, buttonModel } as model) =
     let
+        form =
+            formBinder.form
+
         tfConf =
             Textfield.defaultConfig
 
@@ -129,8 +132,6 @@ formView ({ formBinder } as model) form =
             { tfConf
                 | labelText = Just "Дата рождения"
                 , formName = Just "dateOfBirth"
-                , mask = Just "##.##.####"
-                , numbered = True
             }
 
         lastName =
@@ -186,36 +187,32 @@ formView ({ formBinder } as model) form =
 
 view : Model -> Html Msg
 view model =
-    let
-        form =
-            model.formBinder.form
-    in
-        div []
-            [ (formView model form)
-            , Html.node "link"
-                [ Attr.rel "stylesheet"
-                , Attr.href "material-components-web.css"
-                ]
-                []
-            , Html.node "link"
-                [ Attr.rel "stylesheet"
-                , Attr.href "main.css"
-                ]
-                []
-            , Html.node "link"
-                [ Attr.rel "stylesheet"
-                , Attr.href "datePicker.css"
-                ]
-                []
-            , Html.node "link"
-                [ Attr.rel "stylesheet"
-                , Attr.href "https://fonts.googleapis.com/icon?family=Material+Icons"
-                ]
-                []
-            , Html.node "link"
-                [ Attr.rel "stylesheet", Attr.href "https://fonts.googleapis.com/css?family=Roboto:300,400,500" ]
-                []
+    div []
+        [ (formView model)
+        , Html.node "link"
+            [ Attr.rel "stylesheet"
+            , Attr.href "material-components-web.css"
             ]
+            []
+        , Html.node "link"
+            [ Attr.rel "stylesheet"
+            , Attr.href "main.css"
+            ]
+            []
+        , Html.node "link"
+            [ Attr.rel "stylesheet"
+            , Attr.href "datePicker.css"
+            ]
+            []
+        , Html.node "link"
+            [ Attr.rel "stylesheet"
+            , Attr.href "https://fonts.googleapis.com/icon?family=Material+Icons"
+            ]
+            []
+        , Html.node "link"
+            [ Attr.rel "stylesheet", Attr.href "https://fonts.googleapis.com/css?family=Roboto:300,400,500" ]
+            []
+        ]
 
 
 main : Program Never Model Msg
