@@ -273,9 +273,6 @@ update date settings msg (DatePicker model) =
                     case tfMsg of
                         InternalTextfield.SubmitText ->
                             let
-                                _ =
-                                    Debug.log "SubmitText" "SubmitText"
-
                                 isWhitespace =
                                     String.trim >> String.isEmpty
 
@@ -295,7 +292,14 @@ update date settings msg (DatePicker model) =
                             in
                                 ( DatePicker <|
                                     { model
-                                        | focused =
+                                        | inputText =
+                                            case dateEvent of
+                                                Changed _ ->
+                                                    Nothing
+
+                                                NoChange ->
+                                                    model.inputText
+                                        , focused =
                                             case dateEvent of
                                                 Changed _ ->
                                                     Nothing
