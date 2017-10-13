@@ -107,7 +107,6 @@ withLabel label invalid =
         setLabel tfConfig =
             { tfConfig
                 | labelText = Just label
-                , asTitle = True
                 , invalid = invalid
             }
     in

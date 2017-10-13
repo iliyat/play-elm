@@ -224,8 +224,16 @@ formView model form =
                     model.datePicker
                     |> Html.map DatePickerMsg
                 ]
-            , button
-                [ onClick (FormMsg Form.Submit) ]
+            , Button.view ButtonMsg
+                model.buttonModel
+                [ Button.ripple
+                , Button.raised
+                , Button.primary
+                , Options.onClick
+                    (FormMsg
+                        Form.Submit
+                    )
+                ]
                 [ text "Submit" ]
             ]
 
@@ -233,8 +241,7 @@ formView model form =
 view : Model -> Html Msg
 view ({ form } as model) =
     div []
-        [ Button.view ButtonMsg model.buttonModel [] [ text "Test" ]
-        , (formView model form)
+        [ (formView model form)
         , Html.node "link"
             [ Attr.rel "stylesheet"
             , Attr.href "material-components-web.css"
