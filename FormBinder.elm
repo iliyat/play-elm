@@ -182,7 +182,7 @@ update msg ({ form } as model) validation =
                                 Just d ->
                                     let
                                         fv =
-                                            Field.String (Date.toUtcIsoString d)
+                                            Field.String (Date.toIsoString d)
 
                                         newFormModel_ =
                                             Form.update validation (Form.Input fieldName Form.Text fv) form

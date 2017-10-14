@@ -15,7 +15,7 @@ module Ui.Textfield
         )
 
 import Html exposing (Html, span, input, label, text, div, button, Attribute, p)
-import Html.Attributes as Attr exposing (class, classList, style)
+import Html.Attributes as Attr exposing (class, classList, style, tabindex)
 import Html.Events as Events
 import Ui.Internal.Textfield as InternalTextfield exposing (..)
 import Json.Decode as Json
@@ -139,6 +139,7 @@ type alias Config =
     , mask : Maybe String
     , errorText : String
     , formName : Maybe String
+    , tabindex : Int
     }
 
 
@@ -162,6 +163,7 @@ defaultConfig =
     , mask = Nothing
     , errorText = ""
     , formName = Nothing
+    , tabindex = -1
     }
 
 
@@ -406,6 +408,7 @@ view value_ model config =
                 , Events.onFocus <| Focus
                 , Events.onBlur <| Blur
                 , style [ ( "font-size", st.fontSize ) ]
+                , tabindex config.tabindex
                 ]
                 model.maskedState
                 value
@@ -420,6 +423,7 @@ view value_ model config =
                 , Events.onInput Input
                 , Events.on "change" (Json.succeed SubmitText)
                 , Attr.value displayValue
+                , tabindex config.tabindex
                 ]
                 []
 
@@ -433,6 +437,7 @@ view value_ model config =
                 , Events.onInput Input
                 , Events.on "change" (Json.succeed SubmitText)
                 , Attr.value displayValue
+                , tabindex config.tabindex
                 ]
                 []
 

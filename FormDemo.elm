@@ -113,49 +113,56 @@ formView ({ formBinder, buttonModel } as model) =
         dpConfg =
             DatePicker.defaultSettings
 
-        passportNumber =
-            { tfConf
-                | labelText = Just "Номер"
-                , mask = Just "##"
-                , formName = Just "passportNumber"
-            }
-
         passportSeries =
             { tfConf
                 | labelText = Just "Серия"
                 , mask = Just "####"
                 , formName = Just "passportSeries"
                 , numbered = True
+                , tabindex = 1
+            }
+
+        passportNumber =
+            { tfConf
+                | labelText = Just "Номер"
+                , mask = Just "##"
+                , formName = Just "passportNumber"
+                , tabindex = 2
             }
 
         issuedAt =
             { tfConf
                 | labelText = Just "Дата выдачи"
                 , formName = Just "issuedAt"
+                , tabindex = 3
             }
 
         dateOfBirth =
             { tfConf
                 | labelText = Just "Дата рождения"
                 , formName = Just "dateOfBirth"
+                , tabindex = 4
             }
 
         lastName =
             { tfConf
                 | labelText = Just "Фамилия"
                 , formName = Just "lastName"
+                , tabindex = 5
             }
 
         firstName =
             { tfConf
                 | labelText = Just "Имя"
                 , formName = Just "firstName"
+                , tabindex = 6
             }
 
         middleName =
             { tfConf
                 | labelText = Just "Отчество"
                 , formName = Just "middleName"
+                , tabindex = 7
             }
 
         code =
@@ -163,6 +170,7 @@ formView ({ formBinder, buttonModel } as model) =
                 | labelText = Just "Код подразделения"
                 , formName = Just "code"
                 , mask = Just "###-###"
+                , tabindex = 8
             }
     in
         div []
