@@ -55,9 +55,14 @@ validation =
 init : ( Model, Cmd Msg )
 init =
     let
+        dpModel =
+            DatePicker.DatePicker <| DatePicker.defaultModel
+
         initialUi =
             [ ( "passportSeries", FormBinder.TextfieldModel Textfield.defaultModel )
             , ( "passportNumber", FormBinder.TextfieldModel Textfield.defaultModel )
+            , ( "issuedAt", FormBinder.DatePickerModel dpModel )
+            , ( "dateOfBirth", FormBinder.DatePickerModel dpModel )
             ]
 
         ( formBinderModel, formBinderFx ) =

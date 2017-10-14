@@ -237,9 +237,6 @@ update date settings msg (DatePicker model) =
     let
         inputText =
             model.inputText
-
-        -- Just <|
-        --     (Maybe.map formatDate date |> Maybe.withDefault "")
     in
         case msg of
             TextfieldMsg tfMsg ->

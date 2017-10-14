@@ -103,9 +103,37 @@ update msg ({ form } as model) validation =
             let
                 initDate =
                     (Date.add Date.Day 7 today)
+
+                filterFunc d value =
+                    case value of
+                        DatePickerModel _ ->
+                            True
+
+                        _ ->
+                            False
+
+                datepickersKeys =
+                    Dict.filter filterFunc model.ui |> Dict.keys
+
+                dfMod =
+                    DatePicker.defaultModel
+
+                updater key =
+                    Dict.update key (\_ -> Just <| DatePickerModel (DatePicker.DatePicker <| { dfMod | today = today }))
+
+                folded =
+                    Dict.foldl
+                        (\k v a ->
+                            if (List.member k datepickersKeys) then
+                                (updater k a)
+                            else
+                                a
+                        )
+                        model.ui
             in
                 { model
                     | date = Just initDate
+                    , ui = folded model.ui
                 }
                     ! []
 
