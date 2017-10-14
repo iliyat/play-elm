@@ -56,7 +56,7 @@ initial initialFields validation initialUi =
 
 
 type Msg
-    = TextfieldMsg String Textfield.Msg
+    = TextfieldMsg String Textfield.Config Textfield.Msg
     | DatePickerMsg String DatePicker.Msg
     | FormMsg Form.Msg
     | CurrentDate Date
@@ -112,7 +112,7 @@ update msg ({ form } as model) validation =
         FormMsg formMsg ->
             { model | form = Form.update validation formMsg form } ! []
 
-        TextfieldMsg fieldName msg_ ->
+        TextfieldMsg fieldName config msg_ ->
             let
                 field =
                     Form.getFieldAsString fieldName form
@@ -121,7 +121,7 @@ update msg ({ form } as model) validation =
                     Textfield.externalUpdate
                         msg_
                         (getTextfieldModel model.ui fieldName)
-                        Textfield.defaultConfig
+                        config
                         field.value
 
                 fieldValue =
@@ -207,7 +207,9 @@ textfield lift model config =
         uiModel =
             getTextfieldModel model.ui name
     in
-        Textfield.view field.value uiModel config_ |> Html.map (TextfieldMsg name >> lift)
+        Textfield.view field.value uiModel config_
+            |> Html.map
+                (TextfieldMsg name config >> lift)
 
 
 datePicker : (Msg -> m) -> Model e output -> DatePicker.Settings -> Html m

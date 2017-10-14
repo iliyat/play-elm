@@ -120,6 +120,7 @@ formView ({ formBinder, buttonModel } as model) =
                 | labelText = Just "Серия"
                 , mask = Just "####"
                 , formName = Just "passportSeries"
+                , numbered = True
             }
 
         issuedAt =
