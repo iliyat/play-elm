@@ -244,11 +244,14 @@ update date settings msg (DatePicker model) =
         case msg of
             TextfieldMsg tfMsg ->
                 let
+                    tfConfig =
+                        settings.textfieldConfig
+
                     ( newTextfieldModel, newText ) =
                         Textfield.externalUpdate
                             tfMsg
                             model.textfield
-                            settings.textfieldConfig
+                            ({ tfConfig | numbered = True })
                             inputText
 
                     open =

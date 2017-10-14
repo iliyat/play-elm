@@ -76,7 +76,7 @@ update msg model config =
             Regex.replace Regex.All (Regex.regex "[^0-9]") (\_ -> "")
 
         numberedValue str =
-            if config.numbered || config.mask /= Nothing then
+            if (config.numbered || config.mask /= Nothing) then
                 Just <| numerize str
             else
                 Just str
