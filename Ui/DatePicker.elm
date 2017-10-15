@@ -23,10 +23,11 @@ module Ui.DatePicker
         , initFromDate
         , withLabel
         , withTextfield
+        , subscriptions
         )
 
 import Html exposing (..)
-import Html.Attributes as Attrs exposing (href, tabindex, type_, value)
+import Html.Attributes as Attrs exposing (href, tabindex, type_, value, tabindex)
 import Html.Events exposing (on, onBlur, onInput, onFocus, onWithOptions, targetValue)
 import Html.Keyed
 import Json.Decode as Json
@@ -38,6 +39,7 @@ import Ui.Internal.Textfield as InternalTextfield
 import Icons.Icon as Icon
 import Regex
 import Date.Extra as Date
+import Mouse
 
 
 type Msg
@@ -52,6 +54,7 @@ type Msg
     | MouseDown
     | MouseUp
     | TextfieldMsg Textfield.Msg
+    | Click Mouse.Position
 
 
 type alias Settings =
@@ -239,6 +242,31 @@ update date settings msg (DatePicker model) =
             model.inputText
     in
         case msg of
+            Click pos ->
+                case model.textfield.geometry of
+                    Just geometry ->
+                        let
+                            inside { x, y } { top, left, width, height } =
+                                (left <= toFloat x)
+                                    && (toFloat x <= left + width)
+                                    && (top <= toFloat y)
+                                    && (toFloat y <= top + height)
+                        in
+                            if
+                                inside pos geometry.picker.bounds
+                                    || inside pos
+                                        geometry.textfield.bounds
+                            then
+                                model ! []
+                            else
+                                ( DatePicker <| { model | open = False }
+                                , Cmd.none
+                                , NoChange
+                                )
+
+                    Nothing ->
+                        model ! []
+
             TextfieldMsg tfMsg ->
                 let
                     tfConfig =
@@ -694,3 +722,17 @@ mkClassList { classNamespace } cs =
 
         Nothing ->
             default
+
+
+
+-- SUBSCRIBTIONS
+
+
+subscriptions : DatePicker -> Sub Msg
+subscriptions (DatePicker model) =
+    Sub.batch
+        [ if model.open == True then
+            Mouse.clicks Click
+          else
+            Sub.none
+        ]

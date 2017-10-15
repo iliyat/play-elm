@@ -8,6 +8,7 @@ module FormBinder
         , update
         , textfield
         , datePicker
+        , subscriptions
         )
 
 import Html exposing (Html, div, h1, text, p, label, button)
@@ -20,6 +21,7 @@ import Ui.DatePicker as DatePicker exposing (DateEvent)
 import Date exposing (Date, Day(..), Month(..), day)
 import Date.Extra as Date
 import Task
+import Mouse
 
 
 type InputModels
@@ -96,6 +98,16 @@ newUiModel oldModel path subModel =
         upd
 
 
+onlyDatepickers : comparable -> InputModels -> Bool
+onlyDatepickers d value =
+    case value of
+        DatePickerModel _ ->
+            True
+
+        _ ->
+            False
+
+
 update : Msg -> Model e output -> Validation e output -> ( Model e output, Cmd Msg )
 update msg ({ form } as model) validation =
     case msg of
@@ -104,16 +116,8 @@ update msg ({ form } as model) validation =
                 initDate =
                     (Date.add Date.Day 7 today)
 
-                filterFunc d value =
-                    case value of
-                        DatePickerModel _ ->
-                            True
-
-                        _ ->
-                            False
-
                 datepickersKeys =
-                    Dict.filter filterFunc model.ui |> Dict.keys
+                    Dict.filter onlyDatepickers model.ui |> Dict.keys
 
                 dfMod =
                     DatePicker.defaultModel
@@ -281,3 +285,28 @@ datePicker lift model settings =
             Date.fromIsoString (field.value |> Maybe.withDefault "")
     in
         DatePicker.view date datePickerConfig uiModel |> Html.map (DatePickerMsg name >> lift)
+
+
+subscriptions : Model e o -> Sub Msg
+subscriptions { ui } =
+    let
+        datepickersKeys =
+            Dict.filter onlyDatepickers ui |> Dict.keys
+
+        getter key dict =
+            case Dict.get key dict of
+                Nothing ->
+                    DatePicker.DatePicker DatePicker.defaultModel
+
+                Just v ->
+                    case v of
+                        DatePickerModel m ->
+                            m
+
+                        _ ->
+                            DatePicker.DatePicker DatePicker.defaultModel
+
+        subs =
+            List.map (\k -> Sub.map (DatePickerMsg k) (DatePicker.subscriptions (getter k ui))) datepickersKeys
+    in
+        Sub.batch subs

@@ -235,5 +235,15 @@ main =
         { init = init
         , update = update
         , view = view
-        , subscriptions = always Sub.none
+        , subscriptions = subscriptions
         }
+
+
+subscriptions : Model -> Sub Msg
+subscriptions model =
+    Sub.batch
+        [ Sub.map FormBinderMsg
+            (FormBinder.subscriptions
+                model.formBinder
+            )
+        ]

@@ -17,18 +17,25 @@ module Ui.Textfield
 import Html exposing (Html, span, input, label, text, div, button, Attribute, p)
 import Html.Attributes as Attr exposing (class, classList, style, tabindex)
 import Html.Events as Events
-import Ui.Internal.Textfield as InternalTextfield exposing (..)
+import Ui.Internal.Textfield as InternalTextfield
+    exposing
+        ( Msg(..)
+        , Geometry
+        , geometryDecoder
+        )
 import Json.Decode as Json
 import Regex
 import Utils.General as Utils exposing (..)
 import FormatNumber exposing (format)
 import MaskedInput.Text as MaskedText
+import DOM
 
 
 type alias Model =
     { isFocused : Bool
     , isDirty : Bool
     , maskedState : MaskedText.State
+    , geometry : Maybe Geometry
     }
 
 
@@ -37,6 +44,7 @@ defaultModel =
     { isFocused = False
     , isDirty = False
     , maskedState = MaskedText.initialState
+    , geometry = Nothing
     }
 
 
@@ -106,6 +114,12 @@ update msg model config =
 
             Focus ->
                 { model | isFocused = True } ! []
+
+            InputClick geom ->
+                { model
+                    | geometry = Just geom
+                }
+                    ! []
 
             InputStateChanged state ->
                 { model | maskedState = state } ! []
@@ -315,6 +329,12 @@ render model config =
     view config.value model config
 
 
+infixr 5 :>
+(:>) : (a -> b) -> a -> b
+(:>) f x =
+    f x
+
+
 view : Maybe String -> Model -> Config -> Html Msg
 view value_ model config =
     let
@@ -402,10 +422,10 @@ view value_ model config =
             MaskedText.input
                 (maskedInputOptions config)
                 [ classList
-                    [ ( "mdc-textfield__input", True )
+                    [ ( "mdc-textfield__input maskedInputHtml", True )
                     ]
                 , Events.on "change" (Json.succeed SubmitText)
-                , Events.onFocus <| Focus
+                , Events.on "focus" (Json.succeed (Focus))
                 , Events.onBlur <| Blur
                 , style [ ( "font-size", st.fontSize ) ]
                 , tabindex config.tabindex
@@ -413,26 +433,13 @@ view value_ model config =
                 model.maskedState
                 value
 
-        inputForm =
-            input
-                [ Attr.type_ "text"
-                , style [ ( "font-size", st.fontSize ) ]
-                , classList [ ( "mdc-textfield__input", True ) ]
-                , Events.onFocus <| Focus
-                , Events.onBlur <| Blur
-                , Events.onInput Input
-                , Events.on "change" (Json.succeed SubmitText)
-                , Attr.value displayValue
-                , tabindex config.tabindex
-                ]
-                []
-
         inputHtml =
             input
                 [ Attr.type_ "text"
                 , style [ ( "font-size", st.fontSize ) ]
                 , classList [ ( "mdc-textfield__input", True ) ]
-                , Events.onFocus <| Focus
+                , Events.on "click" (Json.map InputClick geometryDecoder)
+                , Events.on "focus" (Json.succeed Focus)
                 , Events.onBlur <| Blur
                 , Events.onInput Input
                 , Events.on "change" (Json.succeed SubmitText)
@@ -461,7 +468,7 @@ view value_ model config =
             else
                 inputHtml
     in
-        div []
+        div [ style [ ( "position", "relative" ) ] ]
             [ div
                 [ classList
                     [ ( "mdc-textfield mdc-textfield--upgraded", True )
@@ -475,6 +482,7 @@ view value_ model config =
                 , Events.onBlur <| Blur
                 , style
                     [ ( "height", st.height )
+                    , ( "position", "relative" )
                     , ( "width"
                       , if config.fullWidth then
                             "100%"
