@@ -102,6 +102,9 @@ body {
   border: 2px solid #d50000;
   border-color: #d50000 !important;
 }
+.mdc-form-field label {
+  font-size: 16px !important;
+}
 .mdc-checkbox--invalid ~ label {
   color: #d50000 !important;
 }
