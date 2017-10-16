@@ -1,7 +1,6 @@
 module Step.Conditions exposing (view, Model, Msg, init, update)
 
 import Html exposing (Html, div, h1, text, p, span)
-import Html.Attributes as Attrs exposing (style)
 import Ui.Options as Options exposing (styled, cs, css, when)
 import Ui.Typography as Typography
 import Ui.Textfield as Textfield
@@ -18,6 +17,7 @@ import Date exposing (Date, Month(..))
 import Date.Extra as Date
 import Task
 import LoanDetails
+import Step.Conditions.Info as ConditionsInfo
 
 
 -- ID                              string `gorm:"type:uuid;primary_key;"`
@@ -230,14 +230,14 @@ view model =
 
         daysConfig =
             { tfConfig
-                | labelText = Just "Период"
+                | labelText = Just "Срок"
                 , asTitle = True
                 , readonly = True
             }
 
         payAt =
             { tfConfig
-                | labelText = Just "К возврату"
+                | labelText = Just "Дата погашения"
                 , asTitle = True
                 , readonly = True
                 , fullWidth = True
@@ -291,8 +291,7 @@ view model =
                 [ Elevation.z1, cs "block" ]
                 [ styled div
                     [ css "display" "flex"
-                    , css "justify-content"
-                        "space-between"
+                    , css "justify-content" "space-between"
                     ]
                     [ styled div
                         [ Typography.headline
@@ -310,18 +309,7 @@ view model =
                         ]
                         [ text "Изменить условия" ]
                     ]
-                , div [ Attrs.class "ui-flex" ]
-                    [ textfield "10000" amountConfig
-                    , textfield "14 дней" daysConfig
-                    , styled div
-                        [ css "width" "300px" ]
-                        [ textfield "12 сентября 2017" payAt
-                        ]
-                    , textfield "13 212" returnConfig
-                    , textfield "13 212" percentConfig
-                    , Textfield.viewReadonly (Just "lastchance") tfModel promoConfig
-                        |> Html.map never
-                    ]
+                , ConditionsInfo.view |> Html.map never
                 ]
             , styled div
                 hiddenBlockAttributes

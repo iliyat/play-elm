@@ -1,30 +1,30 @@
-module Ui.RadioButton
+module Ui.Checkbox
     exposing
-        ( -- VIEWW
+        ( -- VIEW
           view
         , Property
         , disabled
-        , selected
-        , name
-        , Msg
+        , checked
+        , indeterminate
           -- TEA
         , Model
         , defaultModel
+        , Msg
         , update
-          -- RENDER
+        , invalid
         )
 
 import Html.Attributes as Html
 import Html exposing (Html, text, div)
 import Json.Decode as Json
-import Ui.Internal.Helpers as Helpers exposing (map1st, map2nd, blurOn, filter, noAttr)
+import Json.Encode
+import Ui.Internal.Helpers exposing (map1st, map2nd, blurOn, filter, noAttr)
+import Ui.Internal.Checkbox exposing (Msg(..))
 import Ui.Internal.Options as Internal
-import Ui.Internal.RadioButton exposing (Msg(..))
-import Ui.Options as Options exposing (Style, cs, styled, many, when, maybe)
+import Svg.Attributes as SvgAttr
+import Svg exposing (path)
+import Ui.Options as Options exposing (Style, cs, css, styled, many, when, maybe)
 import Ui.Ripple as Ripple
-
-
--- MODEL
 
 
 type alias Model =
@@ -40,12 +40,8 @@ defaultModel =
     }
 
 
-
--- ACTION, UPDATE
-
-
 type alias Msg =
-    Ui.Internal.RadioButton.Msg
+    Ui.Internal.Checkbox.Msg
 
 
 update : (Msg -> m) -> Msg -> Model -> ( Maybe Model, Cmd m )
@@ -67,10 +63,6 @@ update lift msg model =
             ( Nothing, Cmd.none )
 
 
-
--- OPTIONS
-
-
 type alias Config m =
     { input : List (Options.Style m)
     , container : List (Options.Style m)
@@ -86,40 +78,37 @@ defaultConfig =
     }
 
 
-{-| TODO
--}
 type alias Property m =
     Options.Property (Config m) m
 
 
-{-| TODO
--}
 disabled : Property m
 disabled =
     Options.many
-        [ cs "mdc-radio--disabled"
+        [ cs "mdc-checkbox--disabled"
         , Internal.input
             [ Internal.attribute <| Html.disabled True
             ]
         ]
 
 
-{-| TODO
--}
-selected : Property m
-selected =
+invalid : Property m
+invalid =
+    Options.many
+        [ cs "mdc-checkbox--invalid"
+        ]
+
+
+checked : Property m
+checked =
     Internal.option (\config -> { config | value = True })
 
 
-{-| TODO
--}
-name : String -> Property m
-name value =
-    Internal.attribute (Html.name value)
-
-
-
--- VIEW
+indeterminate : Property m
+indeterminate =
+    Internal.input
+        [ Internal.attribute <| Html.property "indeterminate" (Json.Encode.bool True)
+        ]
 
 
 view : (Msg -> m) -> Model -> List (Property m) -> List (Html m) -> Html m
@@ -130,19 +119,27 @@ view lift model options ch =
 
         ( rippleOptions, rippleStyle ) =
             Ripple.view True (RippleMsg >> lift) model.ripple [] []
+
+        checkmarkClass =
+            "mdc-checkbox__checkmark "
+                ++ (if config.value then
+                        "mdc-checkbox__checkmark--checked"
+                    else
+                        ""
+                   )
     in
-        styled div
+        styled Html.div
             [ cs "mdc-form-field" ]
             ([ Internal.applyContainer summary
-                div
-                [ cs "mdc-radio"
+                Html.div
+                [ cs "mdc-checkbox"
                 , Internal.attribute <| blurOn "mouseup"
                 , rippleOptions
                 ]
                 [ Internal.applyInput summary
                     Html.input
-                    [ cs "mdc-radio__native-control"
-                    , Internal.attribute <| Html.type_ "radio"
+                    [ cs "mdc-checkbox__native-control"
+                    , Internal.attribute <| Html.type_ "checkbox"
                     , Internal.attribute <| Html.checked config.value
                     , Internal.on1 "focus" lift (SetFocus True)
                     , Internal.on1 "blur" lift (SetFocus False)
@@ -154,10 +151,33 @@ view lift model options ch =
                     ]
                     []
                 , styled Html.div
-                    [ cs "mdc-radio__background"
+                    [ cs "mdc-checkbox__background"
+                    , cs "mdc-checkbox__background--checked"
+                        |> Options.when
+                            config.value
                     ]
-                    [ styled Html.div [ cs "mdc-radio__inner-circle" ] []
-                    , styled Html.div [ cs "mdc-radio__outer-circle" ] []
+                    [ Svg.svg
+                        [ SvgAttr.class checkmarkClass
+                        , SvgAttr.viewBox "0 0 24 24"
+                        ]
+                        [ path
+                            [ SvgAttr.class "mdc-checkbox__checkmark__path"
+                            , SvgAttr.fill "none"
+                            , SvgAttr.stroke "white"
+                            , SvgAttr.d "M1.73,12.91 8.1,19.28 22.79,4.59"
+                            , SvgAttr.style
+                                (if config.value then
+                                    "stroke-dashoffset:0"
+                                 else
+                                    ""
+                                )
+                            ]
+                            []
+                        ]
+                    , styled Html.div
+                        [ cs "mdc-checkbox__mixedmark"
+                        ]
+                        []
                     ]
                 , rippleStyle
                 ]

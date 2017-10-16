@@ -97,3 +97,11 @@ body {
 .mdc-textfield__label {
   white-space: nowrap;
 }
+/* invalid checkboxes */
+.mdc-checkbox--invalid .mdc-checkbox__background {
+  border: 2px solid #d50000;
+  border-color: #d50000 !important;
+}
+.mdc-checkbox--invalid ~ label {
+  color: #d50000 !important;
+}

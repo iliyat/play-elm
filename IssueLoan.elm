@@ -16,7 +16,7 @@ import Ui.Button as Button
 import Step.PassportCheck as PassportCheck
 import Step.Conditions as Conditions
 import Step.ReceiveType
-import Step.PrintDocuments
+import Step.PrintDocuments as PrintDocuments
 import Step.IssueLoan
 
 
@@ -24,7 +24,7 @@ type Step
     = PassportCheck PassportCheck.Model
     | Conditions Conditions.Model
     | ReceiveType
-    | PrintDocuments
+    | PrintDocuments PrintDocuments.Model
     | IssueLoan
 
 
@@ -42,6 +42,7 @@ type Msg
     | ClientDeclineAccept
     | ConditionsMsg Conditions.Msg
     | PassportCheckMsg PassportCheck.Msg
+    | PrintDocumentsMsg PrintDocuments.Msg
 
 
 nextStep : Step -> Step
@@ -55,12 +56,12 @@ nextStep current =
                 Conditions model
 
         Conditions _ ->
-            ReceiveType
+            PrintDocuments PrintDocuments.defaultModel
 
         ReceiveType ->
-            PrintDocuments
+            PrintDocuments PrintDocuments.defaultModel
 
-        PrintDocuments ->
+        PrintDocuments _ ->
             IssueLoan
 
         IssueLoan ->
@@ -69,25 +70,25 @@ nextStep current =
 
 prevStep : Step -> Step
 prevStep current =
-    case current of
-        PassportCheck _ ->
-            PassportCheck PassportCheck.defaultModel
+    let
+        ( conditionModel, conditionEffects ) =
+            Conditions.init
+    in
+        case current of
+            PassportCheck _ ->
+                PassportCheck PassportCheck.defaultModel
 
-        Conditions _ ->
-            PassportCheck PassportCheck.defaultModel
+            Conditions _ ->
+                PassportCheck PassportCheck.defaultModel
 
-        ReceiveType ->
-            let
-                ( model, effects ) =
-                    Conditions.init
-            in
-                Conditions model
+            ReceiveType ->
+                Conditions conditionModel
 
-        PrintDocuments ->
-            ReceiveType
+            PrintDocuments _ ->
+                Conditions conditionModel
 
-        IssueLoan ->
-            PrintDocuments
+            IssueLoan ->
+                PrintDocuments PrintDocuments.defaultModel
 
 
 type alias Model =
@@ -110,7 +111,9 @@ init =
             Conditions.init
     in
         { date = Just <| Date.fromParts 1992 Feb 21 0 0 0 0
-        , currentStep = PassportCheck PassportCheck.defaultModel
+
+        -- , currentStep = PassportCheck PassportCheck.defaultModel
+        , currentStep = PrintDocuments PrintDocuments.defaultModel
         , clientDeclineButtonModel = Button.defaultModel
         , prevButtonModel = Button.defaultModel
         , nextButtonModel = Button.defaultModel
@@ -240,6 +243,21 @@ update msg model =
                 , effects |> Cmd.map PassportCheckMsg
                 )
 
+        PrintDocumentsMsg msg_ ->
+            let
+                getModel =
+                    case model.currentStep of
+                        PrintDocuments a ->
+                            a
+
+                        _ ->
+                            PrintDocuments.defaultModel
+
+                ( new, effects ) =
+                    PrintDocuments.update msg_ getModel
+            in
+                ( { model | currentStep = PrintDocuments new }, effects |> Cmd.map PrintDocumentsMsg )
+
 
 getCurrentView : Model -> Html Msg
 getCurrentView model =
@@ -253,8 +271,8 @@ getCurrentView model =
         ReceiveType ->
             Step.ReceiveType.view |> Html.map never
 
-        PrintDocuments ->
-            Step.PrintDocuments.view |> Html.map never
+        PrintDocuments subModel ->
+            PrintDocuments.view subModel |> Html.map PrintDocumentsMsg
 
         IssueLoan ->
             Step.IssueLoan.view |> Html.map never
@@ -297,7 +315,7 @@ stepper model =
                     , stepLine
                     , step "Способ получения" 3 (ifCurrent ReceiveType)
                     , stepLine
-                    , step "Печать документов" 4 (ifCurrent PrintDocuments)
+                    , step "Печать документов" 4 (ifCurrent <| PrintDocuments PrintDocuments.defaultModel)
                     , stepLine
                     , step "Выдача денежных средств" 5 (ifCurrent IssueLoan)
                     ]
