@@ -141,7 +141,7 @@ step title num disabled =
             if disabled then
                 "rgb(158, 158, 158)"
             else
-                "rgb(0, 188, 212)"
+                "#009ce1"
     in
         div
             [ classList

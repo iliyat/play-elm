@@ -146,7 +146,7 @@ view model =
             { tfConfig | labelText = Just "Дата рождения", readonly = True }
 
         passportSeriesConfig =
-            { tfConfig | labelText = Just "Серия", readonly = True }
+            { tfConfig | labelText = Just "Серия", readonly = True, width = 64 }
 
         passportNumberConfig =
             { tfConfig | labelText = Just "Номер", readonly = True }
@@ -193,7 +193,7 @@ view model =
                 , Options.onClick AddNewPassport
                 , css "display" "none" |> when model.formVisible
                 ]
-                [ text "Добавить новый паспорт" ]
+                [ Icon.view "add" [], text "Добавить новый паспорт" ]
             , styled div
                 [ css "display" "none" |> when (not model.formVisible)
                 , css "margin-top" "48px"

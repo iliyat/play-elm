@@ -111,9 +111,7 @@ init =
             Conditions.init
     in
         { date = Just <| Date.fromParts 1992 Feb 21 0 0 0 0
-
-        -- , currentStep = PassportCheck PassportCheck.defaultModel
-        , currentStep = PrintDocuments PrintDocuments.defaultModel
+        , currentStep = PassportCheck PassportCheck.defaultModel
         , clientDeclineButtonModel = Button.defaultModel
         , prevButtonModel = Button.defaultModel
         , nextButtonModel = Button.defaultModel
@@ -287,11 +285,22 @@ stepper model =
         classList =
             mkClassList "stepper--"
 
-        ifCurrent step =
-            if model.currentStep /= step then
-                True
-            else
-                False
+        ifCurrent int =
+            case model.currentStep of
+                PassportCheck _ ->
+                    1 == int
+
+                Conditions _ ->
+                    2 == int
+
+                ReceiveType ->
+                    3 == int
+
+                PrintDocuments _ ->
+                    4 == int
+
+                IssueLoan ->
+                    5 == int
 
         tfConfig =
             Textfield.defaultConfig
@@ -307,17 +316,15 @@ stepper model =
             [ styled Html.div
                 [ Elevation.z1 ]
                 [ div [ class "header" ]
-                    [ step "Проверка паспорта" 1 (ifCurrent <| PassportCheck PassportCheck.defaultModel)
+                    [ step "Проверка паспорта" 1 (ifCurrent 1)
                     , stepLine
-                    , step "Условия займа"
-                        2
-                        (ifCurrent <| Conditions condInitModel)
+                    , step "Условия займа" 2 (ifCurrent 2)
                     , stepLine
-                    , step "Способ получения" 3 (ifCurrent ReceiveType)
+                    , step "Способ получения" 3 (ifCurrent 3)
                     , stepLine
-                    , step "Печать документов" 4 (ifCurrent <| PrintDocuments PrintDocuments.defaultModel)
+                    , step "Печать документов" 4 (ifCurrent 4)
                     , stepLine
-                    , step "Выдача денежных средств" 5 (ifCurrent IssueLoan)
+                    , step "Выдача денежных средств" 5 (ifCurrent 5)
                     ]
                 ]
             , getCurrentView model
@@ -461,8 +468,21 @@ view model =
             , stepper model
             , Html.node "link"
                 [ Attrs.rel "stylesheet"
-                , Attrs.href "material-components-web.css"
+
+                -- , Attrs.href "material-components-web.css"
+                , Attrs.href "mdc-webpack.css"
                 ]
+                []
+            , Html.node "link"
+                [ Attrs.rel "stylesheet"
+                , Attrs.href "https://fonts.googleapis.com/icon?family=Material+Icons"
+                ]
+                []
+            , Html.node "link"
+                [ Attrs.rel "stylesheet", Attrs.href "https://fonts.googleapis.com/css?family=Roboto:400,300,500|Roboto+Mono|Roboto+Condensed:400,700&subset=latin,latin-ext" ]
+                []
+            , Html.node "link"
+                [ Attrs.rel "stylesheet", Attrs.href "https://cdnjs.cloudflare.com/ajax/libs/material-design-iconic-font/2.2.0/css/material-design-iconic-font.css" ]
                 []
             , Html.node "link"
                 [ Attrs.rel "stylesheet"
@@ -473,14 +493,6 @@ view model =
                 [ Attrs.rel "stylesheet"
                 , Attrs.href "issue-loan.css"
                 ]
-                []
-            , Html.node "link"
-                [ Attrs.rel "stylesheet"
-                , Attrs.href "https://fonts.googleapis.com/icon?family=Material+Icons"
-                ]
-                []
-            , Html.node "link"
-                [ Attrs.rel "stylesheet", Attrs.href "https://fonts.googleapis.com/css?family=Roboto:300,400,500" ]
                 []
             , Html.node "link"
                 [ Attrs.rel "stylesheet"
