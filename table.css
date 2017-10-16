@@ -1,7 +1,8 @@
 .loan-details--table-wrapper {
   display: flex;
   position: relative;
-  justify-content: space-between; }
+  justify-content: space-between;
+  margin-left: -32px; }
 
 .loan-details--table {
   background-color: transparent;
@@ -9,9 +10,10 @@
   font-size: 13px;
   width: 90%;
   overflow: auto;
-  white-space: nowrap; }
+  white-space: nowrap;
+  padding-left: 16px;
+  box-sizing: border-box; }
   .loan-details--table::-webkit-scrollbar-track-piece {
-    margin-left: 0;
     margin-right: 0; }
 
 .loan-details--rows-wrapper {
