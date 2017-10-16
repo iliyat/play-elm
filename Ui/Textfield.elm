@@ -154,6 +154,7 @@ type alias Config =
     , errorText : String
     , formName : Maybe String
     , tabindex : Int
+    , width : Int
     }
 
 
@@ -178,6 +179,7 @@ defaultConfig =
     , errorText = ""
     , formName = Nothing
     , tabindex = -1
+    , width = 168
     }
 
 
@@ -194,6 +196,14 @@ maskedInputOptions config =
             | pattern = mask
             , hasFocus = Just FocusChanged
         }
+
+
+getWidth : Config -> String
+getWidth config =
+    if config.fullWidth then
+        "100%"
+    else
+        toString config.width |> flip (++) "px"
 
 
 viewReadonly : Maybe String -> Model -> Config -> Html Never
@@ -229,12 +239,6 @@ viewReadonly value_ model config =
             else
                 simpleStyle
 
-        width =
-            if config.fullWidth then
-                "100%"
-            else
-                "168px"
-
         extra =
             config.extra |> Maybe.withDefault ""
 
@@ -258,7 +262,7 @@ viewReadonly value_ model config =
             div
                 [ style
                     [ ( "font-size", st.fontSize )
-                    , ( "width", width )
+                    , ( "width", getWidth config )
                     ]
                 , classList
                     [ ( "mdc-textfield__input", True )
@@ -280,12 +284,7 @@ viewReadonly value_ model config =
                 ]
             , style
                 [ ( "height", st.height )
-                , ( "width"
-                  , if config.fullWidth then
-                        "100%"
-                    else
-                        "initial"
-                  )
+                , ( "width", getWidth config )
                 ]
             ]
             [ contentHtml
@@ -385,12 +384,6 @@ view value_ model config =
             else
                 simpleStyle
 
-        width =
-            if config.fullWidth then
-                "100%"
-            else
-                "168px"
-
         extra =
             config.extra |> Maybe.withDefault ""
 
@@ -453,7 +446,7 @@ view value_ model config =
             div
                 [ style
                     [ ( "font-size", st.fontSize )
-                    , ( "width", width )
+                    , ( "width", getWidth config )
                     ]
                 , classList
                     [ ( "mdc-textfield__input", True )
@@ -469,7 +462,7 @@ view value_ model config =
             else
                 inputHtml
     in
-        div [ style [ ( "position", "relative" ) ] ]
+        div []
             [ div
                 [ classList
                     [ ( "mdc-textfield mdc-textfield--upgraded", True )
@@ -484,12 +477,7 @@ view value_ model config =
                 , style
                     [ ( "height", st.height )
                     , ( "position", "relative" )
-                    , ( "width"
-                      , if config.fullWidth then
-                            "100%"
-                        else
-                            "initial"
-                      )
+                    , ( "width", getWidth config )
                     ]
                 ]
                 [ contentHtml

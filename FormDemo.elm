@@ -26,6 +26,8 @@ type alias Output =
     , firstName : String
     , middleName : String
     , code : String
+    , issuedBy : String
+    , placeOfBirth : String
     }
 
 
@@ -39,17 +41,35 @@ type LocalError
     = InvalidCode
 
 
+max255 : Validation e String
+max255 =
+    string |> andThen (maxLength 255)
+
+
 validation : Validation () Output
 validation =
     map8 Output
-        (field "passportSeries" (string |> andThen (minLength 4)))
-        (field "passportNumber" string)
-        (field "issuedAt" (string))
+        (field "passportSeries"
+            (string
+                |> andThen (minLength 4)
+                |> andThen (maxLength 4)
+            )
+        )
+        (field "passportNumber"
+            (string
+                |> andThen (minLength 6)
+                |> andThen
+                    (maxLength 6)
+            )
+        )
+        (field "issuedAt" string)
         (field "dateOfBirth" string)
-        (field "lastName" string)
-        (field "firstName" string)
-        (field "middleName" string)
+        (field "lastName" max255)
+        (field "firstName" max255)
+        (field "middleName" max255)
         (field "code" string)
+        |> andMap (field "issuedBy" max255)
+        |> andMap (field "placeOfBirth" max255)
 
 
 init : ( Model, Cmd Msg )
@@ -59,9 +79,7 @@ init =
             DatePicker.DatePicker <| DatePicker.defaultModel
 
         initialUi =
-            [ ( "passportSeries", FormBinder.TextfieldModel Textfield.defaultModel )
-            , ( "passportNumber", FormBinder.TextfieldModel Textfield.defaultModel )
-            , ( "issuedAt", FormBinder.DatePickerModel dpModel )
+            [ ( "issuedAt", FormBinder.DatePickerModel dpModel )
             , ( "dateOfBirth", FormBinder.DatePickerModel dpModel )
             ]
 
@@ -120,14 +138,16 @@ formView ({ formBinder, buttonModel } as model) =
                 , formName = Just "passportSeries"
                 , numbered = True
                 , tabindex = 1
+                , width = 64
             }
 
         passportNumber =
             { tfConf
                 | labelText = Just "Номер"
-                , mask = Just "##"
+                , mask = Just "######"
                 , formName = Just "passportNumber"
                 , tabindex = 2
+                , width = 72
             }
 
         issuedAt =
@@ -135,6 +155,7 @@ formView ({ formBinder, buttonModel } as model) =
                 | labelText = Just "Дата выдачи"
                 , formName = Just "issuedAt"
                 , tabindex = 3
+                , width = 150
             }
 
         dateOfBirth =
@@ -142,6 +163,7 @@ formView ({ formBinder, buttonModel } as model) =
                 | labelText = Just "Дата рождения"
                 , formName = Just "dateOfBirth"
                 , tabindex = 4
+                , width = 150
             }
 
         lastName =
@@ -149,6 +171,7 @@ formView ({ formBinder, buttonModel } as model) =
                 | labelText = Just "Фамилия"
                 , formName = Just "lastName"
                 , tabindex = 5
+                , width = 146
             }
 
         firstName =
@@ -156,6 +179,7 @@ formView ({ formBinder, buttonModel } as model) =
                 | labelText = Just "Имя"
                 , formName = Just "firstName"
                 , tabindex = 6
+                , width = 144
             }
 
         middleName =
@@ -163,6 +187,7 @@ formView ({ formBinder, buttonModel } as model) =
                 | labelText = Just "Отчество"
                 , formName = Just "middleName"
                 , tabindex = 7
+                , width = 200
             }
 
         code =
@@ -171,22 +196,41 @@ formView ({ formBinder, buttonModel } as model) =
                 , formName = Just "code"
                 , mask = Just "###-###"
                 , tabindex = 8
+                , width = 150
+            }
+
+        issuedBy =
+            { tfConf
+                | labelText = Just "Кем выдан"
+                , formName = Just "issuedBy"
+                , tabindex = 9
+                , width = 336
+            }
+
+        placeOfBirth =
+            { tfConf
+                | labelText = Just "Место рождения"
+                , formName = Just "placeOfBirth"
+                , tabindex = 10
+                , width = 168
             }
     in
         div []
-            [ div [ style [ ( "display", "flex" ) ] ]
+            [ div [ class "ui-form-row" ]
                 [ FormBinder.textfield FormBinderMsg formBinder passportSeries
                 , FormBinder.textfield FormBinderMsg formBinder passportNumber
                 , FormBinder.datePicker FormBinderMsg formBinder (DatePicker.withTextfield issuedAt)
                 , FormBinder.datePicker FormBinderMsg formBinder (DatePicker.withTextfield dateOfBirth)
                 ]
-            , div [ style [ ( "display", "flex" ) ] ]
+            , div [ class "ui-form-row" ]
                 [ FormBinder.textfield FormBinderMsg formBinder lastName
                 , FormBinder.textfield FormBinderMsg formBinder firstName
                 , FormBinder.textfield FormBinderMsg formBinder middleName
                 ]
-            , div [ style [ ( "display", "flex" ) ] ]
+            , div [ class "ui-form-row" ]
                 [ FormBinder.textfield FormBinderMsg formBinder code
+                , FormBinder.textfield FormBinderMsg formBinder issuedBy
+                , FormBinder.textfield FormBinderMsg formBinder placeOfBirth
                 ]
             , Button.view ButtonMsg
                 model.buttonModel

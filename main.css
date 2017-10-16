@@ -66,6 +66,12 @@ body {
 .ui-flex {
   display: flex;
 }
+.ui-form-row {
+  display: flex;
+}
+.ui-form-row > div {
+  padding-right: 16px;
+}
 
 .mdc-dialog__surface {
   width: 448px;
