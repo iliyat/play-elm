@@ -1,4 +1,4 @@
-module Step.PassportCheck exposing (view, update, Msg, Model, defaultModel)
+module Step.PassportCheck exposing (view, update, Msg, Model, init, defaultModel)
 
 import Html exposing (Html, div, h1, text, p, span)
 import Html.Attributes as Attrs
@@ -9,6 +9,7 @@ import Utils.Style exposing (mkClass, mkClassList)
 import Icons.Icon as Icon
 import Ui.Elevation as Elevation
 import Ui.Button as Button
+import Step.PassportCheck.Form as Form
 
 
 class =
@@ -22,24 +23,51 @@ classList =
 type alias Model =
     { buttonModel : Button.Model
     , formVisible : Bool
+    , form : Form.Model
     }
 
 
 defaultModel : Model
 defaultModel =
-    { buttonModel = Button.defaultModel
-    , formVisible = False
-    }
+    let
+        ( formModel, effects ) =
+            Form.init
+    in
+        { form = formModel
+        , buttonModel = Button.defaultModel
+        , formVisible = False
+        }
+
+
+init : ( Model, Cmd Msg )
+init =
+    let
+        ( formModel, effects ) =
+            Form.init
+    in
+        { form = formModel
+        , buttonModel = Button.defaultModel
+        , formVisible = False
+        }
+            ! [ Cmd.map FormMsg effects ]
 
 
 type Msg
     = Ripple Button.Msg
     | AddNewPassport
+    | FormMsg Form.Msg
 
 
 update : Msg -> Model -> ( Model, Cmd Msg )
 update msg model =
     case msg of
+        FormMsg formMsg ->
+            let
+                ( new, effects ) =
+                    Form.update formMsg model.form
+            in
+                ( { model | form = new }, effects |> Cmd.map FormMsg )
+
         AddNewPassport ->
             { model | formVisible = True } ! []
 
@@ -172,14 +200,7 @@ view model =
                 ]
                 [ styled div [ Typography.headline ] [ text "Новый паспорт" ]
                 , div []
-                    [ Textfield.viewReadonly (Just "4212")
-                        Textfield.defaultModel
-                        passportSeriesConfig
-                        |> Html.map never
-                    , Textfield.viewReadonly (Just "122312")
-                        Textfield.defaultModel
-                        passportNumberConfig
-                        |> Html.map never
+                    [ Form.view model.form |> Html.map FormMsg
                     ]
                 ]
             ]

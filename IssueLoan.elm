@@ -418,7 +418,7 @@ view model =
                                 nameConfig
                                 |> Html.map noOp
                             , div
-                                []
+                                [ Attrs.style [ ( "display", "flex" ) ] ]
                                 [ Textfield.view (Just "24.05.1990")
                                     Textfield.defaultModel
                                     dateOfBirthConfig
