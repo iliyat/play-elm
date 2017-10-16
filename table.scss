@@ -1,17 +1,30 @@
 $loan-details: loan-details-- !default;
+$loan-details-table-width: 90%;
+
+.#{$loan-details}table-wrapper {
+  display: flex;
+  position: relative;
+  justify-content: space-between;
+}
 
 .#{$loan-details}table {
   background-color: transparent;
   position: relative;
   font-size: 13px;
-  width: 100%;
+  width: #{$loan-details-table-width};
+  overflow: auto;
+  white-space: nowrap;
+
+  &::-webkit-scrollbar-track-piece {
+    margin-left: 0;
+    margin-right: 0;
+  }
 }
 
 .#{$loan-details}rows-wrapper {
   position: absolute;
-  width: 100%;
+  width: #{$loan-details-table-width};
   background-color: transparent;
-  margin-left: -32px;
 }
 
 .#{$loan-details}row {
@@ -23,6 +36,11 @@ $loan-details: loan-details-- !default;
 .#{$loan-details}block {
   display: inline-block;
   padding: 0 16px;
+  position: relative;
+
+  &:hover {
+    background-color: rgba(0, 156, 225, 0.18);
+  }
 }
 
 .#{$loan-details}block-row {
@@ -36,7 +54,6 @@ $loan-details: loan-details-- !default;
   @extend .#{$loan-details}block-row;
 
   font-size: 12px;
-  font-size: 12px;
   font-weight: 500;
   color: rgba(0, 0, 0, 0.38);
 }
@@ -46,4 +63,13 @@ $loan-details: loan-details-- !default;
 
   font-size: 13px;
   font-weight: bold;
+}
+
+
+.#{$loan-details}block-summary-bold {
+  @extend .#{$loan-details}block-row-bold;
+
+  font-size: 24px;
+  font-weight: 500;
+  text-align: right;
 }

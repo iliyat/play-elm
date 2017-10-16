@@ -1,14 +1,23 @@
+.loan-details--table-wrapper {
+  display: flex;
+  position: relative;
+  justify-content: space-between; }
+
 .loan-details--table {
   background-color: transparent;
   position: relative;
   font-size: 13px;
-  width: 100%; }
+  width: 90%;
+  overflow: auto;
+  white-space: nowrap; }
+  .loan-details--table::-webkit-scrollbar-track-piece {
+    margin-left: 0;
+    margin-right: 0; }
 
 .loan-details--rows-wrapper {
   position: absolute;
-  width: 100%;
-  background-color: transparent;
-  margin-left: -32px; }
+  width: 90%;
+  background-color: transparent; }
 
 .loan-details--row {
   box-shadow: inset 0 -1px 0 0 #edeff1;
@@ -17,9 +26,12 @@
 
 .loan-details--block {
   display: inline-block;
-  padding: 0 16px; }
+  padding: 0 16px;
+  position: relative; }
+  .loan-details--block:hover {
+    background-color: rgba(0, 156, 225, 0.18); }
 
-.loan-details--block-row, .loan-details--block-row-header, .loan-details--block-row-bold {
+.loan-details--block-row, .loan-details--block-row-header, .loan-details--block-row-bold, .loan-details--block-summary-bold {
   height: 48px;
   font-size: 13px;
   line-height: 45px;
@@ -27,12 +39,14 @@
 
 .loan-details--block-row-header {
   font-size: 12px;
-  font-size: 12px;
   font-weight: 500;
   color: rgba(0, 0, 0, 0.38); }
 
-.loan-details--block-row-bold {
+.loan-details--block-row-bold, .loan-details--block-summary-bold {
   font-size: 13px;
   font-weight: bold; }
 
-/*# sourceMappingURL=table.css.map */
+.loan-details--block-summary-bold {
+  font-size: 24px;
+  font-weight: 500;
+  text-align: right; }
