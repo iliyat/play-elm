@@ -425,6 +425,7 @@ view value_ model config =
                     [ ( "mdc-textfield__input maskedInputHtml", True )
                     ]
                 , Events.on "change" (Json.succeed SubmitText)
+                , Events.on "click" (Json.map InputClick geometryDecoder)
                 , Events.on "focus" (Json.succeed (Focus))
                 , Events.onBlur <| Blur
                 , style [ ( "font-size", st.fontSize ) ]
