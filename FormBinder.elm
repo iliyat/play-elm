@@ -15,13 +15,13 @@ import Html exposing (Html, div, h1, text, p, label, button)
 import Dict exposing (Dict)
 import Form exposing (Form)
 import Form.Field as Field exposing (Field, FieldValue(..))
+import Form.Error as Error
 import Form.Validate as Validate exposing (Validation)
 import Ui.Textfield as Textfield
 import Ui.DatePicker as DatePicker exposing (DateEvent)
 import Date exposing (Date, Day(..), Month(..), day)
 import Date.Extra as Date
 import Task
-import Mouse
 
 
 type InputModels
@@ -39,6 +39,25 @@ type alias Model e output =
     , form : Form e output
     , date : Maybe Date
     }
+
+
+getErrorText : Error.ErrorValue e -> String
+getErrorText v =
+    case v of
+        Error.Empty ->
+            "Обязательное поле"
+
+        Error.ShorterStringThan len ->
+            "Минимальная длина " ++ (toString len) ++ " симв."
+
+        Error.LongerStringThan len ->
+            "Максимальная длина " ++ (toString len) ++ " симв."
+
+        Error.InvalidString ->
+            "Обязательное поле"
+
+        a ->
+            toString a
 
 
 initial :
@@ -232,7 +251,7 @@ textfield lift model config =
                 , required = True
                 , errorText =
                     field.liveError
-                        |> Maybe.map toString
+                        |> Maybe.map getErrorText
                         |> Maybe.withDefault ""
             }
 
@@ -269,7 +288,7 @@ datePicker lift model settings =
                 , required = True
                 , errorText =
                     field.liveError
-                        |> Maybe.map toString
+                        |> Maybe.map getErrorText
                         |> Maybe.withDefault ""
             }
 

@@ -28,7 +28,6 @@ import Regex
 import Utils.General as Utils exposing (..)
 import FormatNumber exposing (format)
 import MaskedInput.Text as MaskedText
-import DOM
 
 
 type alias Model =
@@ -432,7 +431,6 @@ view value_ model config =
                 [ Attr.type_ "text"
                 , style [ ( "font-size", st.fontSize ) ]
                 , classList [ ( "mdc-textfield__input", True ) ]
-                , Events.on "click" (Json.map InputClick geometryDecoder)
                 , Events.on "focus" (Json.succeed Focus)
                 , Events.onBlur <| Blur
                 , Events.onInput Input
@@ -524,7 +522,7 @@ view value_ model config =
                     [ text <| extra ++ pl ]
                 , div [ class "mdc-textfield__bottom-line" ] []
                 ]
-            , p [ classList errorClasses ] [ text (config.errorText) ]
+            , p [ classList errorClasses, style [ ( "max-width", getWidth config ) ] ] [ text (config.errorText) ]
             ]
 
 
