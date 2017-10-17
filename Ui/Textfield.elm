@@ -229,7 +229,7 @@ viewReadonly value_ model config =
             { labelBottom = "8px"
             , labelFontSize = "16px"
             , height = "48px"
-            , fontSize = "18px"
+            , fontSize = "16px"
             }
 
         st =
@@ -374,7 +374,7 @@ view value_ model config =
             { labelBottom = "8px"
             , labelFontSize = "16px"
             , height = "48px"
-            , fontSize = "18px"
+            , fontSize = "16px"
             }
 
         st =

@@ -348,7 +348,7 @@ stepper model =
                         model.nextButtonModel
                         [ Button.ripple
                         , Button.raised
-                        , Button.primary
+                        , Button.secondary
                         , css "margin-left" "8px"
                         , Options.onClick OnNextClick
                         ]
@@ -469,6 +469,8 @@ view model =
             , Html.node "link"
                 [ Attrs.rel "stylesheet"
                 , Attrs.href "theme.css"
+
+                -- , Attrs.href "material-components-web.css"
                 ]
                 []
             , Html.node "link"
@@ -478,9 +480,6 @@ view model =
                 []
             , Html.node "link"
                 [ Attrs.rel "stylesheet", Attrs.href "https://fonts.googleapis.com/css?family=Roboto:400,300,500|Roboto+Mono|Roboto+Condensed:400,700&subset=latin,latin-ext" ]
-                []
-            , Html.node "link"
-                [ Attrs.rel "stylesheet", Attrs.href "https://cdnjs.cloudflare.com/ajax/libs/material-design-iconic-font/2.2.0/css/material-design-iconic-font.css" ]
                 []
             , Html.node "link"
                 [ Attrs.rel "stylesheet"

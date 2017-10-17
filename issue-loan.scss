@@ -1,17 +1,19 @@
-$ns: issue-loan-- !default;
-$stepper: stepper--;
+$issue-loan: issue-loan-- !default;
+$stepper: stepper-- !default;
 $loan-details: loan-details-- !default;
 $passport-check: passport-check-- !default;
 $passport-check-validation: passport-check--validation- !default;
 
-.#{$ns}base-info {
+@import "./stepper.scss";
+
+.#{$issue-loan}base-info {
   position: relative;
   background: white;
   padding: 32px 32px 18px 32px;
   margin-bottom: 32px;
 }
 
-.#{$ns}avatar {
+.#{$issue-loan}avatar {
   cursor: pointer;
   position: relative;
   display: block;
@@ -29,82 +31,6 @@ $passport-check-validation: passport-check--validation- !default;
     background-position: 50% 50%;
     background-size: cover;
   }
-}
-
-.#{$stepper}header {
-  display: flex;
-  flex-direction: row;
-  place-content: center space-between;
-  align-items: center;
-  height: 72px;
-  background-color: #ffffff;
-  position: relative;
-  box-shadow: 0 2px 2px 0 rgba(52, 62, 77, 0.12), 0 0 2px 0 rgba(52, 62, 77, 0.24);
-}
-
-.#{$stepper}step {
-  flex: 0 0 auto;
-  display: flex;
-  align-items: center;
-
-  .#{$stepper}text {
-    font-weight: 500;
-  }
-
-  .#{$stepper}circle-wrap {
-    height: 72px;
-    color: rgba(0, 0, 0, 0.87);
-    display: flex;
-    align-items: center;
-    font-family: Roboto, sans-serif;
-    font-size: 14px;
-    padding-left: 14px;
-    padding-right: 14px;
-    font-weight: 500;
-
-    .#{$stepper}circle-pad {
-      padding-right: 8px;
-
-      svg {
-        display: block;
-        color: #009ce1;
-        height: 24px;
-        width: 24px;
-        user-select: none;
-        transition: all 450ms cubic-bezier(0.23, 1, 0.32, 1) 0ms;
-        font-size: 24px;
-      }
-    }
-  }
-}
-
-.#{$stepper}step--disabled {
-  .#{$stepper}text {
-    font-weight: 400;
-  }
-
-  svg {
-    color: rgb(158, 158, 158);
-  }
-}
-
-.#{$stepper}step-line {
-  flex: 1 1 auto;
-  margin-left: 16px;
-
-  span {
-    display: block;
-    border-color: rgb(189, 189, 189);
-    margin-left: -6px;
-    border-top-style: solid;
-    border-top-width: 1px;
-  }
-}
-
-.#{$stepper}actions {
-  display: flex;
-  padding-top: 24px;
-  justify-content: space-between;
 }
 
 .#{$loan-details}table {
@@ -178,7 +104,7 @@ $passport-check-validation: passport-check--validation- !default;
 }
 
 .#{$passport-check-validation}title {
-  font-size: 18px;
+  font-size: 16px;
   font-weight: 500;
   text-align: left;
   color: #77b34c;
