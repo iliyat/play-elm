@@ -295,8 +295,7 @@ view model =
                     ]
                     [ styled div
                         [ Typography.headline
-                        , css "padding-bottom"
-                            "24px"
+                        , css "padding-bottom" "24px"
                         ]
                         [ text <| headlineText ]
                     , Button.view Ripple

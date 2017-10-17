@@ -163,7 +163,7 @@ view ({ formBinder, buttonModel } as model) =
                 | labelText = Just "Дата выдачи"
                 , formName = Just "issuedAt"
                 , tabindex = 3
-                , width = 150
+                , width = 120
             }
 
         dateOfBirth =
@@ -171,7 +171,7 @@ view ({ formBinder, buttonModel } as model) =
                 | labelText = Just "Дата рождения"
                 , formName = Just "dateOfBirth"
                 , tabindex = 4
-                , width = 150
+                , width = 120
             }
 
         lastName =
@@ -179,7 +179,7 @@ view ({ formBinder, buttonModel } as model) =
                 | labelText = Just "Фамилия"
                 , formName = Just "lastName"
                 , tabindex = 5
-                , width = 146
+                , width = 136
             }
 
         firstName =
@@ -204,7 +204,7 @@ view ({ formBinder, buttonModel } as model) =
                 , formName = Just "code"
                 , mask = Just "###-###"
                 , tabindex = 8
-                , width = 150
+                , width = 140
             }
 
         issuedBy =

@@ -272,53 +272,55 @@ viewReadonly value_ model config =
         contentHtml =
             divHtml
     in
-        div
-            [ classList
-                [ ( "mdc-textfield mdc-textfield--upgraded", True )
-                , ( "mdc-textfield--focused", isFocused )
-                , ( "mdc-textfield--disabled", config.disabled )
-                , ( "ui-textfield--readonly", config.readonly )
-                , ( "mdc-textfield--fullwidth", False )
-                , ( "mdc-textfield--invalid", config.invalid )
-                ]
-            , style
-                [ ( "height", st.height )
-                , ( "width", getWidth config )
-                ]
-            ]
-            [ contentHtml
-            , label
+        div []
+            [ div
                 [ classList
-                    [ ( "mdc-textfield__label mdc-typography", True )
-                    , ( "mdc-textfield__label--float-above", True )
+                    [ ( "mdc-textfield mdc-textfield--upgraded", True )
+                    , ( "mdc-textfield--focused", isFocused )
+                    , ( "mdc-textfield--disabled", config.disabled )
+                    , ( "ui-textfield--readonly", config.readonly )
+                    , ( "mdc-textfield--fullwidth", False )
+                    , ( "mdc-textfield--invalid", config.invalid )
                     ]
                 , style
-                    [ ( "bottom", st.labelBottom )
-                    , ( "font-size", st.labelFontSize )
+                    [ ( "height", st.height )
+                    , ( "width", getWidth config )
                     ]
                 ]
-                (case config.labelText of
-                    Just str ->
-                        [ text str ]
+                [ contentHtml
+                , label
+                    [ classList
+                        [ ( "mdc-textfield__label mdc-typography", True )
+                        , ( "mdc-textfield__label--float-above", True )
+                        ]
+                    , style
+                        [ ( "bottom", st.labelBottom )
+                        , ( "font-size", st.labelFontSize )
+                        ]
+                    ]
+                    (case config.labelText of
+                        Just str ->
+                            [ text str ]
 
-                    Nothing ->
-                        []
-                )
-            , span
-                [ style
-                    [ ( "float", "right" )
-                    , ( "position", "absolute" )
-                    , ( "right", "0" )
-                    , ( "bottom", "10px" )
-                    , ( "height", "24px" )
-                    , ( "font-family", "Roboto" )
-                    , ( "font-size", "34px" )
-                    , ( "line-height", "15px" )
-                    , ( "color", "rgba(0, 0, 0, 0.38)" )
+                        Nothing ->
+                            []
+                    )
+                , span
+                    [ style
+                        [ ( "float", "right" )
+                        , ( "position", "absolute" )
+                        , ( "right", "0" )
+                        , ( "bottom", "10px" )
+                        , ( "height", "24px" )
+                        , ( "font-family", "Roboto" )
+                        , ( "font-size", "34px" )
+                        , ( "line-height", "15px" )
+                        , ( "color", "rgba(0, 0, 0, 0.38)" )
+                        ]
                     ]
+                    [ text <| extra ++ pl ]
+                , div [ class "mdc-textfield__bottom-line" ] []
                 ]
-                [ text <| extra ++ pl ]
-            , div [ class "mdc-textfield__bottom-line" ] []
             ]
 
 
