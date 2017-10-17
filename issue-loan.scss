@@ -9,8 +9,14 @@ $passport-check-validation: passport-check--validation- !default;
 .#{$issue-loan}base-info {
   position: relative;
   background: white;
-  padding: 32px 32px 18px 32px;
+  padding: 32px;
   margin-bottom: 32px;
+
+  .#{$issue-loan}fields {
+    display: flex;
+    position: absolute;
+    top: 114px;
+  }
 }
 
 .#{$issue-loan}avatar {

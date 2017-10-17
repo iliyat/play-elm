@@ -9,12 +9,14 @@ module Step.PrintDocuments
         )
 
 import Html exposing (Html, div, h1, text, p, span, label)
+import Html.Attributes as Attrs exposing (style)
 import Ui.Options as Options exposing (styled, cs, css)
 import Ui.Typography as Typography
 import Step.Conditions.Info as ConditionsInfo
 import Ui.Elevation as Elevation
 import Ui.Checkbox as Checkbox
-import Html.Events as Events
+import Ui.Button as Button
+import Icons.Icon as Icon
 
 
 type Msg
@@ -22,6 +24,7 @@ type Msg
     | ToggleCheckbox2
     | Checkbox1Msg Checkbox.Msg
     | Checkbox2Msg Checkbox.Msg
+    | ButtonMsg Button.Msg
 
 
 type alias Model =
@@ -29,6 +32,7 @@ type alias Model =
     , checkbox2 : Checkbox.Model
     , checkbox1Clicked : Bool
     , checkbox2Clicked : Bool
+    , buttonModel : Button.Model
     }
 
 
@@ -38,6 +42,7 @@ defaultModel =
     , checkbox2 = Checkbox.defaultModel
     , checkbox1Clicked = False
     , checkbox2Clicked = True
+    , buttonModel = Button.defaultModel
     }
 
 
@@ -80,44 +85,78 @@ update msg model =
         ToggleCheckbox2 ->
             ({ model | checkbox2Clicked = not model.checkbox2Clicked }) ! []
 
+        ButtonMsg msg_ ->
+            let
+                ( new, effects ) =
+                    Button.update msg_ model.buttonModel
+            in
+                ( { model | buttonModel = new }, effects |> Cmd.map ButtonMsg )
+
 
 view : Model -> Html Msg
 view model =
-    div []
-        [ styled div
-            [ Elevation.z1, cs "block" ]
-            [ styled div [ Typography.headline ] [ text "Печать документов" ]
-            , ConditionsInfo.view |> Html.map never
+    let
+        iconStyle =
+            [ ( "color", "#fff" )
+            , ( "position", "relative" )
+            , ( "top", "6px" )
+            , ( "right", "8px" )
             ]
-        , styled div
-            [ Elevation.z1, cs "block", css "margin-top" "24px" ]
-            [ styled div [ Typography.headline ] [ text "Проверка подписей" ]
-            , div []
-                [ Checkbox.view Checkbox1Msg
-                    model.checkbox1
-                    [ Options.onClick ToggleCheckbox1
-                    , Checkbox.checked |> Options.when model.checkbox1Clicked
+    in
+        div []
+            [ styled div
+                [ Elevation.z1, cs "block" ]
+                [ styled div
+                    [ css "display" "flex"
+                    , css "justify-content" "space-between"
                     ]
-                    [ label
-                        [ Events.onClick ToggleCheckbox1
+                    [ styled div
+                        [ Typography.headline, Typography.pad12 ]
+                        [ text "Печать документов"
                         ]
-                        [ text "Договор" ]
-                    ]
-                , Checkbox.view Checkbox2Msg
-                    model.checkbox2
-                    [ Options.onClick ToggleCheckbox2
-                    , Checkbox.checked |> Options.when model.checkbox2Clicked
-                    , Checkbox.invalid
-                        |> Options.when
-                            (not
-                                model.checkbox2Clicked
-                            )
-                    ]
-                    [ label
-                        [ Events.onClick ToggleCheckbox2
+                    , Button.view ButtonMsg
+                        model.buttonModel
+                        [ Button.ripple
+                        , Button.raised
+                        , Button.primary
+                        , css "width" "120px"
                         ]
-                        [ text "Заявление-согласие на обработку данных" ]
+                        [ Icon.view "print" [ style iconStyle ], text "Печать" ]
+                    ]
+                , ConditionsInfo.view |> Html.map never
+                ]
+            , styled div
+                [ Elevation.z1, cs "block", css "margin-top" "24px" ]
+                [ styled div [ Typography.headline, Typography.pad12 ] [ text "Проверка подписей" ]
+                , styled div
+                    [ css "position" "relative", css "left" "-8px" ]
+                    [ Checkbox.view Checkbox1Msg
+                        model.checkbox1
+                        [ Options.onClick ToggleCheckbox1
+                        , Checkbox.checked |> Options.when model.checkbox1Clicked
+                        ]
+                        [ styled label
+                            [ Options.onClick ToggleCheckbox1
+                            , css "user-select" "none"
+                            ]
+                            [ text "Договор" ]
+                        ]
+                    , Checkbox.view Checkbox2Msg
+                        model.checkbox2
+                        [ Options.onClick ToggleCheckbox2
+                        , Checkbox.checked |> Options.when model.checkbox2Clicked
+                        , Checkbox.invalid
+                            |> Options.when
+                                (not
+                                    model.checkbox2Clicked
+                                )
+                        ]
+                        [ styled label
+                            [ Options.onClick ToggleCheckbox2
+                            , css "user-select" "none"
+                            ]
+                            [ text "Заявление-согласие на обработку данных" ]
+                        ]
                     ]
                 ]
             ]
-        ]
