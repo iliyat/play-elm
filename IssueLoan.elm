@@ -468,9 +468,7 @@ view model =
             , stepper model
             , Html.node "link"
                 [ Attrs.rel "stylesheet"
-
-                -- , Attrs.href "material-components-web.css"
-                , Attrs.href "mdc-webpack.css"
+                , Attrs.href "theme.css"
                 ]
                 []
             , Html.node "link"

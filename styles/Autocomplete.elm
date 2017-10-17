@@ -5,7 +5,7 @@ import Html.Attributes exposing (placeholder, checked, type_, style)
 import Views
 import Dom
 import Debug
-import Menu exposing (Common)
+import AutocompleteMenu as Menu exposing (Common)
 import Mouse
 import Task
 import Data.Loan exposing (Loan)
