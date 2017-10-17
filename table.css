@@ -31,7 +31,8 @@
   padding: 0 16px;
   position: relative; }
   .loan-details--block:hover {
-    background-color: rgba(0, 156, 225, 0.18); }
+    background-color: rgba(0, 156, 225, 0.18);
+    cursor: pointer; }
 
 .loan-details--block-row, .loan-details--block-row-header, .loan-details--block-row-bold, .loan-details--block-summary-bold {
   height: 48px;
