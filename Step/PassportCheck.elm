@@ -142,31 +142,54 @@ view model =
         tfConfig =
             Textfield.defaultConfig
 
-        dateOfBirthConfig =
-            { tfConfig | labelText = Just "Дата рождения", readonly = True }
-
         passportSeriesConfig =
-            { tfConfig | labelText = Just "Серия", readonly = True, width = 64 }
+            { tfConfig
+                | labelText = Just "Серия"
+                , readonly = True
+                , width = 64
+            }
 
         passportNumberConfig =
-            { tfConfig | labelText = Just "Номер", readonly = True }
+            { tfConfig
+                | labelText = Just "Номер"
+                , readonly = True
+                , width = 72
+            }
 
         issuedAtConfig =
-            { tfConfig | labelText = Just "Дата выдачи", readonly = True }
+            { tfConfig
+                | labelText = Just "Дата выдачи"
+                , readonly = True
+                , width = 120
+            }
+
+        dateOfBirthConfig =
+            { tfConfig
+                | labelText = Just "Дата рождения"
+                , readonly = True
+                , width = 120
+            }
 
         headlineText =
             if model.formVisible then
                 "Текущий паспорт"
             else
                 "Проверка паспорта"
+
+        iconStyles =
+            [ ( "position", "relative" )
+            , ( "color", "009cd0" )
+            , ( "top", "7px" )
+            , ( "padding-right", "6px" )
+            ]
     in
         styled div
             [ cs "block", Elevation.z1 ]
-            [ styled div [ Typography.headline ] [ text headlineText ]
+            [ styled div [ Typography.headline, Typography.pad12 ] [ text headlineText ]
             , styled div
-                [ cs "ui-flex" ]
+                [ cs "ui-flex", css "justify-content" "space-between" ]
                 [ styled div
-                    [ cs "ui-flex" ]
+                    [ cs "ui-form-row" ]
                     [ Textfield.viewReadonly (Just "4212")
                         Textfield.defaultModel
                         passportSeriesConfig
@@ -190,15 +213,16 @@ view model =
                 model.buttonModel
                 [ Button.ripple
                 , Button.primary
+                , Button.noMargin
                 , Options.onClick AddNewPassport
                 , css "display" "none" |> when model.formVisible
                 ]
-                [ Icon.view "add" [], text "Добавить новый паспорт" ]
+                [ Icon.view "add" [ Attrs.style iconStyles ], text "Добавить новый паспорт" ]
             , styled div
                 [ css "display" "none" |> when (not model.formVisible)
-                , css "margin-top" "48px"
+                , css "margin-top" "40px"
                 ]
-                [ styled div [ Typography.headline ] [ text "Новый паспорт" ]
+                [ styled div [ Typography.headline, Typography.pad12 ] [ text "Новый паспорт" ]
                 , div []
                     [ Form.view model.form |> Html.map FormMsg
                     ]

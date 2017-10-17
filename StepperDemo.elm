@@ -236,7 +236,7 @@ view model =
                     model.nextButtonModel
                     [ Button.ripple
                     , Button.raised
-                    , Button.primary
+                    , Button.secondary
                     , css "margin-left" "8px"
                     , Options.onClick OnNextClick
                     ]

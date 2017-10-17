@@ -17,30 +17,30 @@ step title num enabled =
 
         circleColor =
             if enabled then
-                "#009ce1"
+                "#009cd0"
             else
-                "rgb(158, 158, 158)"
+                "#cfd8dc"
     in
         div
             [ classList
-                [ ( "step", True ), ( "step--disabled", enabled ) ]
+                [ ( "step", True ), ( "step--disabled", not enabled ) ]
             ]
             [ span [ class "circle-wrap" ]
                 [ span [ class "circle-pad" ]
                     [ Svg.svg
                         [ Svg.class "ci"
-                        , Svg.width "21"
-                        , Svg.height "21"
+                        , Svg.width "24"
+                        , Svg.height "24"
                         ]
                         [ Svg.circle
                             [ Svg.cx "12"
                             , Svg.cy "12"
-                            , Svg.r "10"
+                            , Svg.r "12"
                             , Svg.fill circleColor
                             ]
                             []
                         , Svg.text_
-                            [ Svg.x "12"
+                            [ Svg.x "9"
                             , Svg.y "16"
                             , Svg.fontSize "12"
                             , Svg.fill "#fff"

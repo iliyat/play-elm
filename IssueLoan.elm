@@ -111,7 +111,9 @@ init =
             Conditions.init
     in
         { date = Just <| Date.fromParts 1992 Feb 21 0 0 0 0
-        , currentStep = PassportCheck PassportCheck.defaultModel
+
+        -- , currentStep = PassportCheck PassportCheck.defaultModel
+        , currentStep = PrintDocuments PrintDocuments.defaultModel
         , clientDeclineButtonModel = Button.defaultModel
         , prevButtonModel = Button.defaultModel
         , nextButtonModel = Button.defaultModel
@@ -348,7 +350,7 @@ stepper model =
                         model.nextButtonModel
                         [ Button.ripple
                         , Button.raised
-                        , Button.primary
+                        , Button.secondary
                         , css "margin-left" "8px"
                         , Options.onClick OnNextClick
                         ]
@@ -413,16 +415,40 @@ view model =
             }
 
         dateOfBirthConfig =
-            { tfConfig | labelText = Just "Дата рождения", readonly = True }
+            { tfConfig
+                | labelText = Just "Дата рождения"
+                , readonly = True
+                , width = 140
+            }
 
         passportConfig =
-            { tfConfig | labelText = Just "Паспорт", readonly = True }
+            { tfConfig
+                | labelText = Just "Паспорт"
+                , readonly = True
+                , width = 150
+            }
 
         phoneConfig =
-            { tfConfig | labelText = Just "Моб. телефон", readonly = True }
+            { tfConfig
+                | labelText = Just "Моб. телефон"
+                , readonly = True
+                , width =
+                    200
+            }
 
         loanNumberConfig =
-            { tfConfig | labelText = Just "Номер займа", readonly = True }
+            { tfConfig
+                | labelText = Just "Номер займа"
+                , readonly = True
+                , width = 150
+            }
+
+        statusConfig =
+            { tfConfig
+                | labelText = Just "Статус займа"
+                , readonly = True
+                , width = 150
+            }
 
         avatarUrl =
             "url(https://scontent-sea1-1.cdninstagram.com/t51.2885-15/s480x480/e15/11370968_1040105556019723_460503715_n.jpg?ig_cache_key=MTA3Nzg2MzAzMzEyOTIyMDUyMA%3D%3D.2)"
@@ -443,7 +469,7 @@ view model =
                                 nameConfig
                                 |> Html.map noOp
                             , div
-                                [ Attrs.style [ ( "display", "flex" ) ] ]
+                                [ class "fields" ]
                                 [ Textfield.view (Just "24.05.1990")
                                     Textfield.defaultModel
                                     dateOfBirthConfig
@@ -460,6 +486,10 @@ view model =
                                     Textfield.defaultModel
                                     loanNumberConfig
                                     |> Html.map noOp
+                                , Textfield.view (Just "Одобрено")
+                                    Textfield.defaultModel
+                                    statusConfig
+                                    |> Html.map noOp
                                 ]
                             ]
                         ]
@@ -469,6 +499,8 @@ view model =
             , Html.node "link"
                 [ Attrs.rel "stylesheet"
                 , Attrs.href "theme.css"
+
+                -- , Attrs.href "material-components-web.css"
                 ]
                 []
             , Html.node "link"
@@ -478,9 +510,6 @@ view model =
                 []
             , Html.node "link"
                 [ Attrs.rel "stylesheet", Attrs.href "https://fonts.googleapis.com/css?family=Roboto:400,300,500|Roboto+Mono|Roboto+Condensed:400,700&subset=latin,latin-ext" ]
-                []
-            , Html.node "link"
-                [ Attrs.rel "stylesheet", Attrs.href "https://cdnjs.cloudflare.com/ajax/libs/material-design-iconic-font/2.2.0/css/material-design-iconic-font.css" ]
                 []
             , Html.node "link"
                 [ Attrs.rel "stylesheet"

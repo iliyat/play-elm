@@ -266,6 +266,13 @@ view model =
                 , readonly = True
             }
 
+        datepickerTextfieldConfig =
+            { tfConfig
+                | labelText = Just "Дата погашения"
+                , asTitle = True
+                , width = 368
+            }
+
         loanNumber =
             "435-43313"
 
@@ -294,10 +301,7 @@ view model =
                     , css "justify-content" "space-between"
                     ]
                     [ styled div
-                        [ Typography.headline
-                        , css "padding-bottom"
-                            "24px"
-                        ]
+                        [ Typography.headline, Typography.pad12 ]
                         [ text <| headlineText ]
                     , Button.view Ripple
                         model.buttonModel
@@ -313,32 +317,38 @@ view model =
                 ]
             , styled div
                 hiddenBlockAttributes
-                [ styled div
-                    [ Typography.headline
-                    ]
-                    [ text <| "Изменение условий по заявке № " ++ loanNumber
-                    , styled div
-                        [ cs "fields" ]
-                        [ SliderWithTextfield.view
-                            model.sumInputText
-                            model.sumSliderModel
-                            (sumSliderConfig model.sumInputText)
-                            |> Html.map SumSliderWithTextfieldMsg
-                        , SliderWithTextfield.view
-                            model.periodInputText
-                            model.periodSliderModel
-                            (periodSliderConfig model.periodInputText)
-                            |> Html.map PeriodSliderWithTextfieldMsg
-                        , DatePicker.view
-                            model.date
-                            (DatePicker.withLabel "Дата погашения")
-                            model.datePicker
-                            |> Html.map DatePickerMsg
+                [ div []
+                    [ styled div
+                        [ Typography.headline, Typography.pad12 ]
+                        [ text <| "Изменение условий по заявке № " ++ loanNumber
                         ]
                     , div []
-                        [ textfield "1000" returnConfig
-                        , textfield "12" percentConfig
-                        , textfield "12" promoConfig
+                        [ styled div
+                            [ cs "fields" ]
+                            [ SliderWithTextfield.view
+                                model.sumInputText
+                                model.sumSliderModel
+                                (sumSliderConfig model.sumInputText)
+                                |> Html.map SumSliderWithTextfieldMsg
+                            , SliderWithTextfield.view
+                                model.periodInputText
+                                model.periodSliderModel
+                                (periodSliderConfig model.periodInputText)
+                                |> Html.map PeriodSliderWithTextfieldMsg
+                            , DatePicker.view
+                                model.date
+                                (DatePicker.withTextfield
+                                    datepickerTextfieldConfig
+                                )
+                                model.datePicker
+                                |> Html.map DatePickerMsg
+                            ]
+                        , styled div
+                            [ cs "ui-form-row" ]
+                            [ textfield "1000" returnConfig
+                            , textfield "12" percentConfig
+                            , textfield "12" promoConfig
+                            ]
                         ]
                     ]
                 ]

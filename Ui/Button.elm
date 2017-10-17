@@ -19,6 +19,7 @@ module Ui.Button
         , defaultModel
         , Msg
         , update
+        , noMargin
         )
 
 import Html.Attributes exposing (..)
@@ -135,6 +136,14 @@ stroked =
 danger : Property m
 danger =
     css "color" "#d50000"
+
+
+noMargin : Property m
+noMargin =
+    Options.many
+        [ css "margin" "0"
+        , css "padding" "0"
+        ]
 
 
 darkTheme : Property m
