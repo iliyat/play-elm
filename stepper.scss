@@ -71,6 +71,6 @@ $stepper: stepper-- !default;
 
 .#{$stepper}actions {
   display: flex;
-  flex-direction: row-reverse;
   padding-top: 24px;
+  justify-content: space-between;
 }

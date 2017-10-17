@@ -51,8 +51,8 @@
 
 .stepper--actions {
   display: flex;
-  flex-direction: row-reverse;
-  padding-top: 24px; }
+  padding-top: 24px;
+  justify-content: space-between; }
 
 .issue-loan--base-info {
   position: relative;
