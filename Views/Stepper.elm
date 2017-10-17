@@ -7,7 +7,7 @@ import Svg.Attributes as Svg
 
 
 step : String -> Int -> Bool -> Html msg
-step title num disabled =
+step title num enabled =
     let
         class =
             mkClass "stepper--"
@@ -16,14 +16,14 @@ step title num disabled =
             mkClassList "stepper--"
 
         circleColor =
-            if disabled then
-                "rgb(158, 158, 158)"
+            if enabled then
+                "#009ce1"
             else
-                "rgb(0, 188, 212)"
+                "rgb(158, 158, 158)"
     in
         div
             [ classList
-                [ ( "step", True ), ( "step--disabled", disabled ) ]
+                [ ( "step", True ), ( "step--disabled", enabled ) ]
             ]
             [ span [ class "circle-wrap" ]
                 [ span [ class "circle-pad" ]

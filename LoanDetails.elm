@@ -62,6 +62,15 @@ render model =
                 , div [ class "block-row" ] [ text "10 000 ₽" ]
                 , div [ class "block-row" ] [ text "0 ₽" ]
                 ]
+
+        summaryBlock =
+            div []
+                [ div [ class "block-row-header" ] [ text "Процент по займу" ]
+                , div [ class "block-summary-bold" ] [ text "3052 ₽" ]
+                , div [ class "block-row-header" ] [ text "В среднем в день" ]
+                , div [ class "block-summary-bold" ] [ text "218 ₽" ]
+                , div [ class "block-summary-bold" ] [ text "2,18%" ]
+                ]
     in
         div
             []
@@ -80,15 +89,37 @@ render model =
                 ]
             , styled div
                 [ css "padding-top" "24px", css "display" "none" |> when (not model.open) ]
-                [ div [ class "table" ]
+                [ div [ class "table-wrapper" ]
                     [ div [ class "rows-wrapper" ]
                         [ div [ class "row" ] []
                         , div [ class "row" ] []
                         , div [ class "row" ] []
                         , div [ class "row" ] []
+                        , div [ class "row" ] []
                         ]
-                    , block
-                    , block
+                    , div [ class "table", Attrs.class "elm-table-wrapper" ]
+                        [ block
+                        , block
+                        , block
+                        , block
+                        , block
+                        , block
+                        , block
+                        , block
+                        , block
+                        , block
+                        , block
+                        , block
+                        , block
+                        , block
+                        , block
+                        , block
+                        , block
+                        , block
+                        , block
+                        , block
+                        ]
+                    , summaryBlock
                     ]
                 ]
             ]
@@ -105,6 +136,11 @@ styles =
         , Html.node "link"
             [ Attrs.rel "stylesheet"
             , Attrs.href "main.css"
+            ]
+            []
+        , Html.node "link"
+            [ Attrs.rel "stylesheet"
+            , Attrs.href "styles/scroll.css"
             ]
             []
         , Html.node "link"

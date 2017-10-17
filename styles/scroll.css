@@ -1,0 +1,38 @@
+/* SCROLL */
+
+.elm-table-wrapper::-webkit-scrollbar {
+    width: 36px;
+    height: 36px;
+}
+
+.elm-table-wrapper::-webkit-scrollbar-thumb{
+    background-color: #cfd8dc;
+    border-top: 14px solid white;
+    border-bottom: 14px solid white;
+    margin-left: 24px;
+    margin-right: 13px;
+}
+
+.elm-table-wrapper::-webkit-scrollbar-track-piece{
+    border-top: 14px solid white;
+    border-bottom: 14px solid white;
+    margin-left: 24px;
+    margin-right: 24px;
+    background: #edeff1;
+}
+
+.elm-table.scrollable tbody::-webkit-scrollbar {
+    width: 35px;
+}
+
+.elm-table.scrollable tbody::-webkit-scrollbar-track-piece  {
+    border-left: 13px solid #ffffff;
+    background: #edeff1;
+    border-right: 13px solid #ffffff;
+}
+
+.elm-table.scrollable tbody::-webkit-scrollbar-thumb {
+    background-color: #cfd8dc;
+    border-left: 13px solid white;
+    border-right: 13px solid white;
+}
